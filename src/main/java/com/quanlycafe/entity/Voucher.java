@@ -6,13 +6,13 @@ public class Voucher {
     private String maCT;
     private String tenCT;
     private int diemCanDoi;
-    private String loaiGiamGia;
+    private LoaiGiamGia loaiGiamGia;
     private boolean trangThai;
 
     public Voucher() {
     }
 
-    public Voucher(String maCT, String tenCT, int diemCanDoi, String loaiGiamGia, boolean trangThai) {
+    public Voucher(String maCT, String tenCT, int diemCanDoi, LoaiGiamGia loaiGiamGia, boolean trangThai) {
         this.maCT = maCT;
         this.tenCT = tenCT;
         this.diemCanDoi = diemCanDoi;
@@ -44,11 +44,11 @@ public class Voucher {
         this.diemCanDoi = diemCanDoi;
     }
 
-    public String getLoaiGiamGia() {
+    public LoaiGiamGia getLoaiGiamGia() {
         return loaiGiamGia;
     }
 
-    public void setLoaiGiamGia(String loaiGiamGia) {
+    public void setLoaiGiamGia(LoaiGiamGia loaiGiamGia) {
         this.loaiGiamGia = loaiGiamGia;
     }
 
@@ -78,7 +78,7 @@ public class Voucher {
                 "maCT='" + maCT + '\'' +
                 ", tenCT='" + tenCT + '\'' +
                 ", diemCanDoi=" + diemCanDoi +
-                ", loaiGiamGia='" + loaiGiamGia + '\'' +
+                ", loaiGiamGia=" + loaiGiamGia +
                 ", trangThai=" + trangThai +
                 '}';
     }

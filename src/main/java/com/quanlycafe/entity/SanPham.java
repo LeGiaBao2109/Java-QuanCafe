@@ -12,11 +12,12 @@ public class SanPham {
     private int tonKho;
     private boolean trangThai;
     private LocalDateTime ngayTao;
+    private LocalDateTime ngayCapNhat;
 
     public SanPham() {
     }
 
-    public SanPham(String maSP, String tenSP, String anhSP, DanhMuc maDM, String donViTinh, int tonKho, boolean trangThai, LocalDateTime ngayTao) {
+    public SanPham(String maSP, String tenSP, String anhSP, DanhMuc maDM, String donViTinh, int tonKho, boolean trangThai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maSP = maSP;
         this.tenSP = tenSP;
         this.anhSP = anhSP;
@@ -25,6 +26,7 @@ public class SanPham {
         this.tonKho = tonKho;
         this.trangThai = trangThai;
         this.ngayTao = ngayTao;
+        this.ngayCapNhat = ngayCapNhat;
     }
 
     public String getMaSP() {
@@ -91,6 +93,14 @@ public class SanPham {
         this.ngayTao = ngayTao;
     }
 
+    public LocalDateTime getNgayCapNhat() {
+        return ngayCapNhat;
+    }
+
+    public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
+        this.ngayCapNhat = ngayCapNhat;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -114,6 +124,7 @@ public class SanPham {
                 ", tonKho=" + tonKho +
                 ", trangThai=" + trangThai +
                 ", ngayTao=" + ngayTao +
+                ", ngayCapNhat=" + ngayCapNhat +
                 '}';
     }
 }
