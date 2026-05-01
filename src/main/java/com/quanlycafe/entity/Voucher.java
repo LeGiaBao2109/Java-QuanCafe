@@ -7,18 +7,16 @@ public class Voucher {
     private String tenCT;
     private int diemCanDoi;
     private String loaiGiamGia;
-    private String giaGiam;
     private boolean trangThai;
 
     public Voucher() {
     }
 
-    public Voucher(String maCT, String tenCT, int diemCanDoi, String loaiGiamGia, String giaGiam, boolean trangThai) {
+    public Voucher(String maCT, String tenCT, int diemCanDoi, String loaiGiamGia, boolean trangThai) {
         this.maCT = maCT;
         this.tenCT = tenCT;
         this.diemCanDoi = diemCanDoi;
         this.loaiGiamGia = loaiGiamGia;
-        this.giaGiam = giaGiam;
         this.trangThai = trangThai;
     }
 
@@ -54,14 +52,6 @@ public class Voucher {
         this.loaiGiamGia = loaiGiamGia;
     }
 
-    public String getGiaGiam() {
-        return giaGiam;
-    }
-
-    public void setGiaGiam(String giaGiam) {
-        this.giaGiam = giaGiam;
-    }
-
     public boolean isTrangThai() {
         return trangThai;
     }
@@ -89,7 +79,6 @@ public class Voucher {
                 ", tenCT='" + tenCT + '\'' +
                 ", diemCanDoi=" + diemCanDoi +
                 ", loaiGiamGia='" + loaiGiamGia + '\'' +
-                ", giaGiam='" + giaGiam + '\'' +
                 ", trangThai=" + trangThai +
                 '}';
     }

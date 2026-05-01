@@ -6,13 +6,13 @@ public class NhanVien {
     private String maNV;
     private String tenNV;
     private String sdt;
-    private String roleNV;
+    private RoleNhanVien roleNV;
     private boolean trangThai;
 
     public NhanVien() {
     }
 
-    public NhanVien(String maNV, String tenNV, String sdt, String roleNV, boolean trangThai) {
+    public NhanVien(String maNV, String tenNV, String sdt, RoleNhanVien roleNV, boolean trangThai) {
         this.maNV = maNV;
         this.tenNV = tenNV;
         this.sdt = sdt;
@@ -44,11 +44,11 @@ public class NhanVien {
         this.sdt = sdt;
     }
 
-    public String getRoleNV() {
+    public RoleNhanVien getRoleNV() {
         return roleNV;
     }
 
-    public void setRoleNV(String roleNV) {
+    public void setRoleNV(RoleNhanVien roleNV) {
         this.roleNV = roleNV;
     }
 
@@ -78,7 +78,7 @@ public class NhanVien {
                 "maNV='" + maNV + '\'' +
                 ", tenNV='" + tenNV + '\'' +
                 ", sdt='" + sdt + '\'' +
-                ", roleNV='" + roleNV + '\'' +
+                ", roleNV=" + roleNV +
                 ", trangThai=" + trangThai +
                 '}';
     }

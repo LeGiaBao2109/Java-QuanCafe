@@ -3,29 +3,45 @@ package com.quanlycafe.entity;
 import java.util.Objects;
 
 public class ChiTietHoaDon {
-    private HoaDon maHD;
+    private String maCTHD;
+    private DonHang maDH;
     private KichCo maSize;
     private int soLuong;
-    private double thanhTien;
+    private double donGia;
     private String ghiChu;
+    private double thanhTien;
+    private MucDa luongDa;
+    private MucDuong luongDuong;
 
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(HoaDon maHD, KichCo maSize, int soLuong, double thanhTien, String ghiChu) {
-        this.maHD = maHD;
+    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, double thanhTien, MucDa luongDa, MucDuong luongDuong) {
+        this.maCTHD = maCTHD;
+        this.maDH = maDH;
         this.maSize = maSize;
         this.soLuong = soLuong;
-        this.thanhTien = thanhTien;
+        this.donGia = donGia;
         this.ghiChu = ghiChu;
+        this.thanhTien = thanhTien;
+        this.luongDa = luongDa;
+        this.luongDuong = luongDuong;
     }
 
-    public HoaDon getMaHD() {
-        return maHD;
+    public String getMaCTHD() {
+        return maCTHD;
     }
 
-    public void setMaHD(HoaDon maHD) {
-        this.maHD = maHD;
+    public void setMaCTHD(String maCTHD) {
+        this.maCTHD = maCTHD;
+    }
+
+    public DonHang getMaDH() {
+        return maDH;
+    }
+
+    public void setMaDH(DonHang maDH) {
+        this.maDH = maDH;
     }
 
     public KichCo getMaSize() {
@@ -44,12 +60,12 @@ public class ChiTietHoaDon {
         this.soLuong = soLuong;
     }
 
-    public double getThanhTien() {
-        return thanhTien;
+    public double getDonGia() {
+        return donGia;
     }
 
-    public void setThanhTien(double thanhTien) {
-        this.thanhTien = thanhTien;
+    public void setDonGia(double donGia) {
+        this.donGia = donGia;
     }
 
     public String getGhiChu() {
@@ -60,26 +76,54 @@ public class ChiTietHoaDon {
         this.ghiChu = ghiChu;
     }
 
+    public double getThanhTien() {
+        return thanhTien;
+    }
+
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien = thanhTien;
+    }
+
+    public MucDa getLuongDa() {
+        return luongDa;
+    }
+
+    public void setLuongDa(MucDa luongDa) {
+        this.luongDa = luongDa;
+    }
+
+    public MucDuong getLuongDuong() {
+        return luongDuong;
+    }
+
+    public void setLuongDuong(MucDuong luongDuong) {
+        this.luongDuong = luongDuong;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ChiTietHoaDon that = (ChiTietHoaDon) o;
-        return Objects.equals(maHD, that.maHD) && Objects.equals(maSize, that.maSize);
+        return Objects.equals(maCTHD, that.maCTHD);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(maHD, maSize);
+        return Objects.hashCode(maCTHD);
     }
 
     @Override
     public String toString() {
         return "ChiTietHoaDon{" +
-                "maHD=" + maHD +
+                "maCTHD='" + maCTHD + '\'' +
+                ", maDH=" + maDH +
                 ", maSize=" + maSize +
                 ", soLuong=" + soLuong +
-                ", thanhTien=" + thanhTien +
+                ", donGia=" + donGia +
                 ", ghiChu='" + ghiChu + '\'' +
+                ", thanhTien=" + thanhTien +
+                ", luongDa=" + luongDa +
+                ", luongDuong=" + luongDuong +
                 '}';
     }
 }

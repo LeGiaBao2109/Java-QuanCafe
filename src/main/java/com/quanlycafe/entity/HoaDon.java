@@ -5,24 +5,22 @@ import java.util.Objects;
 
 public class HoaDon {
     private String maHD;
-    private LocalDateTime ngayTao;
-    private NhanVien maNV;
-    private KhachHang maKH;
-    private Voucher voucher;
+    private DonHang maDH;
+    private Voucher maVoucher;
+    private LocalDateTime ngayThanhToan;
     private String phuongThucTT;
-    private double tongTien;
+    private double tongTienCuoi;
 
     public HoaDon() {
     }
 
-    public HoaDon(String maHD, LocalDateTime ngayTao, NhanVien maNV, KhachHang maKH, Voucher voucher, String phuongThucTT, double tongTien) {
+    public HoaDon(String maHD, DonHang maDH, Voucher maVoucher, LocalDateTime ngayThanhToan, String phuongThucTT, double tongTienCuoi) {
         this.maHD = maHD;
-        this.ngayTao = ngayTao;
-        this.maNV = maNV;
-        this.maKH = maKH;
-        this.voucher = voucher;
+        this.maDH = maDH;
+        this.maVoucher = maVoucher;
+        this.ngayThanhToan = ngayThanhToan;
         this.phuongThucTT = phuongThucTT;
-        this.tongTien = tongTien;
+        this.tongTienCuoi = tongTienCuoi;
     }
 
     public String getMaHD() {
@@ -33,36 +31,28 @@ public class HoaDon {
         this.maHD = maHD;
     }
 
-    public LocalDateTime getNgayTao() {
-        return ngayTao;
+    public DonHang getMaDH() {
+        return maDH;
     }
 
-    public void setNgayTao(LocalDateTime ngayTao) {
-        this.ngayTao = ngayTao;
+    public void setMaDH(DonHang maDH) {
+        this.maDH = maDH;
     }
 
-    public NhanVien getMaNV() {
-        return maNV;
+    public Voucher getMaVoucher() {
+        return maVoucher;
     }
 
-    public void setMaNV(NhanVien maNV) {
-        this.maNV = maNV;
+    public void setMaVoucher(Voucher maVoucher) {
+        this.maVoucher = maVoucher;
     }
 
-    public KhachHang getMaKH() {
-        return maKH;
+    public LocalDateTime getNgayThanhToan() {
+        return ngayThanhToan;
     }
 
-    public void setMaKH(KhachHang maKH) {
-        this.maKH = maKH;
-    }
-
-    public Voucher getVoucher() {
-        return voucher;
-    }
-
-    public void setVoucher(Voucher voucher) {
-        this.voucher = voucher;
+    public void setNgayThanhToan(LocalDateTime ngayThanhToan) {
+        this.ngayThanhToan = ngayThanhToan;
     }
 
     public String getPhuongThucTT() {
@@ -73,12 +63,12 @@ public class HoaDon {
         this.phuongThucTT = phuongThucTT;
     }
 
-    public double getTongTien() {
-        return tongTien;
+    public double getTongTienCuoi() {
+        return tongTienCuoi;
     }
 
-    public void setTongTien(double tongTien) {
-        this.tongTien = tongTien;
+    public void setTongTienCuoi(double tongTienCuoi) {
+        this.tongTienCuoi = tongTienCuoi;
     }
 
     @Override
@@ -97,12 +87,11 @@ public class HoaDon {
     public String toString() {
         return "HoaDon{" +
                 "maHD='" + maHD + '\'' +
-                ", ngayTao=" + ngayTao +
-                ", maNV=" + maNV +
-                ", maKH=" + maKH +
-                ", voucher=" + voucher +
+                ", maDH=" + maDH +
+                ", maVoucher=" + maVoucher +
+                ", ngayThanhToan=" + ngayThanhToan +
                 ", phuongThucTT='" + phuongThucTT + '\'' +
-                ", tongTien=" + tongTien +
+                ", tongTienCuoi=" + tongTienCuoi +
                 '}';
     }
 }

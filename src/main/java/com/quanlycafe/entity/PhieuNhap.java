@@ -12,10 +12,10 @@ public class PhieuNhap {
     public PhieuNhap() {
     }
 
-    public PhieuNhap(LocalDateTime ngayNhap, String maPhieu, String tenNCC, double tongTienNhap) {
-        this.ngayNhap = ngayNhap;
+    public PhieuNhap(String maPhieu, String tenNCC, LocalDateTime ngayNhap, double tongTienNhap) {
         this.maPhieu = maPhieu;
         this.tenNCC = tenNCC;
+        this.ngayNhap = ngayNhap;
         this.tongTienNhap = tongTienNhap;
     }
 

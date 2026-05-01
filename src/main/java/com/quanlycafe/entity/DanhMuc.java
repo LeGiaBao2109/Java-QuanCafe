@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class DanhMuc {
     private String maDM;
-    private String tenDM;
+    private String tenDM;;
 
     public DanhMuc() {
     }
