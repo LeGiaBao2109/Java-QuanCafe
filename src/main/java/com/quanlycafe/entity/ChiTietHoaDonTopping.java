@@ -12,12 +12,16 @@ public class ChiTietHoaDonTopping {
     public ChiTietHoaDonTopping() {
     }
 
-    public ChiTietHoaDonTopping(ChiTietHoaDon maCTHD, Topping maTopping, int soLuong, double giaBan, double thanhTien) {
+    public ChiTietHoaDonTopping(ChiTietHoaDon maCTHD, Topping maTopping, int soLuong, double giaBan) {
         this.maCTHD = maCTHD;
         this.maTopping = maTopping;
         this.soLuong = soLuong;
         this.giaBan = giaBan;
-        this.thanhTien = thanhTien;
+        tinhThanhTien();
+    }
+
+    private void tinhThanhTien() {
+        this.thanhTien = this.soLuong * this.giaBan;
     }
 
     public ChiTietHoaDon getMaCTHD() {
@@ -42,6 +46,7 @@ public class ChiTietHoaDonTopping {
 
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
+        tinhThanhTien();
     }
 
     public double getGiaBan() {
@@ -50,18 +55,16 @@ public class ChiTietHoaDonTopping {
 
     public void setGiaBan(double giaBan) {
         this.giaBan = giaBan;
+        tinhThanhTien();
     }
 
     public double getThanhTien() {
         return thanhTien;
     }
 
-    public void setThanhTien(double thanhTien) {
-        this.thanhTien = thanhTien;
-    }
-
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChiTietHoaDonTopping that = (ChiTietHoaDonTopping) o;
         return Objects.equals(maCTHD, that.maCTHD) && Objects.equals(maTopping, that.maTopping);

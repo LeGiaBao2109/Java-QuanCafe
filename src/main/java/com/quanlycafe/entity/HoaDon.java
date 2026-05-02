@@ -8,13 +8,13 @@ public class HoaDon {
     private DonHang maDH;
     private Voucher maVoucher;
     private LocalDateTime ngayThanhToan;
-    private String phuongThucTT;
+    private PhuongThucTT phuongThucTT;
     private double tongTienCuoi;
 
     public HoaDon() {
     }
 
-    public HoaDon(String maHD, DonHang maDH, Voucher maVoucher, LocalDateTime ngayThanhToan, String phuongThucTT, double tongTienCuoi) {
+    public HoaDon(String maHD, DonHang maDH, Voucher maVoucher, LocalDateTime ngayThanhToan, PhuongThucTT phuongThucTT, double tongTienCuoi) {
         this.maHD = maHD;
         this.maDH = maDH;
         this.maVoucher = maVoucher;
@@ -55,11 +55,11 @@ public class HoaDon {
         this.ngayThanhToan = ngayThanhToan;
     }
 
-    public String getPhuongThucTT() {
+    public PhuongThucTT getPhuongThucTT() {
         return phuongThucTT;
     }
 
-    public void setPhuongThucTT(String phuongThucTT) {
+    public void setPhuongThucTT(PhuongThucTT phuongThucTT) {
         this.phuongThucTT = phuongThucTT;
     }
 
@@ -90,7 +90,7 @@ public class HoaDon {
                 ", maDH=" + maDH +
                 ", maVoucher=" + maVoucher +
                 ", ngayThanhToan=" + ngayThanhToan +
-                ", phuongThucTT='" + phuongThucTT + '\'' +
+                ", phuongThucTT=" + phuongThucTT +
                 ", tongTienCuoi=" + tongTienCuoi +
                 '}';
     }

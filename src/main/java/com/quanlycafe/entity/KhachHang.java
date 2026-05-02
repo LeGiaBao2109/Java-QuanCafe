@@ -57,7 +57,7 @@ public class KhachHang {
         return diemTL;
     }
 
-    public void setDiemTL() {
+    public void setDiemTL(int diemTL) {
         this.diemTL = diemTL;
     }
 

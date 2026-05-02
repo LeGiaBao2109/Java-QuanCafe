@@ -15,14 +15,14 @@ public class DonHang {
     public DonHang() {
     }
 
-    public DonHang(String maDH, int stt, LocalDateTime ngayTao, NhanVien maNV, KhachHang maKH, boolean trangThai, double tongTien) {
+    public DonHang(String maDH, int stt, LocalDateTime ngayTao, NhanVien maNV, KhachHang maKH, boolean trangThai) {
         this.maDH = maDH;
         this.stt = stt;
         this.ngayTao = ngayTao;
         this.maNV = maNV;
         this.maKH = maKH;
         this.trangThai = trangThai;
-        this.tongTien = tongTien;
+        this.tongTien = 0;
     }
 
     public String getMaDH() {
@@ -83,6 +83,7 @@ public class DonHang {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DonHang donHang = (DonHang) o;
         return Objects.equals(maDH, donHang.maDH);
@@ -90,7 +91,7 @@ public class DonHang {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(maDH);
+        return Objects.hash(maDH);
     }
 
     @Override

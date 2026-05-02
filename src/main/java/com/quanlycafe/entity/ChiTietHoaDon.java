@@ -16,16 +16,20 @@ public class ChiTietHoaDon {
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, double thanhTien, MucDa luongDa, MucDuong luongDuong) {
+    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, MucDa luongDa, MucDuong luongDuong) {
         this.maCTHD = maCTHD;
         this.maDH = maDH;
         this.maSize = maSize;
         this.soLuong = soLuong;
         this.donGia = donGia;
         this.ghiChu = ghiChu;
-        this.thanhTien = thanhTien;
         this.luongDa = luongDa;
         this.luongDuong = luongDuong;
+        tinhThanhTien();
+    }
+
+    private void tinhThanhTien() {
+        this.thanhTien = this.soLuong * this.donGia;
     }
 
     public String getMaCTHD() {
@@ -58,6 +62,7 @@ public class ChiTietHoaDon {
 
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
+        tinhThanhTien();
     }
 
     public double getDonGia() {
@@ -66,6 +71,7 @@ public class ChiTietHoaDon {
 
     public void setDonGia(double donGia) {
         this.donGia = donGia;
+        tinhThanhTien();
     }
 
     public String getGhiChu() {
@@ -78,10 +84,6 @@ public class ChiTietHoaDon {
 
     public double getThanhTien() {
         return thanhTien;
-    }
-
-    public void setThanhTien(double thanhTien) {
-        this.thanhTien = thanhTien;
     }
 
     public MucDa getLuongDa() {
@@ -102,6 +104,7 @@ public class ChiTietHoaDon {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChiTietHoaDon that = (ChiTietHoaDon) o;
         return Objects.equals(maCTHD, that.maCTHD);
@@ -109,7 +112,7 @@ public class ChiTietHoaDon {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(maCTHD);
+        return Objects.hash(maCTHD);
     }
 
     @Override

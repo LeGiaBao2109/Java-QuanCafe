@@ -1,10 +1,11 @@
 package com.quanlycafe.entity;
 
 public enum MucDuong {
-    KHONG_DUONG("0% Đường"),
-    IT_DUONG("25% Đường"),
-    VUA_DUONG("50% Đường"),
-    BINH_THUONG("100% Đường");
+    DUONG_0("0% Đường"),
+    DUONG_25("25% Đường"),
+    DUONG_50("50% Đường"),
+    DUONG_75("75% Đường"),
+    DUONG_100("100% Đường");
 
     private final String label;
 

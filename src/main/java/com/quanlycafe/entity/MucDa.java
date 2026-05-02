@@ -1,10 +1,11 @@
 package com.quanlycafe.entity;
 
 public enum MucDa {
-    KHONG_DA("0% Đá"),
-    IT_DA("25% Đá"),
-    VUA_DA("50% Đá"),
-    BINH_THUONG("100% Đá");
+    DA_0("0% Đá"),
+    DA_25("25% Đá"),
+    DA_50("50% Đá"),
+    DA_75("75% Đá"),
+    DA_100("100% Đá");
 
     private final String label;
 
