@@ -65,22 +65,4 @@ public class TaiKhoanDAO {
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        TaiKhoanDAO dao = new TaiKhoanDAO();
-
-        System.out.println("--- THỬ NGHIỆM VÔ HIỆU HÓA ---");
-        if (dao.voHieuHoaTaiKhoan("TK01")) {
-            System.out.println("✅ Đã khóa tài khoản thành công.");
-        }
-
-        System.out.println("--- THỬ NGHIỆM ĐĂNG NHẬP SAU KHI KHÓA ---");
-        TaiKhoan tk = dao.dangNhap("admin", "Giabao2109@");
-
-        if (tk != null) {
-            System.out.println("✅ Đăng nhập thành công!");
-        } else {
-            System.out.println("❌ Tài khoản không tồn tại hoặc đã bị khóa.");
-        }
-    }
 }

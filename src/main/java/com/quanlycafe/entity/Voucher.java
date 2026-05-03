@@ -60,8 +60,13 @@ public class Voucher {
         this.trangThai = trangThai;
     }
 
+    public double getGiaTriGiam() {
+        return (loaiGiamGia != null) ? loaiGiamGia.getGiaTri() : 0;
+    }
+
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Voucher voucher = (Voucher) o;
         return Objects.equals(maCT, voucher.maCT);
@@ -69,7 +74,7 @@ public class Voucher {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(maCT);
+        return Objects.hash(maCT);
     }
 
     @Override

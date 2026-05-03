@@ -71,8 +71,20 @@ public class HoaDon {
         this.tongTienCuoi = tongTienCuoi;
     }
 
+    public void apDungVoucher(Voucher v) {
+        this.maVoucher = v;
+    }
+
+    public void tinhTongTien(double tongTienHang, double thueSuat) {
+        double tienThue = tongTienHang * thueSuat;
+        double giamGia = (this.maVoucher != null) ? this.maVoucher.getGiaTriGiam() : 0;
+        this.tongTienCuoi = (tongTienHang + tienThue) - giamGia;
+        if (this.tongTienCuoi < 0) this.tongTienCuoi = 0;
+    }
+
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HoaDon hoaDon = (HoaDon) o;
         return Objects.equals(maHD, hoaDon.maHD);
@@ -80,7 +92,7 @@ public class HoaDon {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(maHD);
+        return Objects.hash(maHD);
     }
 
     @Override

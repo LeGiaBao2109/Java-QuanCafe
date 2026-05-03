@@ -5,7 +5,6 @@ import com.quanlycafe.entity.KhachHang;
 import com.quanlycafe.entity.NhanVien;
 import com.quanlycafe.util.DBConnect;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +14,6 @@ public class DonHangDAO {
         String sql = "INSERT INTO DONHANG (maDH, stt, ngayTao, maNV, maKH, trangThai, tongTien) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, dh.getMaDH());
             ps.setInt(2, dh.getStt());
             ps.setTimestamp(3, Timestamp.valueOf(dh.getNgayTao()));
@@ -23,7 +21,6 @@ public class DonHangDAO {
             ps.setString(5, dh.getMaKH().getMaKH());
             ps.setBoolean(6, dh.isTrangThai());
             ps.setDouble(7, dh.getTongTien());
-
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -31,32 +28,91 @@ public class DonHangDAO {
         }
     }
 
-    public List<DonHang> layTatCaDonHang() {
-        List<DonHang> dsTK = new ArrayList<>();
-        String sql = "SELECT * FROM DONHANG";
+    public List<DonHang> layDonHangChuaThanhToan() {
+        List<DonHang> dsDH = new ArrayList<>();
+        String sql = "SELECT * FROM DONHANG WHERE trangThai = 0 ORDER BY ngayTao ASC";
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-
             while (rs.next()) {
-                NhanVien nv = new NhanVien(); nv.setMaNV(rs.getString("maNV"));
-                KhachHang kh = new KhachHang(); kh.setMaKH(rs.getString("maKH"));
-
                 DonHang dh = new DonHang();
                 dh.setMaDH(rs.getString("maDH"));
                 dh.setStt(rs.getInt("stt"));
                 dh.setNgayTao(rs.getTimestamp("ngayTao").toLocalDateTime());
+
+                NhanVien nv = new NhanVien();
+                nv.setMaNV(rs.getString("maNV"));
                 dh.setMaNV(nv);
+
+                KhachHang kh = new KhachHang();
+                kh.setMaKH(rs.getString("maKH"));
                 dh.setMaKH(kh);
+
                 dh.setTrangThai(rs.getBoolean("trangThai"));
                 dh.setTongTien(rs.getDouble("tongTien"));
-
-                dsTK.add(dh);
+                dsDH.add(dh);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return dsTK;
+        return dsDH;
+    }
+
+    public DonHang layTheoMa(String maDH) {
+        String sql = "SELECT * FROM DONHANG WHERE maDH = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maDH);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    DonHang dh = new DonHang();
+                    dh.setMaDH(rs.getString("maDH"));
+                    dh.setStt(rs.getInt("stt"));
+                    dh.setNgayTao(rs.getTimestamp("ngayTao").toLocalDateTime());
+
+                    NhanVien nv = new NhanVien();
+                    nv.setMaNV(rs.getString("maNV"));
+                    dh.setMaNV(nv);
+
+                    KhachHang kh = new KhachHang();
+                    kh.setMaKH(rs.getString("maKH"));
+                    dh.setMaKH(kh);
+
+                    dh.setTrangThai(rs.getBoolean("trangThai"));
+                    dh.setTongTien(rs.getDouble("tongTien"));
+                    return dh;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateTongTien(String maDH, double tongTien) {
+        String sql = "UPDATE DONHANG SET tongTien = ? WHERE maDH = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, tongTien);
+            ps.setString(2, maDH);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean capNhatTrangThai(String maDH, boolean trangThai) {
+        String sql = "UPDATE DONHANG SET trangThai = ? WHERE maDH = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, trangThai);
+            ps.setString(2, maDH);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean xoaDonHang(String maDH) {
@@ -65,25 +121,27 @@ public class DonHangDAO {
             conn = DBConnect.getConnection();
             conn.setAutoCommit(false);
 
-            String sqlTopping = "DELETE FROM CT_HD_TOPPING WHERE maCTHD IN " +
-                    "(SELECT maCTHD FROM CHITIETHOADON WHERE maDH = ?)";
-            PreparedStatement ps1 = conn.prepareStatement(sqlTopping);
-            ps1.setString(1, maDH);
-            ps1.executeUpdate();
+            String sqlTopping = "DELETE FROM CT_HD_TOPPING WHERE maCTHD IN (SELECT maCTHD FROM CHITIETHOADON WHERE maDH = ?)";
+            try (PreparedStatement ps1 = conn.prepareStatement(sqlTopping)) {
+                ps1.setString(1, maDH);
+                ps1.executeUpdate();
+            }
 
             String sqlChiTiet = "DELETE FROM CHITIETHOADON WHERE maDH = ?";
-            PreparedStatement ps2 = conn.prepareStatement(sqlChiTiet);
-            ps2.setString(1, maDH);
-            ps2.executeUpdate();
+            try (PreparedStatement ps2 = conn.prepareStatement(sqlChiTiet)) {
+                ps2.setString(1, maDH);
+                ps2.executeUpdate();
+            }
 
             String sqlDonHang = "DELETE FROM DONHANG WHERE maDH = ?";
-            PreparedStatement ps3 = conn.prepareStatement(sqlDonHang);
-            ps3.setString(1, maDH);
-            int rows = ps3.executeUpdate();
+            int rows;
+            try (PreparedStatement ps3 = conn.prepareStatement(sqlDonHang)) {
+                ps3.setString(1, maDH);
+                rows = ps3.executeUpdate();
+            }
 
             conn.commit();
             return rows > 0;
-
         } catch (SQLException e) {
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
@@ -99,26 +157,6 @@ public class DonHangDAO {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        DonHangDAO dao = new DonHangDAO();
-
-        NhanVien nv = new NhanVien(); nv.setMaNV("NV01");
-        KhachHang kh = new KhachHang(); kh.setMaKH("KH01");
-
-        System.out.println("--- TEST TẠO ĐƠN HÀNG ---");
-        DonHang dh = new DonHang("DH001", 1, LocalDateTime.now(), nv, kh, true);
-        if(dao.themDonHang(dh)) {
-            System.out.println("✅ Thêm thành công!");
-        }
-
-        System.out.println("--- TEST XÓA ĐƠN HÀNG ---");
-        if(dao.xoaDonHang("DH001")) {
-            System.out.println("✅ Xóa thành công!");
-        } else {
-            System.out.println("❌ Thất bại!");
         }
     }
 }

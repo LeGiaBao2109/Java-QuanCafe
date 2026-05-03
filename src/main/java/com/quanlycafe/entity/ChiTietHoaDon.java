@@ -29,6 +29,8 @@ public class ChiTietHoaDon {
     }
 
     private void tinhThanhTien() {
+        // double tienTopping = dsTopping.stream().mapToDouble(t -> t.getGia()).sum();
+        // this.thanhTien = (this.donGia + tienTopping) * this.soLuong;
         this.thanhTien = this.soLuong * this.donGia;
     }
 

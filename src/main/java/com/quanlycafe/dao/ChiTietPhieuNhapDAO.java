@@ -61,20 +61,20 @@ public class ChiTietPhieuNhapDAO {
         return dsCTPN;
     }
 
-    public static void main(String[] args) {
-        ChiTietPhieuNhapDAO dao = new ChiTietPhieuNhapDAO();
-        System.out.println("--- TEST NHẬP KHO ---");
+    public double tinhTongTienTheoPhieu(String maPhieu) {
+        String sql = "SELECT SUM(soLuong * donGiaNhap) AS TongTien FROM CHITIETPHIEUNHAP WHERE maPhieu = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        PhieuNhap pn = new PhieuNhap(); pn.setMaPhieu("PN001");
-        SanPham sp = new SanPham(); sp.setMaSP("SP01");
-
-        ChiTietPhieuNhap ct = new ChiTietPhieuNhap(pn, sp, 10, 20000);
-        System.out.println("Thành tiền (Java tính): " + ct.getThanhTien()); // Sẽ in ra 200000[cite: 5]
-
-        if(dao.themChiTiet(ct)) {
-            System.out.println("✅ Lưu chi tiết phiếu nhập thành công!");
-        } else {
-            System.out.println("❌ Thất bại. Kiểm tra khóa ngoại maPhieu và maSP!");
+            ps.setString(1, maPhieu);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TongTien");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return 0.0;
     }
 }

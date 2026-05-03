@@ -24,7 +24,7 @@ public class PhieuNhapDAO {
     }
 
     public List<PhieuNhap> layTatCaPhieuNhap() {
-        List<PhieuNhap> ds = new ArrayList<>();
+        List<PhieuNhap> dsPN = new ArrayList<>();
         String sql = "SELECT * FROM PHIEUNHAP ORDER BY ngayNhap DESC";
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
@@ -35,12 +35,12 @@ public class PhieuNhapDAO {
                 pn.setTenNCC(rs.getString("tenNCC"));
                 pn.setNgayNhap(rs.getTimestamp("ngayNhap").toLocalDateTime());
                 pn.setTongTienNhap(rs.getDouble("tongTienNhap"));
-                ds.add(pn);
+                dsPN.add(pn);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return ds;
+        return dsPN;
     }
 
     public PhieuNhap timTheoMa(String maPhieu) {
@@ -82,7 +82,7 @@ public class PhieuNhapDAO {
     }
 
     public List<PhieuNhap> locTheoNhaCungCap(String tenNCC) {
-        List<PhieuNhap> ds = new ArrayList<>();
+        List<PhieuNhap> dsPN = new ArrayList<>();
         String sql = "SELECT * FROM PHIEUNHAP WHERE tenNCC LIKE ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -94,26 +94,12 @@ public class PhieuNhapDAO {
                     pn.setTenNCC(rs.getString("tenNCC"));
                     pn.setNgayNhap(rs.getTimestamp("ngayNhap").toLocalDateTime());
                     pn.setTongTienNhap(rs.getDouble("tongTienNhap"));
-                    ds.add(pn);
+                    dsPN.add(pn);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return ds;
-    }
-
-    public static void main(String[] args) {
-        PhieuNhapDAO dao = new PhieuNhapDAO();
-        System.out.println("--- KIỂM TRA QUẢN LÝ PHIẾU NHẬP ---");
-
-        List<PhieuNhap> ds = dao.layTatCaPhieuNhap();
-        if (ds.isEmpty()) {
-            System.out.println("Chưa có phiếu nhập hàng nào.");
-        } else {
-            for (PhieuNhap pn : ds) {
-                System.out.println("Mã: " + pn.getMaPhieu() + " | NCC: " + pn.getTenNCC() + " | Tổng tiền: " + pn.getTongTienNhap());
-            }
-        }
+        return dsPN;
     }
 }

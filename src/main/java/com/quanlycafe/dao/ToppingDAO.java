@@ -97,17 +97,4 @@ public class ToppingDAO {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        ToppingDAO dao = new ToppingDAO();
-        System.out.println("--- KIỂM TRA DANH SÁCH TOPPING (POS) ---");
-        List<Topping> ds = dao.layToppingActive();
-        if (ds.isEmpty()) {
-            System.out.println("Hiện không có Topping nào khả dụng.");
-        } else {
-            for (Topping tp : ds) {
-                System.out.println(tp.getMaTopping() + " | " + tp.getTenTopping() + " | Giá: " + tp.getGia());
-            }
-        }
-    }
 }

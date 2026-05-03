@@ -9,7 +9,7 @@ import java.util.List;
 
 public class KichCoDAO {
     public List<KichCo> layKichCoTheoSP(String maSP) {
-        List<KichCo> dsKichCo = new ArrayList<>();
+        List<KichCo> dsKC = new ArrayList<>();
         String sql = "SELECT * FROM KICHCO WHERE maSP = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -27,13 +27,13 @@ public class KichCoDAO {
                     kc.setTenSize(rs.getString("tenSize"));
                     kc.setGia(rs.getDouble("gia"));
 
-                    dsKichCo.add(kc);
+                    dsKC.add(kc);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return dsKichCo;
+        return dsKC;
     }
 
     public KichCo timTheoMa(String maSize) {
@@ -105,24 +105,6 @@ public class KichCoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public static void main(String[] args) {
-        KichCoDAO dao = new KichCoDAO();
-        System.out.println("--- KIỂM TRA KÍCH CỠ SẢN PHẨM ---");
-
-        // Giả sử mã sản phẩm là SP01
-        String maSPTest = "SP01";
-        List<KichCo> ds = dao.layKichCoTheoSP(maSPTest);
-
-        if (ds.isEmpty()) {
-            System.out.println("Sản phẩm này chưa cấu hình kích thước.");
-        } else {
-            System.out.println("Danh sách size của " + maSPTest + ":");
-            for (KichCo kc : ds) {
-                System.out.println("- " + kc.getTenSize() + " | Giá: " + kc.getGia());
-            }
         }
     }
 }

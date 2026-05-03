@@ -87,15 +87,4 @@ public class DanhMucDAO {
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        DanhMucDAO dao = new DanhMucDAO();
-        System.out.println("--- TEST TÌM KIẾM ---");
-
-        DanhMuc dm = dao.timTheoMa("DM01");
-        if(dm != null) System.out.println("Tìm thấy mã DM01: " + dm.getTenDM());
-
-        List<DanhMuc> kq = dao.timTheoTen("Cà phê");
-        kq.forEach(item -> System.out.println("Kết quả tìm tên: " + item.getTenDM()));
-    }
 }

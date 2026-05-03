@@ -77,24 +77,4 @@ public class NhanVienDAO {
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        NhanVienDAO dao = new NhanVienDAO();
-
-        System.out.println("--- KIỂM TRA DANH SÁCH NHÂN VIÊN ---");
-        List<NhanVien> dsNV = dao.layTatCaNhanVien();
-        if (dsNV.isEmpty()) {
-            System.out.println("Không có dữ liệu trong bảng NHANVIEN.");
-        } else {
-            dsNV.forEach(System.out::println);
-        }
-
-        System.out.println("\n--- THỬ TÌM NHÂN VIÊN NV01 ---");
-        NhanVien nv = dao.timTheoMa("NV01");
-        if (nv != null) {
-            System.out.println("Tìm thấy: " + nv.getTenNV() + " [" + nv.getRoleNV().getMoTa() + "]");
-        } else {
-            System.out.println("Không tìm thấy mã NV01.");
-        }
-    }
 }

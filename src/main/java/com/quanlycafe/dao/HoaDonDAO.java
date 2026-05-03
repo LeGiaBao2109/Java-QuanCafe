@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoaDonDAO {
-
     public boolean taoHoaDon(HoaDon hd) {
         String sql = "INSERT INTO HOADON (maHD, maDH, maVoucher, ngayThanhToan, phuongThucTT, tongTienCuoi) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
@@ -55,7 +54,7 @@ public class HoaDonDAO {
 
     public List<HoaDon> layTatCaHoaDon() {
         List<HoaDon> dsHD = new ArrayList<>();
-        String sql = "SELECT * FROM HOADON";
+        String sql = "SELECT * FROM HOADON ORDER BY ngayThanhToan DESC";
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -142,22 +141,5 @@ public class HoaDonDAO {
             e.printStackTrace();
         }
         return 0.0;
-    }
-
-    public static void main(String[] args) {
-        HoaDonDAO dao = new HoaDonDAO();
-        System.out.println("--- TEST HOADONDAO ---");
-        List<HoaDon> ds = dao.layTatCaHoaDon();
-        if (ds.isEmpty()) {
-            System.out.println("Danh sách trống!");
-        } else {
-            for (HoaDon hd : ds) {
-                System.out.println("Mã HD: " + hd.getMaHD() + " | Tiền: " + hd.getTongTienCuoi());
-            }
-        }
-        // Test doanh thu hôm nay
-        LocalDateTime bd = LocalDateTime.now().withHour(0).withMinute(0);
-        LocalDateTime kt = LocalDateTime.now().withHour(23).withMinute(59);
-        System.out.println("Doanh thu hôm nay: " + dao.tinhDoanhThu(bd, kt));
     }
 }

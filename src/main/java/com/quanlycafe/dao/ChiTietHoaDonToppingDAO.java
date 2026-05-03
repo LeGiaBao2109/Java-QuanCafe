@@ -4,6 +4,7 @@ import com.quanlycafe.entity.ChiTietHoaDon;
 import com.quanlycafe.entity.ChiTietHoaDonTopping;
 import com.quanlycafe.entity.Topping;
 import com.quanlycafe.util.DBConnect;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,23 +46,25 @@ public class ChiTietHoaDonToppingDAO {
                     dsCTHDTP.add(ctt);
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return dsCTHDTP;
     }
 
-    public static void main(String[] args) {
-        ChiTietHoaDonToppingDAO dao = new ChiTietHoaDonToppingDAO();
-        System.out.println("--- TEST LƯU TOPPING CHO MÓN ---");
-
-        ChiTietHoaDon ct = new ChiTietHoaDon(); ct.setMaCTHD("CT001");
-        Topping tp = new Topping(); tp.setMaTopping("TP01");
-
-        ChiTietHoaDonTopping ctt = new ChiTietHoaDonTopping(ct, tp, 1, 5000);
-
-        if(dao.themToppingVaoChiTiet(ctt)) {
-            System.out.println("✅ Thêm Topping thành công! Thành tiền: " + ctt.getThanhTien());
-        } else {
-            System.out.println("❌ Thất bại. Kiểm tra khóa ngoại!");
+    public double tinhTongTienToppingTheoCTHD(String maCTHD) {
+        String sql = "SELECT SUM(soLuong * giaBan) AS TongTien FROM CT_HD_TOPPING WHERE maCTHD = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maCTHD);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TongTien");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return 0.0;
     }
 }

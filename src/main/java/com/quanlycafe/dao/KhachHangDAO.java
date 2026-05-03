@@ -74,7 +74,7 @@ public class KhachHangDAO {
     }
 
     public List<KhachHang> layTatCaKhachHang() {
-        List<KhachHang> ds = new ArrayList<>();
+        List<KhachHang> dsKH = new ArrayList<>();
         String sql = "SELECT * FROM KHACHHANG";
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
@@ -86,27 +86,11 @@ public class KhachHangDAO {
                 kh.setSdt(rs.getString("sdt"));
                 kh.setNgayTao(rs.getTimestamp("ngayTao").toLocalDateTime());
                 kh.setDiemTL(rs.getInt("diemTL"));
-                ds.add(kh);
+                dsKH.add(kh);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return ds;
-    }
-
-    public static void main(String[] args) {
-        KhachHangDAO dao = new KhachHangDAO();
-        System.out.println("--- KIỂM TRA HỆ THỐNG KHÁCH HÀNG (POS) ---");
-
-        String sdtNhap = "0901234567";
-        KhachHang kh = dao.timTheoSDT(sdtNhap);
-
-        if (kh != null) {
-            System.out.println("Khách hàng: " + kh.getTenKH());
-            System.out.println("Điểm hiện tại: " + kh.getDiemTL());
-            System.out.println("=> Nhân viên có thể tư vấn đổi Voucher dựa trên điểm này.");
-        } else {
-            System.out.println("Khách hàng mới. Vui lòng thêm thông tin để tích điểm!");
-        }
+        return dsKH;
     }
 }

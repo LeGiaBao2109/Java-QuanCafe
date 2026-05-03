@@ -6,6 +6,7 @@ import com.quanlycafe.entity.KichCo;
 import com.quanlycafe.entity.MucDa;
 import com.quanlycafe.entity.MucDuong;
 import com.quanlycafe.util.DBConnect;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,26 +60,42 @@ public class ChiTietHoaDonDAO {
                     dsCTHD.add(ct);
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return dsCTHD;
     }
 
-    public static void main(String[] args) {
-        ChiTietHoaDonDAO dao = new ChiTietHoaDonDAO();
-        System.out.println("--- TEST LƯU CHI TIẾT MÓN ĂN ---");
+    public boolean capNhatSoLuong(String maCTHD, int soLuongMoi, double giaMoi) {
+        double thanhTienMoi = soLuongMoi * giaMoi;
 
-        DonHang dh = new DonHang(); dh.setMaDH("DH001");
-        KichCo kc = new KichCo(); kc.setMaSize("S01");
+        String sql = "UPDATE CHITIETHOADON SET soLuong = ?, thanhTien = ? WHERE maCTHD = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, soLuongMoi);
+            ps.setDouble(2, thanhTienMoi);
+            ps.setString(3, maCTHD);
 
-        ChiTietHoaDon ct = new ChiTietHoaDon(
-                "CT001", dh, kc, 2, 35000, "Ít ngọt",
-                MucDa.DA_50, MucDuong.DUONG_25
-        );
-
-        if(dao.themChiTiet(ct)) {
-            System.out.println("✅ Lưu chi tiết thành công! Thành tiền: " + ct.getThanhTien());
-        } else {
-            System.out.println("❌ Thất bại. Kiểm tra khóa ngoại!");
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
+    }
+
+    public double tinhTongTienDonHang(String maDH) {
+        String sql = "SELECT SUM(thanhTien) FROM CHITIETHOADON WHERE maDH = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maDH);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
     }
 }

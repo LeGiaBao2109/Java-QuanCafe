@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,8 @@ public class VoucherDAO {
         List<Voucher> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM VOUCHER";
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Voucher v = new Voucher();
                 v.setMaCT(rs.getString("maCT"));
@@ -96,19 +97,6 @@ public class VoucherDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public static void main(String[] args) {
-        VoucherDAO dao = new VoucherDAO();
-        System.out.println("--- TEST VOUCHERDAO ---");
-        List<Voucher> ds = dao.layTatCaVoucher();
-        if (ds.isEmpty()) {
-            System.out.println("Không có voucher!");
-        } else {
-            for (Voucher v : ds) {
-                System.out.println(v.getMaCT() + " | " + v.getTenCT() + " | " + v.getLoaiGiamGia());
-            }
         }
     }
 }
