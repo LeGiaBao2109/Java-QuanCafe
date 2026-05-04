@@ -27,7 +27,7 @@ public class QuanLyForm extends JFrame {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(COLOR_BG);
         cardPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-
+        
         SanPhamPanel pnlSanPham = new SanPhamPanel(role, tenNV);
         JPanel pnlNhanVien = createPlaceholderPanel("Quản lý Nhân sự (Đang phát triển)");
         ThongKePanel pnlBaoCao = new ThongKePanel(); 

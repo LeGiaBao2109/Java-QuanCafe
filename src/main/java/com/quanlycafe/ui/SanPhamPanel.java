@@ -7,6 +7,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SanPhamPanel extends JPanel {
@@ -24,6 +25,7 @@ public class SanPhamPanel extends JPanel {
     private int totalPages = 1;
 
     private DefaultTableModel model;
+    private JTable table;
     private JLabel lblTotal;
     private JTextField txtPage;
 
@@ -32,10 +34,7 @@ public class SanPhamPanel extends JPanel {
         setBackground(COLOR_BG);
         setOpaque(false);
 
-        SanPhamDAO dao = new SanPhamDAO();
-        allData = dao.layDanhSachSanPhamQuanLy();
-        totalPages = (int) Math.ceil((double) allData.size() / rowsPerPage);
-        if (totalPages == 0) totalPages = 1;
+        loadAndFormatData(); 
 
         JPanel tableContainer = new JPanel(new BorderLayout());
         tableContainer.setBackground(COLOR_SURFACE);
@@ -50,6 +49,39 @@ public class SanPhamPanel extends JPanel {
         updateTableData();
     }
 
+    private void loadAndFormatData() {
+        SanPhamDAO dao = new SanPhamDAO();
+        List<Object[]> rawData = dao.layDanhSachSanPhamQuanLy();
+        allData = new ArrayList<>();
+
+        for (Object[] row : rawData) {
+            String maMon = row[1].toString(); 
+            String tenMonGoc = row[2].toString(); 
+            String nhom = row[3].toString(); 
+            String dvt = row[4].toString(); 
+            String gia = row[5].toString(); 
+
+            String tenMon = tenMonGoc;
+            String size = "Không có";
+
+            if (tenMonGoc.contains("(Size ")) {
+                int openParen = tenMonGoc.indexOf("(Size ");
+                int closeParen = tenMonGoc.indexOf(")", openParen);
+                
+                if (closeParen != -1) {
+                    tenMon = tenMonGoc.substring(0, openParen).trim();
+                    size = tenMonGoc.substring(openParen + 6, closeParen).trim();
+                }
+            }
+
+            Object[] formattedRow = new Object[]{maMon, tenMon, size, nhom, dvt, gia};
+            allData.add(formattedRow);
+        }
+
+        totalPages = (int) Math.ceil((double) allData.size() / rowsPerPage);
+        if (totalPages == 0) totalPages = 1;
+    }
+
     private JPanel createTopActionBar(String role, String tenNV) {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(COLOR_SURFACE);
@@ -61,9 +93,17 @@ public class SanPhamPanel extends JPanel {
         JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pnlLeft.setOpaque(false);
         
-        pnlLeft.add(createModernButton("Thêm Mới", true));
-        pnlLeft.add(createModernButton("Sửa", false));
-        pnlLeft.add(createModernButton("Xóa", false));
+        JButton btnAdd = createModernButton("Thêm Mới", true);
+        JButton btnEdit = createModernButton("Sửa", false);
+        JButton btnDelete = createModernButton("Xóa", false);
+
+        btnAdd.addActionListener(e -> openCrudDialog("ADD"));
+        btnEdit.addActionListener(e -> openCrudDialog("EDIT"));
+        btnDelete.addActionListener(e -> openCrudDialog("DELETE"));
+
+        pnlLeft.add(btnAdd);
+        pnlLeft.add(btnEdit);
+        pnlLeft.add(btnDelete);
 
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearch.setOpaque(false);
@@ -101,15 +141,37 @@ public class SanPhamPanel extends JPanel {
         return topBar;
     }
 
+    private void openCrudDialog(String mode) {
+        Window owner = SwingUtilities.getWindowAncestor(this);
+        Object[] rowData = null;
+
+        if (!mode.equals("ADD")) {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng trên bảng để thao tác!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            int actualRow = (currentPage - 1) * rowsPerPage + selectedRow;
+            rowData = allData.get(actualRow);
+        }
+
+        CrudSanPhamDialog dialog = new CrudSanPhamDialog(owner, mode, rowData);
+        dialog.setVisible(true);
+
+        if (dialog.isSuccess()) {
+            System.out.println("Thực hiện Database ở đây. Refresh lại bảng...");
+        }
+    }
+
     private JScrollPane createTableArea() {
-        String[] columns = {"Loại món", "Mã món", "Tên món", "Nhóm thực đơn", "Đơn vị tính", "Giá"};
+        String[] columns = {"Mã món", "Tên món", "Size", "Nhóm thực đơn", "Đơn vị tính", "Giá"};
 
         model = new DefaultTableModel(null, columns) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        JTable table = new JTable(model);
+        table = new JTable(model);
         table.setRowHeight(48);
         table.setShowVerticalLines(false);
         table.setShowHorizontalLines(true);
@@ -119,6 +181,7 @@ public class SanPhamPanel extends JPanel {
         table.setSelectionForeground(COLOR_PRIMARY);
         table.setFillsViewportHeight(true);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         table.getTableHeader().setPreferredSize(new Dimension(0, 50));
         table.getTableHeader().setBackground(COLOR_TABLE_HEADER);
