@@ -12,7 +12,7 @@ public class DBConnect {
     private static final String USER = "sa";
     private static final String PASS = "01635202769Hieu@";
 
-    // 2. CHUỖI URL PHẢI ĐÚNG CÚ PHÁP NÀY:
+    // 2. CHUỖI URL PHẢI ĐÚNG CÚ PHÁP NÀY:...
     private static final String URL = "jdbc:sqlserver://" + HOST + ":" + PORT + ";databaseName=" + DB_NAME + ";encrypt=true;trustServerCertificate=true;";
 
     public static Connection getConnection() throws SQLException {
