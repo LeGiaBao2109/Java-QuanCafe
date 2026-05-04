@@ -12,10 +12,11 @@ public class KichCo {
     }
 
     public KichCo(String maSize, SanPham maSP, String tenSize, double gia) {
-        this.maSize = maSize;
+        // Gọi setter để áp dụng Regex và Validation
+        setMaSize(maSize);
         this.maSP = maSP;
-        this.tenSize = tenSize;
-        this.gia = gia;
+        setTenSize(tenSize);
+        setGia(gia);
     }
 
     public String getMaSize() {
@@ -23,7 +24,11 @@ public class KichCo {
     }
 
     public void setMaSize(String maSize) {
-        this.maSize = maSize;
+        // Regex: Phải bắt đầu bằng chữ 'S' theo sau là ít nhất 1 chữ số (VD: S01, S123456)
+        if (maSize == null || !maSize.trim().matches("^S\\d+$")) {
+            throw new IllegalArgumentException("Mã kích cỡ không hợp lệ! Phải bắt đầu bằng 'S' theo sau là các chữ số (VD: S01).");
+        }
+        this.maSize = maSize.trim();
     }
 
     public SanPham getMaSP() {
@@ -39,7 +44,11 @@ public class KichCo {
     }
 
     public void setTenSize(String tenSize) {
-        this.tenSize = tenSize;
+        // Validation: Không được để trống
+        if (tenSize == null || tenSize.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên kích cỡ (Size) không được để trống!");
+        }
+        this.tenSize = tenSize.trim();
     }
 
     public double getGia() {
@@ -47,6 +56,10 @@ public class KichCo {
     }
 
     public void setGia(double gia) {
+        // Validation: Giá bán bắt buộc phải LỚN HƠN 0
+        if (gia <= 0) {
+            throw new IllegalArgumentException("Giá bán phải lớn hơn 0!");
+        }
         this.gia = gia;
     }
 

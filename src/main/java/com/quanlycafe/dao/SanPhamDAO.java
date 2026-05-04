@@ -32,6 +32,22 @@ public class SanPhamDAO {
         }
     }
 
+    public boolean themKichCo(String maSP, String tenSize, double gia) {
+        String maSize = "S" + String.format("%08d", (int)(Math.random() * 100000000));
+        String sql = "INSERT INTO KICHCO (maSize, maSP, tenSize, gia) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maSize);
+            ps.setString(2, maSP);
+            ps.setString(3, tenSize);
+            ps.setDouble(4, gia);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean capNhatSanPham(SanPham sp) {
         String sql = "UPDATE SANPHAM SET tenSP = ?, anhSP = ?, maDM = ?, donViTinh = ?, tonKho = ?, trangThai = ?, ngayCapNhat = ? WHERE maSP = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -44,6 +60,34 @@ public class SanPhamDAO {
             ps.setBoolean(6, sp.isTrangThai());
             ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(8, sp.getMaSP());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean capNhatKichCo(String maSP, String oldTenSize, String newTenSize, double gia) {
+        String sql = "UPDATE KICHCO SET tenSize = ?, gia = ? WHERE maSP = ? AND tenSize = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newTenSize);
+            ps.setDouble(2, gia);
+            ps.setString(3, maSP);
+            ps.setString(4, oldTenSize);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // --- PHƯƠNG THỨC MỚI: Xóa mềm sản phẩm (Ẩn khỏi giao diện) ---
+    public boolean xoaSanPham(String maSP) {
+        String sql = "UPDATE SANPHAM SET trangThai = 0, ngayCapNhat = GETDATE() WHERE maSP = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maSP);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

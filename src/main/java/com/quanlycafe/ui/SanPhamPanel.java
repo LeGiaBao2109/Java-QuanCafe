@@ -19,7 +19,9 @@ public class SanPhamPanel extends JPanel {
     private final Color COLOR_TABLE_HEADER = new Color(245, 240, 235);
     private final Color COLOR_TABLE_ROW_ALT = new Color(250, 248, 246);
 
-    private List<Object[]> allData;
+    private List<Object[]> originalData; 
+    private List<Object[]> displayData;  
+    
     private int currentPage = 1;
     private int rowsPerPage = 10;
     private int totalPages = 1;
@@ -28,6 +30,10 @@ public class SanPhamPanel extends JPanel {
     private JTable table;
     private JLabel lblTotal;
     private JTextField txtPage;
+    private JTextField txtSearch; 
+
+    private JButton btnEdit;
+    private JButton btnDelete;
 
     public SanPhamPanel(String role, String tenNV) {
         setLayout(new BorderLayout(0, 15));
@@ -46,13 +52,21 @@ public class SanPhamPanel extends JPanel {
         add(createTopActionBar(role, tenNV), BorderLayout.NORTH);
         add(tableContainer, BorderLayout.CENTER);
 
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean isSelected = table.getSelectedRow() != -1;
+                toggleButtonState(btnEdit, isSelected, COLOR_PRIMARY);
+                toggleButtonState(btnDelete, isSelected, new Color(220, 53, 69)); 
+            }
+        });
+
         updateTableData();
     }
 
     private void loadAndFormatData() {
         SanPhamDAO dao = new SanPhamDAO();
         List<Object[]> rawData = dao.layDanhSachSanPhamQuanLy();
-        allData = new ArrayList<>();
+        originalData = new ArrayList<>();
 
         for (Object[] row : rawData) {
             String maMon = row[1].toString(); 
@@ -75,11 +89,17 @@ public class SanPhamPanel extends JPanel {
             }
 
             Object[] formattedRow = new Object[]{maMon, tenMon, size, nhom, dvt, gia};
-            allData.add(formattedRow);
+            originalData.add(formattedRow);
         }
 
-        totalPages = (int) Math.ceil((double) allData.size() / rowsPerPage);
+        displayData = new ArrayList<>(originalData);
+        calculatePagination();
+    }
+
+    private void calculatePagination() {
+        totalPages = (int) Math.ceil((double) displayData.size() / rowsPerPage);
         if (totalPages == 0) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
     }
 
     private JPanel createTopActionBar(String role, String tenNV) {
@@ -94,8 +114,8 @@ public class SanPhamPanel extends JPanel {
         pnlLeft.setOpaque(false);
         
         JButton btnAdd = createModernButton("Thêm Mới", true);
-        JButton btnEdit = createModernButton("Sửa", false);
-        JButton btnDelete = createModernButton("Xóa", false);
+        btnEdit = createModernButton("Sửa", false); 
+        btnDelete = createModernButton("Xóa", false); 
 
         btnAdd.addActionListener(e -> openCrudDialog("ADD"));
         btnEdit.addActionListener(e -> openCrudDialog("EDIT"));
@@ -109,16 +129,20 @@ public class SanPhamPanel extends JPanel {
         pnlSearch.setOpaque(false);
         pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
 
-        JTextField txtSearch = new JTextField();
+        txtSearch = new JTextField();
         txtSearch.setPreferredSize(new Dimension(250, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BORDER, 1),
                 BorderFactory.createEmptyBorder(0, 10, 0, 10)
         ));
+        txtSearch.setToolTipText("Nhập mã hoặc tên sản phẩm...");
 
         JButton btnSearch = createModernButton("Tìm Kiếm", false);
         btnSearch.setPreferredSize(new Dimension(100, 38));
+
+        btnSearch.addActionListener(e -> performSearch(txtSearch.getText()));
+        txtSearch.addActionListener(e -> performSearch(txtSearch.getText()));
 
         pnlSearch.add(txtSearch);
         pnlSearch.add(Box.createHorizontalStrut(5));
@@ -141,6 +165,40 @@ public class SanPhamPanel extends JPanel {
         return topBar;
     }
 
+    private void performSearch(String keyword) {
+        String lowerKeyword = keyword.trim().toLowerCase();
+        
+        if (lowerKeyword.isEmpty()) {
+            displayData = new ArrayList<>(originalData);
+        } else {
+            displayData = new ArrayList<>();
+            for (Object[] row : originalData) {
+                String maMon = row[0].toString().toLowerCase();
+                String tenMon = row[1].toString().toLowerCase();
+                
+                if (maMon.contains(lowerKeyword) || tenMon.contains(lowerKeyword)) {
+                    displayData.add(row);
+                }
+            }
+        }
+        
+        currentPage = 1; 
+        calculatePagination();
+        updateTableData();
+    }
+
+    private void toggleButtonState(JButton btn, boolean isActive, Color activeColor) {
+        if (isActive) {
+            btn.setBackground(activeColor);
+            btn.setForeground(Color.WHITE);
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        } else {
+            btn.setBackground(COLOR_SURFACE);
+            btn.setForeground(COLOR_PRIMARY);
+            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        }
+    }
+
     private void openCrudDialog(String mode) {
         Window owner = SwingUtilities.getWindowAncestor(this);
         Object[] rowData = null;
@@ -152,14 +210,17 @@ public class SanPhamPanel extends JPanel {
                 return;
             }
             int actualRow = (currentPage - 1) * rowsPerPage + selectedRow;
-            rowData = allData.get(actualRow);
+            rowData = displayData.get(actualRow); 
         }
 
         CrudSanPhamDialog dialog = new CrudSanPhamDialog(owner, mode, rowData);
         dialog.setVisible(true);
 
         if (dialog.isSuccess()) {
-            System.out.println("Thực hiện Database ở đây. Refresh lại bảng...");
+            // Khi thêm/sửa/xóa thành công -> Tải lại dữ liệu từ CSDL
+            loadAndFormatData();
+            // Lọc lại dữ liệu trên bảng theo ô tìm kiếm (nếu người dùng đang tìm kiếm dở)
+            performSearch(txtSearch.getText()); 
         }
     }
 
@@ -274,14 +335,16 @@ public class SanPhamPanel extends JPanel {
     private void updateTableData() {
         model.setRowCount(0);
         int start = (currentPage - 1) * rowsPerPage;
-        int end = Math.min(start + rowsPerPage, allData.size());
+        int end = Math.min(start + rowsPerPage, displayData.size());
         
         for (int i = start; i < end; i++) {
-            model.addRow(allData.get(i));
+            model.addRow(displayData.get(i));
         }
         
         if (txtPage != null) txtPage.setText(String.valueOf(currentPage));
         if (lblTotal != null) lblTotal.setText("/ " + totalPages);
+        
+        if (table != null) table.clearSelection();
     }
 
     private JButton createModernButton(String text, boolean isPrimary) {
