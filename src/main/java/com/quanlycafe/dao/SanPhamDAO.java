@@ -3,12 +3,15 @@ package com.quanlycafe.dao;
 import com.quanlycafe.entity.DanhMuc;
 import com.quanlycafe.entity.SanPham;
 import com.quanlycafe.util.DBConnect;
+
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SanPhamDAO {
+
     public boolean themSanPham(SanPham sp) {
         String sql = "INSERT INTO SANPHAM (maSP, tenSP, anhSP, maDM, donViTinh, tonKho, trangThai, ngayTao, ngayCapNhat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
@@ -143,5 +146,72 @@ public class SanPhamDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Object[]> layDanhSachSanPhamQuanLy() {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT dm.tenDM, sp.maSP, sp.tenSP, k.tenSize, sp.donViTinh, k.gia " +
+                     "FROM SANPHAM sp " +
+                     "JOIN DANHMUC dm ON sp.maDM = dm.maDM " +
+                     "JOIN KICHCO k ON sp.maSP = k.maSP " +
+                     "WHERE sp.trangThai = 1";
+                     
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+             
+            DecimalFormat formatter = new DecimalFormat("#,### VND");
+            while (rs.next()) {
+                String loaiMon = "Đồ uống";
+                String maSP = rs.getString("maSP");
+                String tenSP = rs.getString("tenSP") + " (" + rs.getString("tenSize") + ")"; 
+                String nhom = rs.getString("tenDM");
+                String dvt = rs.getString("donViTinh");
+                double gia = rs.getDouble("gia");
+                
+                list.add(new Object[]{loaiMon, maSP, tenSP, nhom, dvt, formatter.format(gia)});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Object[]> layDanhSachDanhMuc() {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT maDM, tenDM FROM DANHMUC";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new Object[]{rs.getString("maDM"), rs.getString("tenDM")});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Object[]> laySanPhamBanHangPOS(String maDM) {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT sp.tenSP, MIN(k.gia) as gia " +
+                     "FROM SANPHAM sp " +
+                     "JOIN KICHCO k ON sp.maSP = k.maSP " +
+                     "WHERE sp.maDM = ? AND sp.trangThai = 1 " +
+                     "GROUP BY sp.maSP, sp.tenSP";
+                     
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            ps.setString(1, maDM);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Object[]{rs.getString("tenSP"), rs.getInt("gia")});
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }
