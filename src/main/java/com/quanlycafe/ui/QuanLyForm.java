@@ -12,10 +12,12 @@ import java.util.List;
 
 public class QuanLyForm extends JFrame {
 
-    private final Color COLOR_TOP_BG = new Color(232, 215, 203);
-    private final Color COLOR_HEADER_BOT = new Color(185, 137, 118);
-    private final Color COLOR_ROW_BG = new Color(214, 214, 214);
-    private final Color COLOR_WHITE = Color.WHITE;
+    private final Color COLOR_BG = new Color(253, 248, 245);
+    private final Color COLOR_SURFACE = Color.WHITE;
+    private final Color COLOR_PRIMARY = new Color(92, 64, 51);
+    private final Color COLOR_BORDER = new Color(230, 220, 210);
+    private final Color COLOR_TABLE_HEADER = new Color(245, 240, 235);
+    private final Color COLOR_TABLE_ROW_ALT = new Color(250, 248, 246);
 
     private List<Object[]> allData;
     private int currentPage = 1;
@@ -30,11 +32,12 @@ public class QuanLyForm extends JFrame {
     private JPanel cardPanel;
 
     public QuanLyForm(String role, String tenNV) { 
-        setTitle("BaristaPro - Quản lý Thực đơn");
-        setSize(1280, 768);
+        setTitle("BaristaPro - Quản trị Hệ thống");
+        setSize(1366, 768);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(COLOR_BG);
 
         SanPhamDAO dao = new SanPhamDAO();
         allData = dao.layDanhSachSanPhamQuanLy();
@@ -43,10 +46,12 @@ public class QuanLyForm extends JFrame {
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(COLOR_BG);
+        cardPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
         JPanel pnlSanPham = createSanPhamPanel(role, tenNV);
-        JPanel pnlNhanVien = createPlaceholderPanel("Giao diện Quản lý Nhân viên");
-        JPanel pnlBaoCao = createPlaceholderPanel("Giao diện Báo cáo Thống kê");
+        JPanel pnlNhanVien = createPlaceholderPanel("Quản lý Nhân sự (Đang phát triển)");
+        ThongKePanel pnlBaoCao = new ThongKePanel(); 
 
         cardPanel.add(pnlSanPham, "SanPham");
         cardPanel.add(pnlNhanVien, "NhanVien");
@@ -60,55 +65,67 @@ public class QuanLyForm extends JFrame {
     }
 
     private JPanel createSanPhamPanel(String role, String tenNV) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(COLOR_WHITE);
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setBackground(COLOR_BG);
+        panel.setOpaque(false);
+
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setBackground(COLOR_SURFACE);
+        tableContainer.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        
+        tableContainer.add(createTableArea(), BorderLayout.CENTER);
+        tableContainer.add(createPaginationBar(), BorderLayout.SOUTH);
 
         panel.add(createTopActionBar(role, tenNV), BorderLayout.NORTH);
-        panel.add(createTableArea(), BorderLayout.CENTER);
-        panel.add(createPaginationBar(), BorderLayout.SOUTH);
+        panel.add(tableContainer, BorderLayout.CENTER);
 
         return panel;
     }
 
     private JPanel createPlaceholderPanel(String text) {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(COLOR_WHITE);
+        panel.setBackground(COLOR_SURFACE);
+        panel.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        
         JLabel label = new JLabel(text);
-        label.setFont(new Font("SansSerif", Font.BOLD, 24));
-        label.setForeground(new Color(60, 42, 33));
+        label.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        label.setForeground(new Color(150, 140, 130));
         panel.add(label);
         return panel;
     }
 
     private JPanel createTopActionBar(String role, String tenNV) {
         JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setBackground(COLOR_TOP_BG);
-        topBar.setBorder(new EmptyBorder(15, 20, 15, 20));
+        topBar.setBackground(COLOR_SURFACE);
+        topBar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(COLOR_BORDER, 1),
+            new EmptyBorder(12, 20, 12, 20)
+        ));
 
-        JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pnlLeft.setOpaque(false);
         
-        pnlLeft.add(createActionButton("Thêm"));
-        pnlLeft.add(createActionButton("Sửa"));
-        pnlLeft.add(createActionButton("Xóa"));
+        pnlLeft.add(createModernButton("Thêm Mới", true));
+        pnlLeft.add(createModernButton("Sửa", false));
+        pnlLeft.add(createModernButton("Xóa", false));
 
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearch.setOpaque(false);
-        pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
 
         JTextField txtSearch = new JTextField();
-        txtSearch.setPreferredSize(new Dimension(200, 40));
-        txtSearch.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        txtSearch.setPreferredSize(new Dimension(250, 38));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(120, 90, 80), 1),
+                BorderFactory.createLineBorder(COLOR_BORDER, 1),
                 BorderFactory.createEmptyBorder(0, 10, 0, 10)
         ));
 
-        JButton btnSearch = createActionButton("Tìm kiếm");
-        btnSearch.setPreferredSize(new Dimension(100, 40));
+        JButton btnSearch = createModernButton("Tìm Kiếm", false);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
 
         pnlSearch.add(txtSearch);
-        pnlSearch.add(Box.createHorizontalStrut(10));
+        pnlSearch.add(Box.createHorizontalStrut(5));
         pnlSearch.add(btnSearch);
 
         pnlLeft.add(pnlSearch);
@@ -116,11 +133,10 @@ public class QuanLyForm extends JFrame {
         JPanel pnlInfo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         pnlInfo.setOpaque(false);
         
-        String roleDisplay = role.equals("ADMIN") ? "(Admin) " : "(Nhân viên) ";
-        JLabel lblAdminInfo = new JLabel(roleDisplay + tenNV + " \uD83D\uDC64");
-        
-        lblAdminInfo.setFont(new Font("SansSerif", Font.BOLD, 16));
-        lblAdminInfo.setForeground(new Color(60, 42, 33));
+        String roleDisplay = role.equals("ADMIN") ? "Quản lý" : "Nhân viên";
+        JLabel lblAdminInfo = new JLabel("<html><span style='color:gray;font-size:11px;'>" + roleDisplay + "</span><br>" + tenNV + " 👤</html>");
+        lblAdminInfo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblAdminInfo.setForeground(COLOR_PRIMARY);
         pnlInfo.add(lblAdminInfo);
 
         topBar.add(pnlLeft, BorderLayout.WEST);
@@ -134,36 +150,47 @@ public class QuanLyForm extends JFrame {
 
         model = new DefaultTableModel(null, columns) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+            public boolean isCellEditable(int row, int column) { return false; }
         };
 
         JTable table = new JTable(model);
-        table.setRowHeight(45);
-        table.setShowGrid(true);
-        table.setGridColor(COLOR_WHITE);
-        table.setBackground(COLOR_ROW_BG);
-        table.setSelectionBackground(new Color(170, 200, 230));
+        table.setRowHeight(48);
+        table.setShowVerticalLines(false);
+        table.setShowHorizontalLines(true);
+        table.setGridColor(new Color(240, 235, 230));
+        table.setBackground(COLOR_SURFACE);
+        table.setSelectionBackground(new Color(235, 225, 215));
+        table.setSelectionForeground(COLOR_PRIMARY);
         table.setFillsViewportHeight(true);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        table.getTableHeader().setPreferredSize(new Dimension(0, 45));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 50));
+        table.getTableHeader().setBackground(COLOR_TABLE_HEADER);
         
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                label.setBackground(COLOR_HEADER_BOT);
-                label.setForeground(COLOR_WHITE);
-                label.setFont(new Font("SansSerif", Font.BOLD, 14));
+                label.setBackground(COLOR_TABLE_HEADER);
+                label.setForeground(new Color(100, 80, 70));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 13));
                 label.setHorizontalAlignment(JLabel.CENTER);
-                label.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, COLOR_WHITE));
+                label.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, COLOR_BORDER));
                 return label;
             }
         };
         table.getTableHeader().setDefaultRenderer(headerRenderer);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? COLOR_SURFACE : COLOR_TABLE_ROW_ALT);
+                }
+                return c;
+            }
+        };
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
@@ -171,56 +198,35 @@ public class QuanLyForm extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(COLOR_WHITE);
+        scrollPane.getViewport().setBackground(COLOR_SURFACE);
 
         return scrollPane;
     }
 
     private JPanel createPaginationBar() {
-        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 12));
-        bottomBar.setBackground(COLOR_HEADER_BOT);
+        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        bottomBar.setBackground(COLOR_SURFACE);
+        bottomBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER));
 
-        JButton btnFirst = createPageButton("<<");
-        JButton btnPrev = createPageButton("<");
-        
-        JLabel lblTrang = new JLabel("Trang");
-        lblTrang.setForeground(COLOR_WHITE);
-        lblTrang.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        JButton btnFirst = createPageButton("«");
+        JButton btnPrev = createPageButton("‹");
         
         txtPage = new JTextField("1", 3);
         txtPage.setHorizontalAlignment(JTextField.CENTER);
-        txtPage.setFont(new Font("SansSerif", Font.BOLD, 14));
+        txtPage.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        txtPage.setBorder(BorderFactory.createLineBorder(COLOR_BORDER));
         
-        lblTotal = new JLabel("trên " + totalPages + " trang");
-        lblTotal.setForeground(COLOR_WHITE);
-        lblTotal.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        lblTotal = new JLabel("/ " + totalPages);
+        lblTotal.setForeground(Color.GRAY);
+        lblTotal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         
-        JButton btnNext = createPageButton(">");
-        JButton btnLast = createPageButton(">>");
+        JButton btnNext = createPageButton("›");
+        JButton btnLast = createPageButton("»");
 
-        btnFirst.addActionListener(e -> { 
-            currentPage = 1; 
-            updateTableData(); 
-        });
-        
-        btnPrev.addActionListener(e -> { 
-            if (currentPage > 1) { 
-                currentPage--; 
-                updateTableData(); 
-            } 
-        });
-        
-        btnNext.addActionListener(e -> { 
-            if (currentPage < totalPages) { 
-                currentPage++; 
-                updateTableData(); 
-            } 
-        });
-        
-        btnLast.addActionListener(e -> { 
-            currentPage = totalPages; 
-            updateTableData(); 
-        });
+        btnFirst.addActionListener(e -> { currentPage = 1; updateTableData(); });
+        btnPrev.addActionListener(e -> { if (currentPage > 1) { currentPage--; updateTableData(); } });
+        btnNext.addActionListener(e -> { if (currentPage < totalPages) { currentPage++; updateTableData(); } });
+        btnLast.addActionListener(e -> { currentPage = totalPages; updateTableData(); });
         
         txtPage.addActionListener(e -> {
             try {
@@ -238,7 +244,6 @@ public class QuanLyForm extends JFrame {
 
         bottomBar.add(btnFirst);
         bottomBar.add(btnPrev);
-        bottomBar.add(lblTrang);
         bottomBar.add(txtPage);
         bottomBar.add(lblTotal);
         bottomBar.add(btnNext);
@@ -256,35 +261,41 @@ public class QuanLyForm extends JFrame {
             model.addRow(allData.get(i));
         }
         
-        if (txtPage != null) {
-            txtPage.setText(String.valueOf(currentPage));
-        }
-        if (lblTotal != null) {
-            lblTotal.setText("trên " + totalPages + " trang");
-        }
+        if (txtPage != null) txtPage.setText(String.valueOf(currentPage));
+        if (lblTotal != null) lblTotal.setText("/ " + totalPages);
     }
 
-    private JButton createActionButton(String text) {
+    private JButton createModernButton(String text, boolean isPrimary) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(100, 40));
-        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btn.setBackground(COLOR_WHITE);
-        btn.setForeground(new Color(60, 42, 33));
+        btn.setPreferredSize(new Dimension(110, 38));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setOpaque(true);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(120, 90, 80), 1));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        if (isPrimary) {
+            btn.setBackground(COLOR_PRIMARY);
+            btn.setForeground(Color.WHITE);
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        } else {
+            btn.setBackground(COLOR_SURFACE);
+            btn.setForeground(COLOR_PRIMARY);
+            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        }
         return btn;
-    }	
+    }
 
     private JButton createPageButton(String text) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        btn.setForeground(COLOR_WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
+        btn.setPreferredSize(new Dimension(35, 30));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btn.setForeground(COLOR_PRIMARY);
+        btn.setBackground(COLOR_SURFACE);
         btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
@@ -292,7 +303,6 @@ public class QuanLyForm extends JFrame {
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } 
         catch (Exception e) {}
-        
         SwingUtilities.invokeLater(() -> new QuanLyForm("ADMIN", "Usertest").setVisible(true)); 
     }
 }
