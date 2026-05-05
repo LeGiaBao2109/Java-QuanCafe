@@ -10,7 +10,7 @@ public class DBConnect {
     private static final String PORT = "1433";
     private static final String DB_NAME = "quanlycafe";
     private static final String USER = "sa";
-    private static final String PASS = "123456789";
+    private static final String PASS = "01635202769Hieu@";
 
     // 2. CHUỖI URL PHẢI ĐÚNG CÚ PHÁP NÀY:
     private static final String URL = "jdbc:sqlserver://" + HOST + ":" + PORT + ";databaseName=" + DB_NAME + ";encrypt=true;trustServerCertificate=true;";

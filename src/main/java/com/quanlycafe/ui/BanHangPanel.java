@@ -2,6 +2,7 @@ package com.quanlycafe.ui;
 
 import com.quanlycafe.dao.SanPhamDAO;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -9,9 +10,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BanHangPanel extends JPanel {
 
@@ -23,7 +27,7 @@ public class BanHangPanel extends JPanel {
 
     private JPanel rightCartPanel; 
     private JPanel gridPanel;      
-    private JSplitPane splitPane;
+    private JSplitPane splitPane;  
     
     private JTable table; 
     private DefaultTableModel cartTableModel; 
@@ -31,6 +35,8 @@ public class BanHangPanel extends JPanel {
     
     private List<JButton> tabButtons = new ArrayList<>(); 
     private DecimalFormat formatter = new DecimalFormat("#,###đ"); 
+
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
 
     public BanHangPanel() {
         setLayout(new BorderLayout());
@@ -54,7 +60,7 @@ public class BanHangPanel extends JPanel {
     }
 
     private void loadProducts(String maDM) {
-        gridPanel.removeAll();
+        gridPanel.removeAll(); 
 
         SanPhamDAO dao = new SanPhamDAO();
         List<Object[]> dsSanPham = dao.laySanPhamBanHangPOS(maDM);
@@ -62,11 +68,12 @@ public class BanHangPanel extends JPanel {
         for (Object[] sp : dsSanPham) {
             String tenSP = sp[0].toString();
             int gia = Integer.parseInt(sp[1].toString());
-
-            gridPanel.add(createProductCard(tenSP, gia, maDM));
+            String anhSP = (sp.length > 2 && sp[2] != null) ? sp[2].toString() : "";
+            
+            gridPanel.add(createProductCard(tenSP, gia, anhSP, maDM));
         }
 
-        gridPanel.revalidate();
+        gridPanel.revalidate(); 
         gridPanel.repaint();
     }
 
@@ -125,22 +132,23 @@ public class BanHangPanel extends JPanel {
         return leftPanel;
     }
 
-    private void addToCart(String customName, int quantity, int unitPrice, List<String> toppings) {
+    private void addToCart(String customName, int quantity, int unitPrice) {
         if (!rightCartPanel.isVisible()) {
             rightCartPanel.setVisible(true);
-            splitPane.setDividerLocation(800);
+            splitPane.setDividerLocation(800); 
         }
 
-        cartTableModel.addRow(new Object[]{customName, quantity, formatter.format(quantity * unitPrice), unitPrice, toppings});
-
+        cartTableModel.addRow(new Object[]{customName, quantity, formatter.format(quantity * unitPrice), unitPrice});
+        
         int newRowIdx = cartTableModel.getRowCount() - 1;
         table.setRowSelectionInterval(newRowIdx, newRowIdx);
 
         JLabel tempLabel = new JLabel(customName);
         tempLabel.setFont(table.getFont());
-        tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5));
+        tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5)); 
+        
         int perfectHeight = tempLabel.getPreferredSize().height;
-        table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65));
+        table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65)); 
 
         recalculateTotal();
     }
@@ -176,7 +184,7 @@ public class BanHangPanel extends JPanel {
         lblTable.setForeground(COLOR_TEXT_MAIN);
         cartHeader.add(lblTable, BorderLayout.NORTH);
 
-        String[] columnNames = {"Tên món", "SL", "Thành tiền", "UnitPrice", "ToppingList"};
+        String[] columnNames = {"Tên món", "SL", "Thành tiền", "UnitPrice"};
         cartTableModel = new DefaultTableModel(null, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -197,8 +205,6 @@ public class BanHangPanel extends JPanel {
         
         table.getColumnModel().getColumn(2).setMinWidth(90);
         table.getColumnModel().getColumn(2).setMaxWidth(110);
-
-        table.getColumnModel().removeColumn(table.getColumnModel().getColumn(4));
         
         DefaultTableCellRenderer topRenderer = new DefaultTableCellRenderer() {
             @Override
@@ -233,27 +239,9 @@ public class BanHangPanel extends JPanel {
 
         table.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) { // Nhấn đúp chuột để sửa
-                    int row = table.getSelectedRow();
-                    if (row != -1) {
-                        String tenMonHienTai = (String) cartTableModel.getValueAt(row, 0);
-                        int unitPrice = (int) cartTableModel.getValueAt(row, 3);
-
-                        Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonHienTai.replaceAll("<[^>]*>", ""), unitPrice, "");                        dialog.setVisible(true);
-
-                        if (dialog.isConfirmed()) {
-                            cartTableModel.setValueAt(dialog.getFinalTenMonDetail(), row, 0);
-                            cartTableModel.setValueAt(dialog.getSoLuong(), row, 1);
-                            cartTableModel.setValueAt(formatter.format(dialog.getSoLuong() * dialog.getDonGia()), row, 2);
-                            cartTableModel.setValueAt(dialog.getDonGia(), row, 3);
-
-                            cartTableModel.setValueAt(dialog.getSelectedToppingNames(), row, 4);
-
-                            recalculateTotal();
-                        }
-                    }
+            public void mousePressed(MouseEvent e) {
+                if (table.rowAtPoint(e.getPoint()) == -1) {
+                    table.clearSelection();
                 }
             }
         });
@@ -359,30 +347,6 @@ public class BanHangPanel extends JPanel {
         btnThanhToan.setForeground(Color.WHITE);
         btnThanhToan.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-        btnThanhToan.addActionListener(e -> {
-            if (cartTableModel.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(this, "Giỏ hàng trống!");
-                return;
-            }
-
-            StringBuilder bill = new StringBuilder();
-            bill.append("--- HÓA ĐƠN THANH TOÁN ---\n");
-            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-                String detail = cartTableModel.getValueAt(i, 0).toString().replaceAll("<[^>]*>", "");
-                String qty = cartTableModel.getValueAt(i, 1).toString();
-                String totalRow = cartTableModel.getValueAt(i, 2).toString();
-
-                bill.append(qty).append(" x ").append(detail).append(" = ").append(totalRow).append("\n");
-            }
-            bill.append("--------------------------\n");
-            bill.append("TỔNG THANH TOÁN: ").append(lblTongTien.getText());
-
-            JOptionPane.showMessageDialog(this, bill.toString(), "In Hóa Đơn", JOptionPane.INFORMATION_MESSAGE);
-
-            cartTableModel.setRowCount(0);
-            recalculateTotal();
-        });
-
         btnPanel.add(btnHuy);
         btnPanel.add(btnThanhToan);
 
@@ -391,14 +355,7 @@ public class BanHangPanel extends JPanel {
 
         JPanel centerWrapper = new JPanel(new BorderLayout());
         centerWrapper.add(scrollTable, BorderLayout.CENTER);
-        centerWrapper.add(controlsPanel, BorderLayout.SOUTH);
-
-        JPanel priceWrapper = new JPanel(new BorderLayout());
-        priceWrapper.setOpaque(false);
-        priceWrapper.add(calcPanel, BorderLayout.CENTER);
-
-        bottomPanel.add(priceWrapper, BorderLayout.CENTER);
-        bottomPanel.add(btnPanel, BorderLayout.SOUTH);
+        centerWrapper.add(controlsPanel, BorderLayout.SOUTH); 
 
         rightPanel.add(cartHeader, BorderLayout.NORTH);
         rightPanel.add(centerWrapper, BorderLayout.CENTER);
@@ -414,16 +371,50 @@ public class BanHangPanel extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    private JPanel createProductCard(String name, int price, String maDM) {
+    private JPanel createProductCard(String name, int price, String imageUrl, String maDM) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1)); 
         card.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
 
-        JLabel lblImg = new JLabel("Ảnh", SwingConstants.CENTER);
-        lblImg.setPreferredSize(new Dimension(100, 120));
+        JLabel lblImg = new JLabel("...", SwingConstants.CENTER);
+        // CẬP NHẬT 1: Tăng kích thước khu vực chứa ảnh để lấp đầy ô vuông
+        lblImg.setPreferredSize(new Dimension(0, 160));
         lblImg.setBackground(new Color(250, 242, 235)); 
         lblImg.setOpaque(true);
+
+        if (imageUrl != null && imageUrl.startsWith("http")) {
+            
+            // CẬP NHẬT 2: Ép đuôi .webp thành .png để Java có thể đọc được ảnh bình thường
+            final String safeUrl = imageUrl.replace(".webp", ".png");
+            
+            if (imageCache.containsKey(safeUrl)) {
+                lblImg.setText("");
+                lblImg.setIcon(imageCache.get(safeUrl));
+            } else {
+                new Thread(() -> {
+                    try {
+                        URL url = new URL(safeUrl);
+                        Image img = ImageIO.read(url);
+                        if (img != null) {
+                            // CẬP NHẬT 3: Tăng kích thước khung scale ảnh ra cho to rõ
+                            Image scaledImg = img.getScaledInstance(240, 160, Image.SCALE_SMOOTH);
+                            ImageIcon icon = new ImageIcon(scaledImg);
+                            imageCache.put(safeUrl, icon); 
+                            
+                            SwingUtilities.invokeLater(() -> {
+                                lblImg.setText("");
+                                lblImg.setIcon(icon);
+                            });
+                        }
+                    } catch (Exception ex) {
+                        SwingUtilities.invokeLater(() -> lblImg.setText("Lỗi ảnh"));
+                    }
+                }).start();
+            }
+        } else {
+            lblImg.setText("Không có ảnh");
+        }
 
         JPanel info = new JPanel(new BorderLayout());
         info.setBackground(Color.WHITE);
@@ -450,8 +441,7 @@ public class BanHangPanel extends JPanel {
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {
-                    List<String> dsTopping = dialog.getSelectedToppingNames();
-                    addToCart(dialog.getFinalTenMonDetail(), dialog.getSoLuong(), dialog.getDonGia(), dsTopping);
+                    addToCart(dialog.getFinalTenMonDetail(), dialog.getSoLuong(), dialog.getDonGia());
                 }
             }
         });

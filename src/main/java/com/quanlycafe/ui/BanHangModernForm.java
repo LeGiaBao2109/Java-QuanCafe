@@ -7,7 +7,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class BanHangModernForm extends JFrame {
-
+	
     private final Color COLOR_BG = new Color(253, 248, 245);
     
     private CardLayout cardLayout;
@@ -29,10 +29,12 @@ public class BanHangModernForm extends JFrame {
         BanHangPanel pnlBanHang = new BanHangPanel();
         HoaDonPanel pnlHoaDon = new HoaDonPanel();
         KhachHangPanel pnlKhachHang = new KhachHangPanel();
+        NhapKhoPanel pnlNhapKho = new NhapKhoPanel();
 
         cardPanel.add(pnlBanHang, "BanHang");
         cardPanel.add(pnlHoaDon, "HoaDon");
         cardPanel.add(pnlKhachHang, "KhachHang");
+        cardPanel.add(pnlNhapKho, "NhapKho");
 
         Sidebar sidebar = new Sidebar(role, tenNV, menu -> cardLayout.show(cardPanel, menu)); 
         
