@@ -17,7 +17,9 @@ import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BanHangPanel extends JPanel {
 
@@ -47,6 +49,7 @@ public class BanHangPanel extends JPanel {
     private Voucher voucherApDung = null;
     private JSpinner spnDiemDung;
     private double giamGiaTuDiem = 0;
+    private Map<String, ImageIcon> imageCache = new HashMap<>();
 
     public BanHangPanel() {
         setLayout(new BorderLayout());
@@ -128,7 +131,7 @@ public class BanHangPanel extends JPanel {
         JButton btnSearch = new JButton("Tìm kiếm");
         btnSearch.setPreferredSize(new Dimension(100, 35));
         btnSearch.setBackground(COLOR_PRIMARY_LIGHT);
-        btnSearch.setForeground(Color.WHITE);
+        btnSearch.setForeground(COLOR_TEXT_MAIN);
         btnSearch.setFocusPainted(false);
 
         txtSearch.addKeyListener(new KeyAdapter() {
@@ -705,27 +708,52 @@ public class BanHangPanel extends JPanel {
         card.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JLabel lblImg = new JLabel("", SwingConstants.CENTER);
-        lblImg.setPreferredSize(new Dimension(100, 120));
+        // Label hiển thị ảnh
+        JLabel lblImg = new JLabel("Đang tải...", SwingConstants.CENTER);
+        lblImg.setPreferredSize(new Dimension(0, 150));
         lblImg.setBackground(new Color(250, 242, 235));
         lblImg.setOpaque(true);
 
-        try {
-            if (linkAnh != null && !linkAnh.isEmpty()) {
-                java.net.URL url = new java.net.URL(linkAnh);
-                ImageIcon icon = new ImageIcon(url);
-                Image img = icon.getImage().getScaledInstance(150, 120, Image.SCALE_SMOOTH);
-                lblImg.setIcon(new ImageIcon(img));
+        if (linkAnh != null && !linkAnh.isEmpty()) {
+            // Kiểm tra trong bộ nhớ đệm (Cache) trước
+            if (imageCache.containsKey(linkAnh)) {
+                lblImg.setText("");
+                lblImg.setIcon(imageCache.get(linkAnh));
             } else {
-                lblImg.setText("No Image");
+                // Tải ảnh trong luồng phụ (Thread) để không treo giao diện
+                new Thread(() -> {
+                    try {
+                        java.net.URL url = new java.net.URL(linkAnh);
+                        // ImageIO lúc này đã có TwelveMonkeys hỗ trợ đọc WebP
+                        java.awt.Image rawImg = javax.imageio.ImageIO.read(url);
+
+                        if (rawImg != null) {
+                            // Căn chỉnh kích thước ảnh phù hợp với khung hình
+                            java.awt.Image scaledImg = rawImg.getScaledInstance(180, 150, java.awt.Image.SCALE_SMOOTH);
+                            ImageIcon icon = new ImageIcon(scaledImg);
+
+                            // Lưu vào bộ nhớ đệm để dùng lại lần sau
+                            imageCache.put(linkAnh, icon);
+
+                            // Cập nhật lại giao diện trên luồng chính của Swing
+                            SwingUtilities.invokeLater(() -> {
+                                lblImg.setText("");
+                                lblImg.setIcon(icon);
+                            });
+                        }
+                    } catch (Exception e) {
+                        SwingUtilities.invokeLater(() -> lblImg.setText("Lỗi ảnh"));
+                    }
+                }).start();
             }
-        } catch (Exception e) {
-            lblImg.setText("Error");
+        } else {
+            lblImg.setText("Không có ảnh");
         }
 
+        // Phần thông tin tên và giá món
         JPanel info = new JPanel(new BorderLayout());
         info.setBackground(Color.WHITE);
-        info.setBorder(new EmptyBorder(10, 10, 10, 10));
+        info.setBorder(new javax.swing.border.EmptyBorder(10, 10, 10, 10));
 
         JLabel lblName = new JLabel(name);
         lblName.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -740,6 +768,7 @@ public class BanHangPanel extends JPanel {
         card.add(lblImg, BorderLayout.CENTER);
         card.add(info, BorderLayout.SOUTH);
 
+        // Xử lý sự kiện khi click vào món ăn
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -759,14 +788,6 @@ public class BanHangPanel extends JPanel {
                             dialog.getSelectedMucDuong()
                     );
                 }
-            }
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                card.setBorder(BorderFactory.createLineBorder(COLOR_PRIMARY_LIGHT, 2));
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                card.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
             }
         });
 
