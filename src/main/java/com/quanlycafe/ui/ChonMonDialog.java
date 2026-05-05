@@ -16,6 +16,8 @@ public class ChonMonDialog extends JDialog {
     private final Color COLOR_BORDER = new Color(222, 204, 190);
 
     private String tenMonGoc;
+    private String maDM; // Lưu mã danh mục
+    private boolean isDrink; // Biến check loại món
     private int giaGoc;
     private int giaTong;
     
@@ -32,12 +34,18 @@ public class ChonMonDialog extends JDialog {
 
     private DecimalFormat formatter = new DecimalFormat("#,###đ");
 
-    public ChonMonDialog(Window owner, String tenMon, int giaGoc) {
+    public ChonMonDialog(Window owner, String tenMon, int giaGoc, String maDM) {
         super(owner, "Tùy chỉnh món: " + tenMon, Dialog.ModalityType.APPLICATION_MODAL);
         this.tenMonGoc = tenMon;
         this.giaGoc = giaGoc;
         this.giaTong = giaGoc;
-        
+        this.maDM = maDM; // Gán giá trị
+        this.isDrink = (maDM != null) && !maDM.isEmpty() && !maDM.equalsIgnoreCase("DM002");
+
+        if (tenMon.toLowerCase().contains("bánh")) {
+            this.isDrink = false;
+        }
+
         setSize(450, 650);
         setLocationRelativeTo(owner);
         setLayout(new BorderLayout());
@@ -48,29 +56,32 @@ public class ChonMonDialog extends JDialog {
         pnlBody.setBackground(COLOR_BG);
         pnlBody.setBorder(new EmptyBorder(10, 15, 10, 15));
 
-        pnlBody.add(createSizePanel());
-        pnlBody.add(Box.createVerticalStrut(10));
+        // CHỈ ADD NẾU LÀ NƯỚC (Bánh sẽ bỏ qua hết đoạn này)
+        if (isDrink) {
+            pnlBody.add(createSizePanel());
+            pnlBody.add(Box.createVerticalStrut(10));
 
-        JPanel pnlDuongDa = new JPanel(new GridLayout(1, 2, 10, 0));
-        pnlDuongDa.setBackground(COLOR_BG);
-        pnlDuongDa.add(createDuongPanel());
-        pnlDuongDa.add(createDaPanel());
-        pnlBody.add(pnlDuongDa);
-        pnlBody.add(Box.createVerticalStrut(10));
+            JPanel pnlDuongDa = new JPanel(new GridLayout(1, 2, 10, 0));
+            pnlDuongDa.setBackground(COLOR_BG);
+            pnlDuongDa.add(createDuongPanel());
+            pnlDuongDa.add(createDaPanel());
+            pnlBody.add(pnlDuongDa);
 
-        pnlBody.add(createToppingPanel());
-        pnlBody.add(Box.createVerticalStrut(10));
+            pnlBody.add(Box.createVerticalStrut(10));
+            pnlBody.add(createToppingPanel());
+            pnlBody.add(Box.createVerticalStrut(10));
+        }
 
+        // Ghi chú thì món nào cũng có
         pnlBody.add(createGhiChuPanel());
 
         JScrollPane scrollPane = new JScrollPane(pnlBody);
         scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         add(scrollPane, BorderLayout.CENTER);
 
         add(createFooterPanel(), BorderLayout.SOUTH);
-        
-        updateTotalPrice(); 
+
+        updateTotalPrice();
     }
 
     private JPanel createSizePanel() {
@@ -210,12 +221,16 @@ public class ChonMonDialog extends JDialog {
 
     private void updateTotalPrice() {
         int tempPrice = giaGoc;
-        
-        if (radSizeL.isSelected()) tempPrice += 10000;
-        
-        for (JCheckBox chk : chkToppings) {
-            if (chk.isSelected()) {
-                tempPrice += Integer.parseInt(chk.getActionCommand());
+
+        if (isDrink) { // Chỉ tính thêm tiền nếu là nước và có bảng chọn
+            if (radSizeL != null && radSizeL.isSelected()) tempPrice += 10000;
+
+            if (chkToppings != null) {
+                for (JCheckBox chk : chkToppings) {
+                    if (chk.isSelected()) {
+                        tempPrice += Integer.parseInt(chk.getActionCommand());
+                    }
+                }
             }
         }
         
@@ -229,31 +244,43 @@ public class ChonMonDialog extends JDialog {
 
     private void buildFinalDetails() {
         finalSoLuong = (int) spnSoLuong.getValue();
-        
-        String size = radSizeL.isSelected() ? "Size L" : "Size M";
-        String duong = duongGroup.getSelection().getActionCommand();
-        String da = daGroup.getSelection().getActionCommand();
-        
-        List<String> listTuyChinh = new ArrayList<>();
-        if (!duong.equals("Bình thường")) listTuyChinh.add(duong);
-        if (!da.equals("Bình thường")) listTuyChinh.add(da);
-        
-        String tuyChinhStr = listTuyChinh.isEmpty() ? "" : "<br/><i style='font-size:10px; color:gray;'>" + String.join(", ", listTuyChinh) + "</i>";
-        
-        // --- CẬP NHẬT: XẾP TOPPING THEO HÀNG DỌC CÓ GIÁ TIỀN BÊN CẠNH ---
-        List<String> listTopping = new ArrayList<>();
-        for (JCheckBox chk : chkToppings) {
-            if (chk.isSelected()) {
-                int giaTopping = Integer.parseInt(chk.getActionCommand());
-                listTopping.add("+ " + chk.getName() + " (" + formatter.format(giaTopping) + ")");
+
+        String sizeStr = "";
+        String tuyChinhStr = "";
+        String toppingStr = "";
+
+        if (isDrink) {
+            // Size
+            String size = radSizeL.isSelected() ? "Size L" : "Size M";
+            sizeStr = " (" + size + ")";
+
+            // Đường/Đá - Dùng try-catch hoặc kiểm tra null để tránh crash nếu chưa chọn
+            try {
+                String duong = duongGroup.getSelection().getActionCommand();
+                String da = daGroup.getSelection().getActionCommand();
+
+                List<String> listTuyChinh = new ArrayList<>();
+                if (!duong.equals("Bình thường")) listTuyChinh.add(duong);
+                if (!da.equals("Bình thường")) listTuyChinh.add(da);
+                tuyChinhStr = listTuyChinh.isEmpty() ? "" : "<br/><i style='font-size:10px; color:gray;'>" + String.join(", ", listTuyChinh) + "</i>";
+            } catch (Exception e) {
+                // Phòng hờ nếu ButtonGroup chưa có lựa chọn
             }
+
+            // Topping
+            List<String> listTopping = new ArrayList<>();
+            for (JCheckBox chk : chkToppings) {
+                if (chk.isSelected()) {
+                    int giaTopping = Integer.parseInt(chk.getActionCommand());
+                    listTopping.add("+ " + chk.getName() + " (" + formatter.format(giaTopping) + ")");
+                }
+            }
+            toppingStr = listTopping.isEmpty() ? "" : "<br/><span style='font-size:10px; color:#c0392b;'>" + String.join("<br/>", listTopping) + "</span>";
         }
-        // Dùng <br/> để nối chuỗi thay vì dấu phẩy
-        String toppingStr = listTopping.isEmpty() ? "" : "<br/><span style='font-size:10px; color:#c0392b;'>" + String.join("<br/>", listTopping) + "</span>";
-        
+
         String ghiChuStr = txtGhiChu.getText().trim().isEmpty() ? "" : "<br/><span style='font-size:10px; color:#2980b9;'>* " + txtGhiChu.getText().trim() + "</span>";
 
-        finalTenMonDetail = "<html><b>" + tenMonGoc + " (" + size + ")</b>"
+        finalTenMonDetail = "<html><b>" + tenMonGoc + "</b>" + sizeStr
                 + tuyChinhStr + toppingStr + ghiChuStr + "</html>";
     }
 

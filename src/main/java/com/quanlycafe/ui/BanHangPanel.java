@@ -23,7 +23,7 @@ public class BanHangPanel extends JPanel {
 
     private JPanel rightCartPanel; 
     private JPanel gridPanel;      
-    private JSplitPane splitPane;  
+    private JSplitPane splitPane;
     
     private JTable table; 
     private DefaultTableModel cartTableModel; 
@@ -53,8 +53,8 @@ public class BanHangPanel extends JPanel {
         add(splitPane, BorderLayout.CENTER);
     }
 
-    private void loadProducts(String maDM) {
-        gridPanel.removeAll(); 
+    private void loadProducts(String maDM) { // maDM ở đây là mã của Tab bạn đang chọn (ví dụ: DM002 cho Bánh)
+        gridPanel.removeAll();
 
         SanPhamDAO dao = new SanPhamDAO();
         List<Object[]> dsSanPham = dao.laySanPhamBanHangPOS(maDM);
@@ -62,10 +62,11 @@ public class BanHangPanel extends JPanel {
         for (Object[] sp : dsSanPham) {
             String tenSP = sp[0].toString();
             int gia = Integer.parseInt(sp[1].toString());
-            gridPanel.add(createProductCard(tenSP, gia));
+
+            gridPanel.add(createProductCard(tenSP, gia, maDM));
         }
 
-        gridPanel.revalidate(); 
+        gridPanel.revalidate();
         gridPanel.repaint();
     }
 
@@ -232,11 +233,30 @@ public class BanHangPanel extends JPanel {
         
         table.setFillsViewportHeight(true);
 
+        // Thêm đoạn này vào sau đoạn khởi tạo table trong createRightCartPanel
         table.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                if (table.rowAtPoint(e.getPoint()) == -1) {
-                    table.clearSelection();
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) { // Nhấn đúp chuột để sửa
+                    int row = table.getSelectedRow();
+                    if (row != -1) {
+                        String tenMonHienTai = (String) cartTableModel.getValueAt(row, 0);
+                        int unitPrice = (int) cartTableModel.getValueAt(row, 3);
+
+                        Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
+                        // Mở lại dialog (Bạn có thể nâng cấp Dialog để nhận lại các thông số cũ nếu muốn,
+                        // hiện tại nó sẽ mở ra như món mới để khách chọn lại từ đầu)
+                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonHienTai.replaceAll("<[^>]*>", ""), unitPrice, "");                        dialog.setVisible(true);
+
+                        if (dialog.isConfirmed()) {
+                            // Cập nhật lại dòng hiện tại
+                            cartTableModel.setValueAt(dialog.getFinalTenMonDetail(), row, 0);
+                            cartTableModel.setValueAt(dialog.getSoLuong(), row, 1);
+                            cartTableModel.setValueAt(formatter.format(dialog.getSoLuong() * dialog.getDonGia()), row, 2);
+                            cartTableModel.setValueAt(dialog.getDonGia(), row, 3);
+                            recalculateTotal();
+                        }
+                    }
                 }
             }
         });
@@ -342,6 +362,31 @@ public class BanHangPanel extends JPanel {
         btnThanhToan.setForeground(Color.WHITE);
         btnThanhToan.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
+        btnThanhToan.addActionListener(e -> {
+            if (cartTableModel.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, "Giỏ hàng trống!");
+                return;
+            }
+
+            StringBuilder bill = new StringBuilder();
+            bill.append("--- HÓA ĐƠN THANH TOÁN ---\n");
+            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+                // Lấy dữ liệu từ TableModel
+                String detail = cartTableModel.getValueAt(i, 0).toString().replaceAll("<[^>]*>", "");
+                String qty = cartTableModel.getValueAt(i, 1).toString();
+                String totalRow = cartTableModel.getValueAt(i, 2).toString();
+
+                bill.append(qty).append(" x ").append(detail).append(" = ").append(totalRow).append("\n");
+            }
+            bill.append("--------------------------\n");
+            bill.append("TỔNG THANH TOÁN: ").append(lblTongTien.getText());
+
+            JOptionPane.showMessageDialog(this, bill.toString(), "In Hóa Đơn", JOptionPane.INFORMATION_MESSAGE);
+
+            cartTableModel.setRowCount(0);
+            recalculateTotal();
+        });
+
         btnPanel.add(btnHuy);
         btnPanel.add(btnThanhToan);
 
@@ -350,7 +395,14 @@ public class BanHangPanel extends JPanel {
 
         JPanel centerWrapper = new JPanel(new BorderLayout());
         centerWrapper.add(scrollTable, BorderLayout.CENTER);
-        centerWrapper.add(controlsPanel, BorderLayout.SOUTH); 
+        centerWrapper.add(controlsPanel, BorderLayout.SOUTH);
+
+        JPanel priceWrapper = new JPanel(new BorderLayout());
+        priceWrapper.setOpaque(false);
+        priceWrapper.add(calcPanel, BorderLayout.CENTER);
+
+        bottomPanel.add(priceWrapper, BorderLayout.CENTER);
+        bottomPanel.add(btnPanel, BorderLayout.SOUTH);
 
         rightPanel.add(cartHeader, BorderLayout.NORTH);
         rightPanel.add(centerWrapper, BorderLayout.CENTER);
@@ -366,7 +418,7 @@ public class BanHangPanel extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    private JPanel createProductCard(String name, int price) {
+    private JPanel createProductCard(String name, int price, String maDM) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1)); 
@@ -398,7 +450,9 @@ public class BanHangPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                ChonMonDialog dialog = new ChonMonDialog(owner, name, price);
+
+                // TRUYỀN maDM VÀO ĐÂY:
+                ChonMonDialog dialog = new ChonMonDialog(owner, name, price, maDM);
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {
