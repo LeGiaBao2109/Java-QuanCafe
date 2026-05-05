@@ -18,12 +18,13 @@ public class SanPham {
     }
 
     public SanPham(String maSP, String tenSP, String anhSP, DanhMuc maDM, String donViTinh, int tonKho, boolean trangThai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
-        this.maSP = maSP;
-        this.tenSP = tenSP;
+        // Gọi setter để áp dụng Regex và Validation ngay khi khởi tạo đối tượng
+        setMaSP(maSP);
+        setTenSP(tenSP);
         this.anhSP = anhSP;
         this.maDM = maDM;
         this.donViTinh = donViTinh;
-        this.tonKho = tonKho;
+        setTonKho(tonKho);
         this.trangThai = trangThai;
         this.ngayTao = ngayTao;
         this.ngayCapNhat = ngayCapNhat;
@@ -34,7 +35,11 @@ public class SanPham {
     }
 
     public void setMaSP(String maSP) {
-        this.maSP = maSP;
+        // Regex: Phải bắt đầu bằng chữ 'SP' theo sau là ít nhất 1 chữ số
+        if (maSP == null || !maSP.trim().matches("^SP\\d+$")) {
+            throw new IllegalArgumentException("Mã sản phẩm không hợp lệ! Phải bắt đầu bằng 'SP' theo sau là các chữ số (VD: SP01).");
+        }
+        this.maSP = maSP.trim();
     }
 
     public String getTenSP() {
@@ -42,7 +47,11 @@ public class SanPham {
     }
 
     public void setTenSP(String tenSP) {
-        this.tenSP = tenSP;
+        // Validation: Không được để trống
+        if (tenSP == null || tenSP.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên sản phẩm không được để trống!");
+        }
+        this.tenSP = tenSP.trim();
     }
 
     public String getAnhSP() {
@@ -74,6 +83,10 @@ public class SanPham {
     }
 
     public void setTonKho(int tonKho) {
+        // Validation: Tồn kho không được là số âm
+        if (tonKho < 0) {
+            throw new IllegalArgumentException("Tồn kho không được phép nhỏ hơn 0!");
+        }
         this.tonKho = tonKho;
     }
 

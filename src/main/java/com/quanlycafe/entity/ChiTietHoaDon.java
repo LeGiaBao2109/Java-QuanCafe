@@ -1,5 +1,7 @@
 package com.quanlycafe.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ChiTietHoaDon {
@@ -12,25 +14,25 @@ public class ChiTietHoaDon {
     private double thanhTien;
     private MucDa luongDa;
     private MucDuong luongDuong;
+    private List<String> dsTopping = new ArrayList<>();
 
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, MucDa luongDa, MucDuong luongDuong) {
+    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, double thanhTien, MucDa luongDa, MucDuong luongDuong, List<String> dsTopping) {
         this.maCTHD = maCTHD;
         this.maDH = maDH;
         this.maSize = maSize;
         this.soLuong = soLuong;
         this.donGia = donGia;
         this.ghiChu = ghiChu;
+        this.thanhTien = thanhTien;
         this.luongDa = luongDa;
         this.luongDuong = luongDuong;
-        tinhThanhTien();
+        this.dsTopping = dsTopping;
     }
 
     private void tinhThanhTien() {
-        // double tienTopping = dsTopping.stream().mapToDouble(t -> t.getGia()).sum();
-        // this.thanhTien = (this.donGia + tienTopping) * this.soLuong;
         this.thanhTien = this.soLuong * this.donGia;
     }
 
@@ -104,6 +106,21 @@ public class ChiTietHoaDon {
         this.luongDuong = luongDuong;
     }
 
+    public List<String> getDsTopping() {
+        return dsTopping;
+    }
+
+    public void setDsTopping(List<String> dsTopping) {
+        this.dsTopping = dsTopping;
+    }
+
+    public void addTopping(String toppingName) {
+        if (this.dsTopping == null) {
+            this.dsTopping = new ArrayList<>();
+        }
+        this.dsTopping.add(toppingName);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -129,6 +146,7 @@ public class ChiTietHoaDon {
                 ", thanhTien=" + thanhTien +
                 ", luongDa=" + luongDa +
                 ", luongDuong=" + luongDuong +
+                ", dsTopping=" + dsTopping +
                 '}';
     }
 }
