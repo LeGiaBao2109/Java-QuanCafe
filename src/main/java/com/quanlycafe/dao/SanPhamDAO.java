@@ -237,10 +237,11 @@ public class SanPhamDAO {
 
     public List<Object[]> laySanPhamBanHangPOS(String maDM) {
         List<Object[]> list = new ArrayList<>();
-        String sql = "SELECT sp.tenSP, k.gia, k.maSize, sp.anhSP, sp.maSP " +
+        String sql = "SELECT sp.tenSP, MIN(k.gia) as gia, MIN(k.maSize) as maSize, sp.anhSP, sp.maSP " +
                 "FROM SANPHAM sp " +
                 "JOIN KICHCO k ON sp.maSP = k.maSP " +
-                "WHERE sp.maDM = ? AND sp.trangThai = 1";
+                "WHERE sp.maDM = ? AND sp.trangThai = 1 " +
+                "GROUP BY sp.maSP, sp.tenSP, sp.anhSP";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -264,10 +265,11 @@ public class SanPhamDAO {
 
     public List<Object[]> timKiemSanPham(String keyword) {
         List<Object[]> list = new ArrayList<>();
-        String sql = "SELECT sp.tenSP, k.gia, k.maSize, sp.maDM, sp.anhSP, sp.maSP " +
+        String sql = "SELECT sp.tenSP, MIN(k.gia) as gia, MIN(k.maSize) as maSize, sp.maDM, sp.anhSP, sp.maSP " +
                 "FROM SANPHAM sp " +
                 "JOIN KICHCO k ON sp.maSP = k.maSP " +
-                "WHERE (sp.tenSP LIKE ? OR sp.maSP LIKE ?) AND sp.trangThai = 1";
+                "WHERE (sp.tenSP LIKE ? OR sp.maSP LIKE ?) AND sp.trangThai = 1 " +
+                "GROUP BY sp.maSP, sp.tenSP, sp.maDM, sp.anhSP";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

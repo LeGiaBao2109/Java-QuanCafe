@@ -369,6 +369,7 @@ public class BanHangPanel extends JPanel {
                         MucDa daCu = (MucDa) cartTableModel.getValueAt(row, 7);
                         MucDuong duongCu = (MucDuong) cartTableModel.getValueAt(row, 8);
                         int soLuongCu = (int) cartTableModel.getValueAt(row, 1);
+                        String maSP = (String) cartTableModel.getValueAt(row, 9);
 
                         String tenMonGoc = tenMonHTML.replaceAll("<[^>]*>", "").split(" \\(")[0].trim();
 
@@ -378,11 +379,24 @@ public class BanHangPanel extends JPanel {
                                     .replaceAll("</span></html>", "").trim();
                         }
 
+                        int giaGoc = unitPrice;
+                        if (maSizeCu != null && maSizeCu.equals("S02")) {
+                            giaGoc -= 10000;
+                        }
+                        if (toppingsCu != null) {
+                            for (String tpName : toppingsCu) {
+                                if (tpName.contains("Trân châu") || tpName.contains("Thạch")) giaGoc -= 5000;
+                                else if (tpName.contains("Phô mai")) giaGoc -= 8000;
+                                else if (tpName.contains("Macchiato")) giaGoc -= 10000;
+                            }
+                        }
+
                         Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonGoc, unitPrice, maDM);
+                        KichCoDAO kcDAO = new KichCoDAO();
+                        List<KichCo> dsSizeCuaSP = kcDAO.layKichCoTheoSP(maSP);
 
+                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonGoc, giaGoc, maDM, dsSizeCuaSP);
                         dialog.setFullData(soLuongCu, ghiChuCu, toppingsCu, maSizeCu, daCu, duongCu);
-
                         dialog.setVisible(true);
 
                         if (dialog.isConfirmed()) {
@@ -394,7 +408,6 @@ public class BanHangPanel extends JPanel {
                             cartTableModel.setValueAt(dialog.getSelectedMaSize(), row, 6);
                             cartTableModel.setValueAt(dialog.getSelectedMucDa(), row, 7);
                             cartTableModel.setValueAt(dialog.getSelectedMucDuong(), row, 8);
-
                             recalculateTotal();
                         }
                     }
@@ -632,7 +645,7 @@ public class BanHangPanel extends JPanel {
                     }
                 } else {
                     khFinal = new KhachHang();
-                    khFinal.setMaKH("KH00");
+                    khFinal.setMaKH("KH01");
                 }
 
                 DonHang dh = new DonHang();
@@ -656,32 +669,33 @@ public class BanHangPanel extends JPanel {
                     boolean allDetailsSaved = true;
                     for (int i = 0; i < cartTableModel.getRowCount(); i++) {
                         ChiTietHoaDon ct = new ChiTietHoaDon();
-                        String maCTHD = "CT" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+                        String maCTHD = "CT" + System.currentTimeMillis() + i;
+
                         int soLuong = Integer.parseInt(cartTableModel.getValueAt(i, 1).toString());
                         double thanhTien = Double.parseDouble(cartTableModel.getValueAt(i, 2).toString().replaceAll("[^\\d]", ""));
-                        String fullDisplayName = cartTableModel.getValueAt(i, 0).toString();
-                        String ghiChuThuan = "";
-                        if (fullDisplayName.contains("* ")) {
-                            ghiChuThuan = fullDisplayName.substring(fullDisplayName.lastIndexOf("* ") + 2).replaceAll("</span></html>", "").trim();
-                        }
-                        String displaySize = cartTableModel.getValueAt(i, 6).toString();
-                        String maSizeReal = displaySize;
-                        if (displaySize.equalsIgnoreCase("M")) maSizeReal = "S01";
-                        else if (displaySize.equalsIgnoreCase("L")) maSizeReal = "S07";
-                        else if (displaySize.equalsIgnoreCase("Tiêu chuẩn")) maSizeReal = "S02";
+                        String maSizeTuTable = cartTableModel.getValueAt(i, 6).toString();
 
                         Object daObj = cartTableModel.getValueAt(i, 7);
                         Object duongObj = cartTableModel.getValueAt(i, 8);
+
                         MucDa daChon = (daObj instanceof MucDa) ? (MucDa) daObj : MucDa.DA_100;
                         MucDuong duongChon = (duongObj instanceof MucDuong) ? (MucDuong) duongObj : MucDuong.DUONG_100;
 
                         ct.setMaCTHD(maCTHD);
                         ct.setDonHang(dh);
-                        ct.setMaSize(maSizeReal);
+                        ct.setMaSize(maSizeTuTable);
                         ct.setSoLuong(soLuong);
                         ct.setThanhTien(thanhTien);
-                        ct.setLuongDa(daChon);
-                        ct.setLuongDuong(duongChon);
+                        ct.setLuongDa((MucDa) daObj);
+                        ct.setLuongDuong((MucDuong) duongObj);
+
+                        String fullDisplayName = cartTableModel.getValueAt(i, 0).toString();
+                        String ghiChuThuan = "";
+                        if (fullDisplayName.contains("* ")) {
+                            ghiChuThuan = fullDisplayName.substring(fullDisplayName.lastIndexOf("* ") + 2)
+                                    .replaceAll("</span></html>", "").trim();
+                        }
                         ct.setGhiChu(ghiChuThuan);
 
                         if (cthdDAO.themChiTiet(ct)) {
@@ -706,6 +720,7 @@ public class BanHangPanel extends JPanel {
                         hd.setNgayThanhToan(LocalDateTime.now());
                         hd.setPhuongThucTT(PhuongThucTT.TIEN_MAT);
                         hd.setTongTienCuoi(tongTienCuoi);
+
                         if (hdDAO.taoHoaDon(hd)) {
                             JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                             resetForm();
@@ -797,8 +812,18 @@ public class BanHangPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                ChonMonDialog dialog = new ChonMonDialog(owner, name, price, maDM);
+                KichCoDAO kcDAO = new KichCoDAO();
+                java.util.List<com.quanlycafe.entity.KichCo> dsSizeCuaSP = kcDAO.layKichCoTheoSP(maSP);
 
+                int giaNhoNhat = price;
+                if (dsSizeCuaSP != null && !dsSizeCuaSP.isEmpty()) {
+                    giaNhoNhat = (int) dsSizeCuaSP.get(0).getGia();
+                    for (com.quanlycafe.entity.KichCo kc : dsSizeCuaSP) {
+                        if (kc.getGia() < giaNhoNhat) giaNhoNhat = (int) kc.getGia();
+                    }
+                }
+
+                ChonMonDialog dialog = new ChonMonDialog(owner, name, giaNhoNhat, maDM, dsSizeCuaSP);
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {

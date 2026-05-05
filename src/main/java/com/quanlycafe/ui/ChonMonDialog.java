@@ -1,5 +1,6 @@
 package com.quanlycafe.ui;
 
+import com.quanlycafe.entity.KichCo;
 import com.quanlycafe.entity.MucDa;
 import com.quanlycafe.entity.MucDuong;
 
@@ -35,13 +36,15 @@ public class ChonMonDialog extends JDialog {
     private int finalSoLuong;
 
     private DecimalFormat formatter = new DecimalFormat("#,###đ");
+    private List<KichCo> dsKichCo;
 
-    public ChonMonDialog(Window owner, String tenMon, int giaGoc, String maDM) {
+    public ChonMonDialog(Window owner, String tenMon, int giaGoc, String maDM, List<KichCo> dsKichCo) {
         super(owner, "Tùy chỉnh món: " + tenMon, Dialog.ModalityType.APPLICATION_MODAL);
         this.tenMonGoc = tenMon;
         this.giaGoc = giaGoc;
         this.giaTong = giaGoc;
         this.maDM = maDM;
+        this.dsKichCo = dsKichCo != null ? dsKichCo : new ArrayList<>();
         this.isDrink = (maDM != null) && !maDM.isEmpty() && !maDM.equalsIgnoreCase("DM002");
 
         if (tenMon.toLowerCase().contains("bánh")) {
@@ -90,22 +93,34 @@ public class ChonMonDialog extends JDialog {
         pnl.setBorder(createCustomTitledBorder("Chọn Size"));
 
         sizeGroup = new ButtonGroup();
-        radSizeM = new JRadioButton("Size M (+0đ)", true);
-        radSizeL = new JRadioButton("Size L (+10.000đ)");
 
-        radSizeM.setBackground(COLOR_BG);
-        radSizeL.setBackground(COLOR_BG);
-        radSizeM.setActionCommand("M");
-        radSizeL.setActionCommand("L");
+        for (KichCo kc : dsKichCo) {
+            String displayLabel = kc.getTenSize();
+            if (displayLabel.equalsIgnoreCase("Size L")) {
+                radSizeL = new JRadioButton(displayLabel + " (+" + formatter.format(10000) + ")");
+                radSizeL.setBackground(COLOR_BG);
+                radSizeL.setActionCommand(kc.getMaSize());
+                radSizeL.addActionListener(e -> updateTotalPrice());
+                sizeGroup.add(radSizeL);
+                pnl.add(radSizeL);
+            } else if (displayLabel.equalsIgnoreCase("Size M")) {
+                radSizeM = new JRadioButton(displayLabel + " (+0đ)", true);
+                radSizeM.setBackground(COLOR_BG);
+                radSizeM.setActionCommand(kc.getMaSize());
+                radSizeM.addActionListener(e -> updateTotalPrice());
+                sizeGroup.add(radSizeM);
+                pnl.add(radSizeM);
+            }
+        }
 
-        radSizeM.addActionListener(e -> updateTotalPrice());
-        radSizeL.addActionListener(e -> updateTotalPrice());
+        if (radSizeM == null && radSizeL == null) {
+            radSizeM = new JRadioButton("Size M (+0đ)", true);
+            radSizeM.setActionCommand("S01");
+            radSizeM.setBackground(COLOR_BG);
+            sizeGroup.add(radSizeM);
+            pnl.add(radSizeM);
+        }
 
-        sizeGroup.add(radSizeM);
-        sizeGroup.add(radSizeL);
-
-        pnl.add(radSizeM);
-        pnl.add(radSizeL);
         return pnl;
     }
 
@@ -248,8 +263,9 @@ public class ChonMonDialog extends JDialog {
         String toppingStr = "";
 
         if (isDrink) {
-            String size = radSizeL.isSelected() ? "Size L" : "Size M";
-            sizeStr = " (" + size + ")";
+            String sizeText = "Size M";
+            if (radSizeL != null && radSizeL.isSelected()) sizeText = "Size L";
+            sizeStr = " (" + sizeText + ")";
 
             try {
                 String duong = duongGroup.getSelection().getActionCommand();
@@ -359,11 +375,14 @@ public class ChonMonDialog extends JDialog {
         txtGhiChu.setText(ghiChu);
 
         if (isDrink) {
-            if (maSize != null) {
-                if (maSize.equalsIgnoreCase("L")) {
-                    radSizeL.setSelected(true);
-                } else {
-                    radSizeM.setSelected(true);
+            if (maSize != null && sizeGroup != null) {
+                java.util.Enumeration<AbstractButton> enu = sizeGroup.getElements();
+                while (enu.hasMoreElements()) {
+                    AbstractButton btn = enu.nextElement();
+                    if (btn.getActionCommand().equals(maSize)) {
+                        btn.setSelected(true);
+                        break;
+                    }
                 }
             }
 
@@ -385,8 +404,17 @@ public class ChonMonDialog extends JDialog {
     }
 
     public String getSelectedMaSize() {
-        if (!isDrink) return "M";
-        return (radSizeL != null && radSizeL.isSelected()) ? "L" : "M";
+        if (!isDrink) {
+            return dsKichCo.stream()
+                    .filter(kc -> kc.getTenSize().equalsIgnoreCase("Size M") || kc.getTenSize().equalsIgnoreCase("Tiêu chuẩn"))
+                    .map(KichCo::getMaSize)
+                    .findFirst()
+                    .orElse("S01");
+        }
+        if (sizeGroup.getSelection() != null) {
+            return sizeGroup.getSelection().getActionCommand();
+        }
+        return "S01";
     }
 
     public String getGhiChuThuan() {
