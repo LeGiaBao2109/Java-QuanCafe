@@ -67,4 +67,22 @@ public class ChiTietHoaDonToppingDAO {
         }
         return 0.0;
     }
+
+    public boolean themToppingTheoTen(String maCTHD, String tenTopping) {
+        String sql = "INSERT INTO CT_HD_TOPPING (maCTHD, maTopping, soLuong, giaBan) " +
+                "SELECT ?, maTopping, 1, gia FROM TOPPING WHERE tenTopping = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, maCTHD);
+            ps.setString(2, tenTopping);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi lưu topping: " + tenTopping);
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

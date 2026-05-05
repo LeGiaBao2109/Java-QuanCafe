@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DonHangDAO {
-
     public boolean themDonHang(DonHang dh) {
         String sql = "INSERT INTO DONHANG (maDH, stt, ngayTao, maNV, maKH, trangThai, tongTien) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();

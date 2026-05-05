@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +77,7 @@ public class NhanVienDAO {
             return false;
         }
     }
+
     public List<Object[]> layDanhSachNhanVienQuanLy() {
         List<Object[]> list = new ArrayList<>();
         String sql = "SELECT nv.maNV, tk.tenDangNhap, nv.tenNV, nv.roleNV, nv.sdt, nv.trangThai " +

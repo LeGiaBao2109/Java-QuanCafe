@@ -16,4 +16,23 @@ public enum MucDa {
     public String getLabel() {
         return label;
     }
+
+    public static String getLabelFromCode(String code) {
+        if (code == null || code.isEmpty()) return "Bình thường";
+        for (MucDa md : MucDa.values()) {
+            if (md.name().equalsIgnoreCase(code)) {
+                return md.getLabel();
+            }
+        }
+        return code;
+    }
+
+    public static MucDa fromLabel(String label) {
+        for (MucDa md : MucDa.values()) {
+            if (md.label.equalsIgnoreCase(label)) {
+                return md;
+            }
+        }
+        return DA_100;
+    }
 }

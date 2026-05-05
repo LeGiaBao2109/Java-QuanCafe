@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class ChiTietHoaDon {
     private String maCTHD;
-    private DonHang maDH;
-    private KichCo maSize;
+    private DonHang donHang;
+    private String maSize;
     private int soLuong;
     private double donGia;
     private String ghiChu;
@@ -19,9 +19,9 @@ public class ChiTietHoaDon {
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(String maCTHD, DonHang maDH, KichCo maSize, int soLuong, double donGia, String ghiChu, double thanhTien, MucDa luongDa, MucDuong luongDuong, List<String> dsTopping) {
+    public ChiTietHoaDon(String maCTHD, DonHang donHang, String maSize, int soLuong, double donGia, String ghiChu, double thanhTien, MucDa luongDa, MucDuong luongDuong, List<String> dsTopping) {
         this.maCTHD = maCTHD;
-        this.maDH = maDH;
+        this.donHang = donHang;
         this.maSize = maSize;
         this.soLuong = soLuong;
         this.donGia = donGia;
@@ -32,10 +32,6 @@ public class ChiTietHoaDon {
         this.dsTopping = dsTopping;
     }
 
-    private void tinhThanhTien() {
-        this.thanhTien = this.soLuong * this.donGia;
-    }
-
     public String getMaCTHD() {
         return maCTHD;
     }
@@ -44,19 +40,19 @@ public class ChiTietHoaDon {
         this.maCTHD = maCTHD;
     }
 
-    public DonHang getMaDH() {
-        return maDH;
+    public DonHang getDonHang() {
+        return donHang;
     }
 
-    public void setMaDH(DonHang maDH) {
-        this.maDH = maDH;
+    public void setDonHang(DonHang donHang) {
+        this.donHang = donHang;
     }
 
-    public KichCo getMaSize() {
+    public String getMaSize() {
         return maSize;
     }
 
-    public void setMaSize(KichCo maSize) {
+    public void setMaSize(String maSize) {
         this.maSize = maSize;
     }
 
@@ -66,7 +62,6 @@ public class ChiTietHoaDon {
 
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
-        tinhThanhTien();
     }
 
     public double getDonGia() {
@@ -75,7 +70,6 @@ public class ChiTietHoaDon {
 
     public void setDonGia(double donGia) {
         this.donGia = donGia;
-        tinhThanhTien();
     }
 
     public String getGhiChu() {
@@ -88,6 +82,10 @@ public class ChiTietHoaDon {
 
     public double getThanhTien() {
         return thanhTien;
+    }
+
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien = thanhTien;
     }
 
     public MucDa getLuongDa() {
@@ -114,13 +112,6 @@ public class ChiTietHoaDon {
         this.dsTopping = dsTopping;
     }
 
-    public void addTopping(String toppingName) {
-        if (this.dsTopping == null) {
-            this.dsTopping = new ArrayList<>();
-        }
-        this.dsTopping.add(toppingName);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -138,15 +129,9 @@ public class ChiTietHoaDon {
     public String toString() {
         return "ChiTietHoaDon{" +
                 "maCTHD='" + maCTHD + '\'' +
-                ", maDH=" + maDH +
-                ", maSize=" + maSize +
+                ", maSize='" + maSize + '\'' +
                 ", soLuong=" + soLuong +
-                ", donGia=" + donGia +
-                ", ghiChu='" + ghiChu + '\'' +
                 ", thanhTien=" + thanhTien +
-                ", luongDa=" + luongDa +
-                ", luongDuong=" + luongDuong +
-                ", dsTopping=" + dsTopping +
                 '}';
     }
 }

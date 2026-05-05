@@ -16,4 +16,23 @@ public enum MucDuong {
     public String getLabel() {
         return label;
     }
+
+    public static String getLabelFromCode(String code) {
+        if (code == null || code.isEmpty()) return "Bình thường";
+        for (MucDuong mdu : MucDuong.values()) {
+            if (mdu.name().equalsIgnoreCase(code)) {
+                return mdu.getLabel();
+            }
+        }
+        return code;
+    }
+
+    public static MucDuong fromLabel(String label) {
+        for (MucDuong mdu : MucDuong.values()) {
+            if (mdu.label.equalsIgnoreCase(label)) {
+                return mdu;
+            }
+        }
+        return DUONG_100;
+    }
 }

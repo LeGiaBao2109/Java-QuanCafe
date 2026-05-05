@@ -1,5 +1,8 @@
 package com.quanlycafe.ui;
 
+import com.quanlycafe.entity.MucDa;
+import com.quanlycafe.entity.MucDuong;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -10,14 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChonMonDialog extends JDialog {
-
     private final Color COLOR_PRIMARY_DARK = new Color(92, 64, 51);
     private final Color COLOR_BG = Color.WHITE;
     private final Color COLOR_BORDER = new Color(222, 204, 190);
 
     private String tenMonGoc;
-    private String maDM; // Lưu mã danh mục
-    private boolean isDrink; // Biến check loại món
+    private String maDM;
+    private boolean isDrink;
     private int giaGoc;
     private int giaTong;
 
@@ -39,7 +41,7 @@ public class ChonMonDialog extends JDialog {
         this.tenMonGoc = tenMon;
         this.giaGoc = giaGoc;
         this.giaTong = giaGoc;
-        this.maDM = maDM; // Gán giá trị
+        this.maDM = maDM;
         this.isDrink = (maDM != null) && !maDM.isEmpty() && !maDM.equalsIgnoreCase("DM002");
 
         if (tenMon.toLowerCase().contains("bánh")) {
@@ -56,7 +58,6 @@ public class ChonMonDialog extends JDialog {
         pnlBody.setBackground(COLOR_BG);
         pnlBody.setBorder(new EmptyBorder(10, 15, 10, 15));
 
-        // CHỈ ADD NẾU LÀ NƯỚC (Bánh sẽ bỏ qua hết đoạn này)
         if (isDrink) {
             pnlBody.add(createSizePanel());
             pnlBody.add(Box.createVerticalStrut(10));
@@ -72,7 +73,6 @@ public class ChonMonDialog extends JDialog {
             pnlBody.add(Box.createVerticalStrut(10));
         }
 
-        // Ghi chú thì món nào cũng có
         pnlBody.add(createGhiChuPanel());
 
         JScrollPane scrollPane = new JScrollPane(pnlBody);
@@ -113,15 +113,13 @@ public class ChonMonDialog extends JDialog {
         pnl.setBorder(createCustomTitledBorder("Lượng Đường"));
 
         duongGroup = new ButtonGroup();
-        String[] mucDuong = {"Bình thường", "70% Đường", "50% Đường", "30% Đường", "Không Đường"};
-        boolean isFirst = true;
-        for (String md : mucDuong) {
-            JRadioButton rad = new JRadioButton(md, isFirst);
+        for (MucDuong md : MucDuong.values()) {
+            boolean isDefault = (md == MucDuong.DUONG_100);
+            JRadioButton rad = new JRadioButton(md.getLabel(), isDefault);
             rad.setBackground(COLOR_BG);
-            rad.setActionCommand(md);
+            rad.setActionCommand(md.getLabel());
             duongGroup.add(rad);
             pnl.add(rad);
-            isFirst = false;
         }
         return pnl;
     }
@@ -132,15 +130,13 @@ public class ChonMonDialog extends JDialog {
         pnl.setBorder(createCustomTitledBorder("Lượng Đá"));
 
         daGroup = new ButtonGroup();
-        String[] mucDa = {"Bình thường", "70% Đá", "50% Đá", "30% Đá", "Không Đá", "Uống Nóng"};
-        boolean isFirst = true;
-        for (String md : mucDa) {
-            JRadioButton rad = new JRadioButton(md, isFirst);
+        for (MucDa md : MucDa.values()) {
+            boolean isDefault = (md == MucDa.DA_100);
+            JRadioButton rad = new JRadioButton(md.getLabel(), isDefault);
             rad.setBackground(COLOR_BG);
-            rad.setActionCommand(md);
+            rad.setActionCommand(md.getLabel());
             daGroup.add(rad);
             pnl.add(rad);
-            isFirst = false;
         }
         return pnl;
     }
@@ -222,7 +218,7 @@ public class ChonMonDialog extends JDialog {
     private void updateTotalPrice() {
         int tempPrice = giaGoc;
 
-        if (isDrink) { // Chỉ tính thêm tiền nếu là nước và có bảng chọn
+        if (isDrink) {
             if (radSizeL != null && radSizeL.isSelected()) tempPrice += 10000;
 
             if (chkToppings != null) {
@@ -250,24 +246,20 @@ public class ChonMonDialog extends JDialog {
         String toppingStr = "";
 
         if (isDrink) {
-            // Size
             String size = radSizeL.isSelected() ? "Size L" : "Size M";
             sizeStr = " (" + size + ")";
 
-            // Đường/Đá - Dùng try-catch hoặc kiểm tra null để tránh crash nếu chưa chọn
             try {
                 String duong = duongGroup.getSelection().getActionCommand();
                 String da = daGroup.getSelection().getActionCommand();
 
                 List<String> listTuyChinh = new ArrayList<>();
-                if (!duong.equals("Bình thường")) listTuyChinh.add(duong);
-                if (!da.equals("Bình thường")) listTuyChinh.add(da);
+                if (!duong.equals(MucDuong.DUONG_100.getLabel())) listTuyChinh.add(duong);
+                if (!da.equals(MucDa.DA_100.getLabel())) listTuyChinh.add(da);
                 tuyChinhStr = listTuyChinh.isEmpty() ? "" : "<br/><i style='font-size:10px; color:gray;'>" + String.join(", ", listTuyChinh) + "</i>";
             } catch (Exception e) {
-                // Phòng hờ nếu ButtonGroup chưa có lựa chọn
             }
 
-            // Topping
             List<String> listTopping = new ArrayList<>();
             for (JCheckBox chk : chkToppings) {
                 if (chk.isSelected()) {
@@ -293,16 +285,55 @@ public class ChonMonDialog extends JDialog {
 
     public List<String> getSelectedToppingNames() {
         List<String> selected = new ArrayList<>();
-        // Nếu là bánh hoặc không có bảng topping thì trả về list rỗng
         if (isDrink && chkToppings != null) {
             for (JCheckBox chk : chkToppings) {
                 if (chk.isSelected()) {
-                    // Lấy Name (ví dụ: "Trân châu đen") đã set ở hàm createToppingPanel
                     selected.add(chk.getName());
                 }
             }
         }
         return selected;
+    }
+
+    public void setExistingData(int soLuong, String ghiChu, List<String> selectedToppings) {
+        spnSoLuong.setValue(soLuong);
+        txtGhiChu.setText(ghiChu);
+
+        if (isDrink && chkToppings != null && selectedToppings != null) {
+            for (JCheckBox chk : chkToppings) {
+                if (selectedToppings.contains(chk.getName())) {
+                    chk.setSelected(true);
+                }
+            }
+        }
+        updateTotalPrice();
+    }
+
+    public MucDa getSelectedMucDa() {
+        try {
+            String cmd = daGroup.getSelection().getActionCommand();
+            return MucDa.fromLabel(cmd);
+        } catch (Exception e) {
+            return MucDa.DA_100;
+        }
+    }
+
+    public MucDuong getSelectedMucDuong() {
+        try {
+            String cmd = duongGroup.getSelection().getActionCommand();
+            return MucDuong.fromLabel(cmd);
+        } catch (Exception e) {
+            return MucDuong.DUONG_100;
+        }
+    }
+
+    public String getSelectedMaSize() {
+        if (!isDrink) return "M";
+        return (radSizeL != null && radSizeL.isSelected()) ? "L" : "M";
+    }
+
+    public String getGhiChuThuan() {
+        return txtGhiChu.getText().trim();
     }
 
     public boolean isConfirmed() {

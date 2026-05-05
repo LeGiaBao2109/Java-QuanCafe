@@ -3,11 +3,24 @@ package com.quanlycafe.dao;
 import com.quanlycafe.entity.KhachHang;
 import com.quanlycafe.util.DBConnect;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class KhachHangDAO {
+    public boolean capNhatKhachHang(String maKH, String tenMoi, String sdtMoi) {
+        String sql = "UPDATE KHACHHANG SET tenKH = ?, sdt = ? WHERE maKH = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, tenMoi);
+            ps.setString(2, sdtMoi);
+            ps.setString(3, maKH);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean themKhachHang(KhachHang kh) {
         String sql = "INSERT INTO KHACHHANG (maKH, tenKH, sdt, ngayTao, diemTL) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();

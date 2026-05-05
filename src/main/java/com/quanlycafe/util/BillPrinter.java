@@ -2,27 +2,34 @@ package com.quanlycafe.util;
 
 import com.quanlycafe.entity.ChiTietHoaDon;
 import com.quanlycafe.entity.HoaDon;
+
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class BillPrinter {
     private static final DecimalFormat formatter = new DecimalFormat("#,###đ");
-
-    private static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter dFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter tFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     public static String generateBillHTML(HoaDon hd, List<ChiTietHoaDon> dsCT) {
         StringBuilder sb = new StringBuilder();
 
+        double giaBanDau = 0;
+        for (ChiTietHoaDon ct : dsCT) {
+            giaBanDau += ct.getThanhTien();
+        }
+
+        double tong = hd.getTongTienCuoi();
+        double giaGiam = giaBanDau - tong;
+
         sb.append("<html><body style='width: 100%; font-family: sans-serif; font-size: 12px; padding: 10px; color: black;'>");
-
-        sb.append("<h2 style='text-align: center; margin-bottom: 2px; font-size: 16px;'>CAFE BIỂN GỌI</h2>");
-        sb.append("<p style='text-align: center; margin-top: 0; font-size: 10px;'>35 Xuân Thủy, P. Thảo Điền, Quận 2</p>");
-
+        sb.append("<h2 style='text-align: center; margin-bottom: 2px; font-size: 16px;'>BARISTAPRO</h2>");
+        sb.append("<p style='text-align: center; margin-top: 0; font-size: 10px;'>Hệ thống Quản lý Bán hàng chuyên nghiệp</p>");
         sb.append("<div style='border-top: 1px dashed black; margin: 10px 0;'></div>");
 
         sb.append("<table style='width: 100%; font-size: 11px;'>");
-        sb.append("<tr><td><b>Mã HD:</b> ").append(hd.getMaHD()).append("</td><td align='right'><b>Bàn:</b> ").append(hd.getMaDH() != null ? hd.getMaDH().getStt() : "-").append("</td></tr>");
+        sb.append("<tr><td colspan='2'><b>Mã HD:</b> ").append(hd.getMaHD()).append("</td></tr>");
 
         String tenNV = (hd.getMaDH() != null && hd.getMaDH().getMaNV() != null)
                 ? hd.getMaDH().getMaNV().getTenNV()
@@ -34,7 +41,10 @@ public class BillPrinter {
                 : "Khách vãng lai";
         sb.append("<tr><td colspan='2'><b>Khách hàng:</b> ").append(tenKH).append("</td></tr>");
 
-        sb.append("<tr><td colspan='2'><b>Ngày:</b> ").append(hd.getNgayThanhToan().format(dtFormatter)).append("</td></tr>");
+        sb.append("<tr>");
+        sb.append("<td><b>Ngày:</b> ").append(hd.getNgayThanhToan().format(dFormatter)).append("</td>");
+        sb.append("<td align='right'><b>Giờ:</b> ").append(hd.getNgayThanhToan().format(tFormatter)).append("</td>");
+        sb.append("</tr>");
         sb.append("</table>");
 
         sb.append("<div style='border-top: 1px dashed black; margin: 10px 0;'></div>");
@@ -47,25 +57,27 @@ public class BillPrinter {
         sb.append("</tr>");
 
         for (ChiTietHoaDon ct : dsCT) {
+            String[] parts = ct.getGhiChu().split(" \\| ");
+            String tenMonFull = parts[0];
+            String ghiChuThucSu = parts.length > 1 ? parts[1] : "";
+
             sb.append("<tr>");
-            String tenMon = (ct.getMaSize() != null) ? ct.getMaSize().getMaSize() : "Sản phẩm";
-            sb.append("<td style='padding-top: 5px;'><b>").append(tenMon).append("</b></td>");
+            sb.append("<td style='padding-top: 5px;'><b>").append(tenMonFull).append("</b></td>");
             sb.append("<td align='center' style='padding-top: 5px;'>").append(ct.getSoLuong()).append("</td>");
             sb.append("<td align='right' style='padding-top: 5px;'>").append(formatter.format(ct.getThanhTien())).append("</td>");
             sb.append("</tr>");
 
             sb.append("<tr><td colspan='3' style='font-style: italic; color: #555; font-size: 10px; padding-left: 10px;'>");
-
-            sb.append("- ").append(ct.getLuongDa()).append(", ").append(ct.getLuongDuong());
+            sb.append("- ").append(ct.getLuongDa() != null ? ct.getLuongDa().getLabel() : "Bình thường")
+                    .append(", ").append(ct.getLuongDuong() != null ? ct.getLuongDuong().getLabel() : "Bình thường");
 
             if (ct.getDsTopping() != null && !ct.getDsTopping().isEmpty()) {
                 sb.append("<br>+ Topping: ").append(String.join(", ", ct.getDsTopping()));
             }
 
-            if (ct.getGhiChu() != null && !ct.getGhiChu().trim().isEmpty()) {
-                sb.append("<br>* Ghi chú: ").append(ct.getGhiChu());
+            if (!ghiChuThucSu.trim().isEmpty()) {
+                sb.append("<br>* Ghi chú: ").append(ghiChuThucSu);
             }
-
             sb.append("</td></tr>");
         }
 
@@ -74,21 +86,23 @@ public class BillPrinter {
         sb.append("<div style='border-top: 1px dashed black; margin: 10px 0;'></div>");
         sb.append("<table style='width: 100%; font-size: 12px;'>");
 
-        if (hd.getMaVoucher() != null) {
-            sb.append("<tr><td align='right'>Voucher (").append(hd.getMaVoucher().getMaCT()).append("):</td>");
-            sb.append("<td align='right'>-").append(formatter.format(hd.getMaVoucher().getGiaTriGiam())).append("</td></tr>");
+        sb.append("<tr><td align='right'>Giá ban đầu:</td>");
+        sb.append("<td align='right'>").append(formatter.format(giaBanDau)).append("</td></tr>");
+
+        if (giaGiam > 0) {
+            sb.append("<tr><td align='right'>Giảm giá:</td>");
+            sb.append("<td align='right' style='color: red;'>-").append(formatter.format(giaGiam)).append("</td></tr>");
         }
 
-        sb.append("<tr><td align='right'><b>TỔNG CỘNG:</b></td>");
-        sb.append("<td align='right' style='font-size: 15px;'><b>").append(formatter.format(hd.getTongTienCuoi())).append("</b></td></tr>");
+        sb.append("<tr><td align='right' style='padding-top: 5px;'><b>TỔNG:</b></td>");
+        sb.append("<td align='right' style='font-size: 15px; padding-top: 5px;'><b>").append(formatter.format(tong)).append("</b></td></tr>");
 
-        sb.append("<tr><td align='right'>Hình thức:</td>");
-        sb.append("<td align='right'>").append(hd.getPhuongThucTT()).append("</td></tr>");
+        sb.append("<tr><td align='right' style='font-size: 10px; padding-top: 10px;'>PTTT:</td>");
+        sb.append("<td align='right' style='font-size: 10px; padding-top: 10px;'>").append(hd.getPhuongThucTT() != null ? hd.getPhuongThucTT().getMoTa() : "N/A").append("</td></tr>");
         sb.append("</table>");
 
-        // 5. Chân trang
         sb.append("<div style='margin-top: 20px; text-align: center;'>");
-        sb.append("<p style='font-style: italic; font-size: 10px;'>Cảm ơn quý khách và hẹn gặp lại!</p>");
+        sb.append("<p style='font-style: italic; font-size: 10px;'>Cảm ơn quý khách!</p>");
         sb.append("</div>");
 
         sb.append("</body></html>");

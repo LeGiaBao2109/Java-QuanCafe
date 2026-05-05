@@ -1,5 +1,6 @@
 package com.quanlycafe.entity;
 
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 public class Voucher {
@@ -8,6 +9,9 @@ public class Voucher {
     private int diemCanDoi;
     private LoaiGiamGia loaiGiamGia;
     private boolean trangThai;
+    private double giaTriGiam;
+
+    private static final DecimalFormat df = new DecimalFormat("#,###đ");
 
     public Voucher() {
     }
@@ -18,6 +22,15 @@ public class Voucher {
         this.diemCanDoi = diemCanDoi;
         this.loaiGiamGia = loaiGiamGia;
         this.trangThai = trangThai;
+    }
+
+    public Voucher(String maCT, String tenCT, int diemCanDoi, LoaiGiamGia loaiGiamGia, boolean trangThai, double giaTriGiam) {
+        this.maCT = maCT;
+        this.tenCT = tenCT;
+        this.diemCanDoi = diemCanDoi;
+        this.loaiGiamGia = loaiGiamGia;
+        this.trangThai = trangThai;
+        this.giaTriGiam = giaTriGiam;
     }
 
     public String getMaCT() {
@@ -60,7 +73,14 @@ public class Voucher {
         this.trangThai = trangThai;
     }
 
+    public void setGiaTriGiam(double giaTriGiam) {
+        this.giaTriGiam = giaTriGiam;
+    }
+
     public double getGiaTriGiam() {
+        if (this.giaTriGiam > 0) {
+            return this.giaTriGiam;
+        }
         return (loaiGiamGia != null) ? loaiGiamGia.getGiaTri() : 0;
     }
 
@@ -79,12 +99,13 @@ public class Voucher {
 
     @Override
     public String toString() {
-        return "Voucher{" +
-                "maCT='" + maCT + '\'' +
-                ", tenCT='" + tenCT + '\'' +
-                ", diemCanDoi=" + diemCanDoi +
-                ", loaiGiamGia=" + loaiGiamGia +
-                ", trangThai=" + trangThai +
-                '}';
+        if (loaiGiamGia == null) return tenCT;
+        if (loaiGiamGia.name().equals("DOI_MON_FREE")) {
+            return tenCT + " (Tốn " + diemCanDoi + " điểm)";
+        }
+
+        String detail = loaiGiamGia.isLaPhanTram() ? (int) giaTriGiam + "%" : df.format(giaTriGiam);
+
+        return tenCT + " - Giảm: " + detail;
     }
 }

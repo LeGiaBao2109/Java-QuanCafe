@@ -8,6 +8,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class KhachHangPanel extends JPanel {
     private final Color COLOR_TABLE_ROW_ALT = new Color(250, 248, 246);
 
     private List<Object[]> allData;
+    private List<Object[]> filteredData;
     private int currentPage = 1;
     private int rowsPerPage = 10;
     private int totalPages = 1;
@@ -29,18 +32,19 @@ public class KhachHangPanel extends JPanel {
     private JTable table;
     private JLabel lblTotal;
     private JTextField txtPage;
+    private JTextField txtSearch;
 
     public KhachHangPanel() {
         setLayout(new BorderLayout(0, 15));
         setBackground(COLOR_BG);
         setOpaque(false);
 
-        loadData(); 
+        loadData();
 
         JPanel tableContainer = new JPanel(new BorderLayout());
         tableContainer.setBackground(COLOR_SURFACE);
         tableContainer.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
-        
+
         tableContainer.add(createTableArea(), BorderLayout.CENTER);
         tableContainer.add(createPaginationBar(), BorderLayout.SOUTH);
 
@@ -53,56 +57,109 @@ public class KhachHangPanel extends JPanel {
     private void loadData() {
         allData = new ArrayList<>();
         KhachHangDAO dao = new KhachHangDAO();
-        
         List<KhachHang> dsKhachHang = dao.layTatCaKhachHang();
-        
+
         if (dsKhachHang != null) {
             for (KhachHang kh : dsKhachHang) {
                 allData.add(new Object[]{
-                    kh.getMaKH(), 
-                    kh.getTenKH(), 
-                    kh.getSdt(), 
-                    kh.getDiemTL()
+                        kh.getMaKH(),
+                        kh.getTenKH(),
+                        kh.getSdt(),
+                        kh.getDiemTL()
                 });
             }
         }
+        filteredData = new ArrayList<>(allData);
+        calculateTotalPages();
+    }
 
-        totalPages = (int) Math.ceil((double) allData.size() / rowsPerPage);
+    private void calculateTotalPages() {
+        totalPages = (int) Math.ceil((double) filteredData.size() / rowsPerPage);
         if (totalPages == 0) totalPages = 1;
+    }
+
+    private void filterData(String keyword) {
+        filteredData.clear();
+        String searchKey = keyword.toLowerCase().trim();
+
+        for (Object[] row : allData) {
+            String maKH = row[0].toString().toLowerCase();
+            String tenKH = row[1].toString().toLowerCase();
+            String sdt = row[2].toString().toLowerCase();
+
+            if (maKH.contains(searchKey) || tenKH.contains(searchKey) || sdt.contains(searchKey)) {
+                filteredData.add(row);
+            }
+        }
+
+        currentPage = 1;
+        calculateTotalPages();
+        updateTableData();
+    }
+
+    private void showEditDialog() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String maKH = table.getValueAt(selectedRow, 0).toString();
+        String tenHT = table.getValueAt(selectedRow, 1).toString();
+        String sdtHT = table.getValueAt(selectedRow, 2).toString();
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JTextField txtTenMoi = new JTextField(tenHT);
+        JTextField txtSdtMoi = new JTextField(sdtHT);
+
+        panel.add(new JLabel("Tên khách hàng:"));
+        panel.add(txtTenMoi);
+        panel.add(new JLabel("Số điện thoại:"));
+        panel.add(txtSdtMoi);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Sửa thông tin: " + maKH, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String tenMoi = txtTenMoi.getText().trim();
+            String sdtMoi = txtSdtMoi.getText().trim();
+
+            if (tenMoi.isEmpty() || sdtMoi.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không được để trống thông tin!");
+                return;
+            }
+
+            KhachHangDAO dao = new KhachHangDAO();
+            if (dao.capNhatKhachHang(maKH, tenMoi, sdtMoi)) {
+                JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+                loadData();
+                filterData(txtSearch.getText());
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
+            }
+        }
     }
 
     private JPanel createTopActionBar() {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(COLOR_SURFACE);
         topBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(COLOR_BORDER, 1),
-            new EmptyBorder(12, 20, 12, 20)
+                BorderFactory.createLineBorder(COLOR_BORDER, 1),
+                new EmptyBorder(12, 20, 12, 20)
         ));
 
         JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pnlLeft.setOpaque(false);
-        
-        // --- CẬP NHẬT: Gỡ nút Thêm, chỉ giữ lại nút Sửa ---
+
         JButton btnEdit = createModernButton("✎ Sửa thông tin", false);
-
-        btnEdit.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if(row != -1) {
-                JOptionPane.showMessageDialog(this, "Mở form Sửa khách hàng: " + table.getValueAt(row, 1));
-            } else {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-
+        btnEdit.addActionListener(e -> showEditDialog());
         pnlLeft.add(btnEdit);
 
-        // --- CẬP NHẬT: Mở rộng thanh tìm kiếm cho cân đối không gian ---
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearch.setOpaque(false);
         pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
 
-        JTextField txtSearch = new JTextField();
-        txtSearch.setPreferredSize(new Dimension(350, 38)); // Kéo dài ra xíu
+        txtSearch = new JTextField();
+        txtSearch.setPreferredSize(new Dimension(350, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BORDER, 1),
@@ -111,6 +168,16 @@ public class KhachHangPanel extends JPanel {
 
         JButton btnSearch = createModernButton("Tìm Kiếm", false);
         btnSearch.setPreferredSize(new Dimension(100, 38));
+
+        btnSearch.addActionListener(e -> filterData(txtSearch.getText()));
+        txtSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    filterData(txtSearch.getText());
+                }
+            }
+        });
 
         pnlSearch.add(txtSearch);
         pnlSearch.add(Box.createHorizontalStrut(5));
@@ -124,7 +191,6 @@ public class KhachHangPanel extends JPanel {
 
     private JScrollPane createTableArea() {
         String[] columns = {"Mã KH", "Tên Khách Hàng", "Số Điện Thoại", "Điểm Tích Lũy"};
-
         model = new DefaultTableModel(null, columns) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -144,7 +210,7 @@ public class KhachHangPanel extends JPanel {
 
         table.getTableHeader().setPreferredSize(new Dimension(0, 50));
         table.getTableHeader().setBackground(COLOR_TABLE_HEADER);
-        
+
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -170,15 +236,15 @@ public class KhachHangPanel extends JPanel {
             }
         };
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        
+
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(100);  
-        table.getColumnModel().getColumn(1).setPreferredWidth(300);  
-        table.getColumnModel().getColumn(2).setPreferredWidth(150);  
-        table.getColumnModel().getColumn(3).setPreferredWidth(120);  
+        table.getColumnModel().getColumn(0).setPreferredWidth(100);
+        table.getColumnModel().getColumn(1).setPreferredWidth(300);
+        table.getColumnModel().getColumn(2).setPreferredWidth(150);
+        table.getColumnModel().getColumn(3).setPreferredWidth(120);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(null);
@@ -194,16 +260,13 @@ public class KhachHangPanel extends JPanel {
 
         JButton btnFirst = createPageButton("«");
         JButton btnPrev = createPageButton("‹");
-        
         txtPage = new JTextField("1", 3);
         txtPage.setHorizontalAlignment(JTextField.CENTER);
         txtPage.setFont(new Font("Segoe UI", Font.BOLD, 13));
         txtPage.setBorder(BorderFactory.createLineBorder(COLOR_BORDER));
-        
         lblTotal = new JLabel("/ " + totalPages);
         lblTotal.setForeground(Color.GRAY);
         lblTotal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        
         JButton btnNext = createPageButton("›");
         JButton btnLast = createPageButton("»");
 
@@ -211,7 +274,7 @@ public class KhachHangPanel extends JPanel {
         btnPrev.addActionListener(e -> { if (currentPage > 1) { currentPage--; updateTableData(); } });
         btnNext.addActionListener(e -> { if (currentPage < totalPages) { currentPage++; updateTableData(); } });
         btnLast.addActionListener(e -> { currentPage = totalPages; updateTableData(); });
-        
+
         txtPage.addActionListener(e -> {
             try {
                 int p = Integer.parseInt(txtPage.getText());
@@ -239,19 +302,19 @@ public class KhachHangPanel extends JPanel {
     private void updateTableData() {
         model.setRowCount(0);
         int start = (currentPage - 1) * rowsPerPage;
-        int end = Math.min(start + rowsPerPage, allData.size());
-        
+        int end = Math.min(start + rowsPerPage, filteredData.size());
+
         for (int i = start; i < end; i++) {
-            model.addRow(allData.get(i));
+            model.addRow(filteredData.get(i));
         }
-        
+
         if (txtPage != null) txtPage.setText(String.valueOf(currentPage));
         if (lblTotal != null) lblTotal.setText("/ " + totalPages);
     }
 
     private JButton createModernButton(String text, boolean isPrimary) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(140, 38)); // Cho nút Sửa bự ra một xíu
+        btn.setPreferredSize(new Dimension(140, 38));
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);

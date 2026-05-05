@@ -82,7 +82,6 @@ public class SanPhamDAO {
         }
     }
 
-    // --- PHƯƠNG THỨC MỚI: Xóa mềm sản phẩm (Ẩn khỏi giao diện) ---
     public boolean xoaSanPham(String maSP) {
         String sql = "UPDATE SANPHAM SET trangThai = 0, ngayCapNhat = GETDATE() WHERE maSP = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -238,19 +237,53 @@ public class SanPhamDAO {
 
     public List<Object[]> laySanPhamBanHangPOS(String maDM) {
         List<Object[]> list = new ArrayList<>();
-        String sql = "SELECT sp.tenSP, MIN(k.gia) as gia " +
-                     "FROM SANPHAM sp " +
-                     "JOIN KICHCO k ON sp.maSP = k.maSP " +
-                     "WHERE sp.maDM = ? AND sp.trangThai = 1 " +
-                     "GROUP BY sp.maSP, sp.tenSP";
-                     
+        String sql = "SELECT sp.tenSP, k.gia, k.maSize, sp.anhSP, sp.maSP " +
+                "FROM SANPHAM sp " +
+                "JOIN KICHCO k ON sp.maSP = k.maSP " +
+                "WHERE sp.maDM = ? AND sp.trangThai = 1";
+
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-             
             ps.setString(1, maDM);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(new Object[]{rs.getString("tenSP"), rs.getInt("gia")});
+                    list.add(new Object[]{
+                            rs.getString("tenSP"),
+                            rs.getInt("gia"),
+                            rs.getString("maSize"),
+                            rs.getString("anhSP"),
+                            rs.getString("maSP")
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Object[]> timKiemSanPham(String keyword) {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT sp.tenSP, k.gia, k.maSize, sp.maDM, sp.anhSP, sp.maSP " +
+                "FROM SANPHAM sp " +
+                "JOIN KICHCO k ON sp.maSP = k.maSP " +
+                "WHERE (sp.tenSP LIKE ? OR sp.maSP LIKE ?) AND sp.trangThai = 1";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String p = "%" + keyword + "%";
+            ps.setString(1, p);
+            ps.setString(2, p);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Object[]{
+                            rs.getString("tenSP"),
+                            rs.getInt("gia"),
+                            rs.getString("maSize"),
+                            rs.getString("maDM"),
+                            rs.getString("anhSP"),
+                            rs.getString("maSP")
+                    });
                 }
             }
         } catch (Exception e) {
