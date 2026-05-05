@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,5 +77,33 @@ public class NhanVienDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    public List<Object[]> layDanhSachNhanVienQuanLy() {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT nv.maNV, tk.tenDangNhap, nv.tenNV, nv.roleNV, nv.sdt, nv.trangThai " +
+                     "FROM NHANVIEN nv " +
+                     "JOIN TAIKHOAN tk ON nv.maNV = tk.maNV " +
+                     "WHERE nv.trangThai = 1";
+                     
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+             
+            
+            while (rs.next()) {
+                
+                String maNV = rs.getString("maNV");
+                String tenDangNhap = rs.getString("tenDangNhap");
+                String tenNV = rs.getString("tenNV"); 
+                String roleNV = rs.getString("roleNV");
+                
+                int sdt = rs.getInt("sdt");
+                
+                list.add(new Object[]{maNV, tenDangNhap, tenNV, roleNV, sdt});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }
