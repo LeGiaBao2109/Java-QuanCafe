@@ -327,6 +327,50 @@ public class ChonMonDialog extends JDialog {
         }
     }
 
+    public void setFullData(int soLuong, String ghiChu, List<String> toppings, String maSize, MucDa da, MucDuong duong) {
+        spnSoLuong.setValue(soLuong);
+        txtGhiChu.setText(ghiChu);
+
+        if (isDrink) {
+            if (maSize != null) {
+                if (maSize.equalsIgnoreCase("L")) {
+                    radSizeL.setSelected(true);
+                } else {
+                    radSizeM.setSelected(true);
+                }
+            }
+
+            if (da != null && daGroup != null) {
+                java.util.Enumeration<AbstractButton> bgDa = daGroup.getElements();
+                while (bgDa.hasMoreElements()) {
+                    AbstractButton btn = bgDa.nextElement();
+                    if (btn.getActionCommand().equals(da.getLabel())) {
+                        btn.setSelected(true);
+                        break;
+                    }
+                }
+            }
+
+            if (duong != null && duongGroup != null) {
+                java.util.Enumeration<AbstractButton> bgDuong = duongGroup.getElements();
+                while (bgDuong.hasMoreElements()) {
+                    AbstractButton btn = bgDuong.nextElement();
+                    if (btn.getActionCommand().equals(duong.getLabel())) {
+                        btn.setSelected(true);
+                        break;
+                    }
+                }
+            }
+
+            if (toppings != null && chkToppings != null) {
+                for (JCheckBox chk : chkToppings) {
+                    chk.setSelected(toppings.contains(chk.getName()));
+                }
+            }
+        }
+        updateTotalPrice();
+    }
+
     public String getSelectedMaSize() {
         if (!isDrink) return "M";
         return (radSizeL != null && radSizeL.isSelected()) ? "L" : "M";

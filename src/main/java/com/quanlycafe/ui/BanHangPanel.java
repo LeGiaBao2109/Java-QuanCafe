@@ -190,7 +190,7 @@ public class BanHangPanel extends JPanel {
         gridPanel.repaint();
     }
 
-    private void addToCart(String customName, int quantity, int unitPrice, List<String> toppings, String maDM, String maSize, MucDa da, MucDuong duong) {
+    private void addToCart(String customName, int quantity, int unitPrice, List<String> toppings, String maDM, String maSize, MucDa da, MucDuong duong, String maSP) {
         if (!rightCartPanel.isVisible()) {
             rightCartPanel.setVisible(true);
             splitPane.setDividerLocation(800);
@@ -199,26 +199,44 @@ public class BanHangPanel extends JPanel {
             splitPane.repaint();
         }
 
-        cartTableModel.addRow(new Object[]{
-                customName,
-                quantity,
-                formatter.format(quantity * unitPrice),
-                unitPrice,
-                toppings,
-                maDM,
-                maSize,
-                da,
-                duong
-        });
+        int matchedRow = -1;
+        for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+            String existingName = (String) cartTableModel.getValueAt(i, 0);
+            if (existingName.equals(customName)) {
+                matchedRow = i;
+                break;
+            }
+        }
 
-        int newRowIdx = cartTableModel.getRowCount() - 1;
-        table.setRowSelectionInterval(newRowIdx, newRowIdx);
+        if (matchedRow != -1) {
+            int currentQty = (int) cartTableModel.getValueAt(matchedRow, 1);
+            int updatedQty = currentQty + quantity;
+            cartTableModel.setValueAt(updatedQty, matchedRow, 1);
+            cartTableModel.setValueAt(formatter.format(updatedQty * unitPrice), matchedRow, 2);
+            table.setRowSelectionInterval(matchedRow, matchedRow);
+        } else {
+            cartTableModel.addRow(new Object[]{
+                    customName,
+                    quantity,
+                    formatter.format(quantity * unitPrice),
+                    unitPrice,
+                    toppings,
+                    maDM,
+                    maSize,
+                    da,
+                    duong,
+                    maSP
+            });
 
-        JLabel tempLabel = new JLabel(customName);
-        tempLabel.setFont(table.getFont());
-        tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5));
-        int perfectHeight = tempLabel.getPreferredSize().height;
-        table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65));
+            int newRowIdx = cartTableModel.getRowCount() - 1;
+            table.setRowSelectionInterval(newRowIdx, newRowIdx);
+
+            JLabel tempLabel = new JLabel(customName);
+            tempLabel.setFont(table.getFont());
+            tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5));
+            int perfectHeight = tempLabel.getPreferredSize().height;
+            table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65));
+        }
 
         recalculateTotal();
     }
@@ -345,9 +363,26 @@ public class BanHangPanel extends JPanel {
                     if (row != -1) {
                         String tenMonHTML = (String) cartTableModel.getValueAt(row, 0);
                         int unitPrice = (int) cartTableModel.getValueAt(row, 3);
+                        List<String> toppingsCu = (List<String>) cartTableModel.getValueAt(row, 4);
                         String maDM = (String) cartTableModel.getValueAt(row, 5);
+                        String maSizeCu = (String) cartTableModel.getValueAt(row, 6);
+                        MucDa daCu = (MucDa) cartTableModel.getValueAt(row, 7);
+                        MucDuong duongCu = (MucDuong) cartTableModel.getValueAt(row, 8);
+                        int soLuongCu = (int) cartTableModel.getValueAt(row, 1);
+
+                        String tenMonGoc = tenMonHTML.replaceAll("<[^>]*>", "").split(" \\(")[0].trim();
+
+                        String ghiChuCu = "";
+                        if (tenMonHTML.contains("* ")) {
+                            ghiChuCu = tenMonHTML.substring(tenMonHTML.lastIndexOf("* ") + 2)
+                                    .replaceAll("</span></html>", "").trim();
+                        }
+
                         Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonHTML.replaceAll("<[^>]*>", "").split(" \\(")[0].trim(), unitPrice, maDM);
+                        ChonMonDialog dialog = new ChonMonDialog(owner, tenMonGoc, unitPrice, maDM);
+
+                        dialog.setFullData(soLuongCu, ghiChuCu, toppingsCu, maSizeCu, daCu, duongCu);
+
                         dialog.setVisible(true);
 
                         if (dialog.isConfirmed()) {
@@ -359,6 +394,7 @@ public class BanHangPanel extends JPanel {
                             cartTableModel.setValueAt(dialog.getSelectedMaSize(), row, 6);
                             cartTableModel.setValueAt(dialog.getSelectedMucDa(), row, 7);
                             cartTableModel.setValueAt(dialog.getSelectedMucDuong(), row, 8);
+
                             recalculateTotal();
                         }
                     }
@@ -557,7 +593,7 @@ public class BanHangPanel extends JPanel {
 
         JButton btnThanhToan = new JButton("THANH TOÁN");
         btnThanhToan.setBackground(COLOR_PRIMARY_DARK);
-        btnThanhToan.setForeground(Color.WHITE);
+        btnThanhToan.setForeground(COLOR_TEXT_MAIN);
         btnThanhToan.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnThanhToan.setFocusPainted(false);
         btnThanhToan.addActionListener(e -> {
@@ -708,34 +744,24 @@ public class BanHangPanel extends JPanel {
         card.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Label hiển thị ảnh
         JLabel lblImg = new JLabel("Đang tải...", SwingConstants.CENTER);
         lblImg.setPreferredSize(new Dimension(0, 150));
         lblImg.setBackground(new Color(250, 242, 235));
         lblImg.setOpaque(true);
 
         if (linkAnh != null && !linkAnh.isEmpty()) {
-            // Kiểm tra trong bộ nhớ đệm (Cache) trước
             if (imageCache.containsKey(linkAnh)) {
                 lblImg.setText("");
                 lblImg.setIcon(imageCache.get(linkAnh));
             } else {
-                // Tải ảnh trong luồng phụ (Thread) để không treo giao diện
                 new Thread(() -> {
                     try {
                         java.net.URL url = new java.net.URL(linkAnh);
-                        // ImageIO lúc này đã có TwelveMonkeys hỗ trợ đọc WebP
                         java.awt.Image rawImg = javax.imageio.ImageIO.read(url);
-
                         if (rawImg != null) {
-                            // Căn chỉnh kích thước ảnh phù hợp với khung hình
                             java.awt.Image scaledImg = rawImg.getScaledInstance(180, 150, java.awt.Image.SCALE_SMOOTH);
                             ImageIcon icon = new ImageIcon(scaledImg);
-
-                            // Lưu vào bộ nhớ đệm để dùng lại lần sau
                             imageCache.put(linkAnh, icon);
-
-                            // Cập nhật lại giao diện trên luồng chính của Swing
                             SwingUtilities.invokeLater(() -> {
                                 lblImg.setText("");
                                 lblImg.setIcon(icon);
@@ -750,7 +776,6 @@ public class BanHangPanel extends JPanel {
             lblImg.setText("Không có ảnh");
         }
 
-        // Phần thông tin tên và giá món
         JPanel info = new JPanel(new BorderLayout());
         info.setBackground(Color.WHITE);
         info.setBorder(new javax.swing.border.EmptyBorder(10, 10, 10, 10));
@@ -768,12 +793,33 @@ public class BanHangPanel extends JPanel {
         card.add(lblImg, BorderLayout.CENTER);
         card.add(info, BorderLayout.SOUTH);
 
-        // Xử lý sự kiện khi click vào món ăn
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
                 ChonMonDialog dialog = new ChonMonDialog(owner, name, price, maDM);
+
+                int row = -1;
+                for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+                    if (cartTableModel.getValueAt(i, 9).toString().equals(maSP)) {
+                        row = i;
+                        break;
+                    }
+                }
+
+                if (row != -1) {
+                    int currentQty = (int) cartTableModel.getValueAt(row, 1);
+                    List<String> currentToppings = (List<String>) cartTableModel.getValueAt(row, 4);
+                    String fullHTML = (String) cartTableModel.getValueAt(row, 0);
+                    String note = "";
+                    if (fullHTML.contains("* ")) {
+                        int start = fullHTML.lastIndexOf("* ") + 2;
+                        int end = fullHTML.lastIndexOf("</span>");
+                        note = (end > start) ? fullHTML.substring(start, end).trim() : fullHTML.substring(start).replaceAll("</html>", "").trim();
+                    }
+                    dialog.setExistingData(currentQty, note, currentToppings);
+                }
+
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {
@@ -785,7 +831,8 @@ public class BanHangPanel extends JPanel {
                             maDM,
                             dialog.getSelectedMaSize(),
                             dialog.getSelectedMucDa(),
-                            dialog.getSelectedMucDuong()
+                            dialog.getSelectedMucDuong(),
+                            maSP
                     );
                 }
             }

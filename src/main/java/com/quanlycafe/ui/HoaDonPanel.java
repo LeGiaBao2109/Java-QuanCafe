@@ -132,7 +132,7 @@ public class HoaDonPanel extends JPanel {
         lbl.setBorder(new EmptyBorder(0, 0, 10, 0));
         pnl.add(lbl, BorderLayout.NORTH);
 
-        String[] cols = {"Sản phẩm (Size)", "Topping", "Số lượng", "Đá", "Đường", "Ghi chú", "Thành tiền"};
+        String[] cols = {"Sản phẩm (Size)", "Topping", "Số lượng", "Đá", "Đường", "Ghi chú", "Giá Gốc"};
         modelCT = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }

@@ -53,7 +53,7 @@ public class BillPrinter {
         sb.append("<tr style='border-bottom: 1px solid black;'>");
         sb.append("<th align='left' style='padding-bottom: 5px;'>Sản phẩm</th>");
         sb.append("<th align='center' style='padding-bottom: 5px;'>SL</th>");
-        sb.append("<th align='right' style='padding-bottom: 5px;'>Thành tiền</th>");
+        sb.append("<th align='right' style='padding-bottom: 5px;'>Giá gốc</th>");
         sb.append("</tr>");
 
         for (ChiTietHoaDon ct : dsCT) {
