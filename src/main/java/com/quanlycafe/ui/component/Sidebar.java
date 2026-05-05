@@ -67,9 +67,10 @@ public class Sidebar extends JPanel {
             topMenu.add(btnBC);
             
         } else if (role.equals("STAFF") || role.equals("NHAN_VIEN")) {
-            JButton btnOrder = createNavButton("Order", true);
-            JButton btnBill = createNavButton("Bill", false);
-            JButton btnKH = createNavButton("Khách hàng", false);
+            JButton btnOrder = createNavButton("🛒 Order", true);
+            JButton btnBill = createNavButton("🧾 Bill", false);
+            JButton btnKH = createNavButton("👥 Khách hàng", false);
+            JButton btnNhapKho = createNavButton("📦 Nhập Kho", false); 
 
             btnOrder.addActionListener(e -> {
                 setActive(btnOrder);
@@ -83,19 +84,25 @@ public class Sidebar extends JPanel {
                 setActive(btnKH);
                 if (onMenuClick != null) onMenuClick.accept("KhachHang");
             });
+            btnNhapKho.addActionListener(e -> {
+                setActive(btnNhapKho);
+                if (onMenuClick != null) onMenuClick.accept("NhapKho");
+            });
 
             topMenu.add(btnOrder);
             topMenu.add(Box.createVerticalStrut(8));
             topMenu.add(btnBill);
             topMenu.add(Box.createVerticalStrut(8));
             topMenu.add(btnKH);
+            topMenu.add(Box.createVerticalStrut(8));
+            topMenu.add(btnNhapKho);
         }
 
         JPanel bottomMenu = new JPanel(new BorderLayout());
         bottomMenu.setBackground(Color.WHITE);
         bottomMenu.setBorder(new EmptyBorder(15, 15, 20, 15));
         
-        JButton btnLogout = createNavButton("🚪Đăng xuất", false);
+        JButton btnLogout = createNavButton("🚪 Đăng xuất", false);
         btnLogout.setForeground(new Color(220, 53, 69));
         
         btnLogout.addActionListener(e -> {

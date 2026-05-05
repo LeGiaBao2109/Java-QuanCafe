@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhieuNhapDAO {
+
     public boolean taoPhieuNhap(PhieuNhap pn) {
         String sql = "INSERT INTO PHIEUNHAP (maPhieu, tenNCC, ngayNhap, tongTienNhap) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
@@ -101,5 +102,94 @@ public class PhieuNhapDAO {
             e.printStackTrace();
         }
         return dsPN;
+    }
+
+    public String taoMaPhieuMoi() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maPhieu, 3, LEN(maPhieu)) AS INT)) FROM PHIEUNHAP";
+        try (Connection conn = DBConnect.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                int maxId = rs.getInt(1);
+                return "PN" + String.format("%03d", maxId + 1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "PN001";
+    }
+
+    public List<String> layDanhSachNhaCungCap() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT tenNCC FROM PHIEUNHAP WHERE tenNCC IS NOT NULL AND tenNCC <> ''";
+        try (Connection conn = DBConnect.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean thucHienNhapKho(PhieuNhap pn, List<Object[]> danhSachChiTiet) {
+        Connection conn = null;
+        try {
+            conn = DBConnect.getConnection();
+            conn.setAutoCommit(false);
+
+            String sqlPhieu = "INSERT INTO PHIEUNHAP (maPhieu, tenNCC, ngayNhap, tongTienNhap) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement psPhieu = conn.prepareStatement(sqlPhieu)) {
+                psPhieu.setString(1, pn.getMaPhieu());
+                psPhieu.setString(2, pn.getTenNCC());
+                psPhieu.setTimestamp(3, Timestamp.valueOf(pn.getNgayNhap()));
+                psPhieu.setDouble(4, pn.getTongTienNhap());
+                psPhieu.executeUpdate();
+            }
+
+            String sqlChiTiet = "INSERT INTO CHITIETPHIEUNHAP (maPhieu, maSP, soLuong, donGiaNhap) VALUES (?, ?, ?, ?)";
+            String sqlCapNhatKho = "UPDATE SANPHAM SET tonKho = tonKho + ? WHERE maSP = ?";
+            
+            try (PreparedStatement psChiTiet = conn.prepareStatement(sqlChiTiet);
+                 PreparedStatement psKho = conn.prepareStatement(sqlCapNhatKho)) {
+                
+                for (Object[] row : danhSachChiTiet) {
+                    String maSP = row[0].toString();
+                    int soLuong = Integer.parseInt(row[2].toString());
+                    double donGia = Double.parseDouble(row[3].toString());
+
+                    psChiTiet.setString(1, pn.getMaPhieu());
+                    psChiTiet.setString(2, maSP);
+                    psChiTiet.setInt(3, soLuong);
+                    psChiTiet.setDouble(4, donGia);
+                    psChiTiet.addBatch();
+
+                    psKho.setInt(1, soLuong);
+                    psKho.setString(2, maSP);
+                    psKho.addBatch();
+                }
+                psChiTiet.executeBatch();
+                psKho.executeBatch();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
     }
 }
