@@ -36,7 +36,8 @@ public class ChiTietHoaDonDAO {
 
     public List<ChiTietHoaDon> layDanhSachTheoMaDH(String maDH) {
         List<ChiTietHoaDon> dsCTHD = new ArrayList<>();
-        String sql = "SELECT * FROM CHITIETHOADON WHERE maDH = ?";
+        String sql = "SELECT maCTHD, maDH, maSize, soLuong, luongDa, luongDuong, ghiChu, thanhTien FROM CHITIETHOADON WHERE maDH = ?";
+
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maDH);
@@ -44,18 +45,27 @@ public class ChiTietHoaDonDAO {
                 while (rs.next()) {
                     DonHang dh = new DonHang();
                     dh.setMaDH(rs.getString("maDH"));
+
                     KichCo kc = new KichCo();
                     kc.setMaSize(rs.getString("maSize"));
+
+                    double thanhTien = rs.getDouble("thanhTien");
+                    int soLuong = rs.getInt("soLuong");
+                    double donGia = soLuong > 0 ? thanhTien / soLuong : 0;
+
+                    List<String> toppings = layToppingCuaChiTiet(rs.getString("maCTHD"));
 
                     ChiTietHoaDon ct = new ChiTietHoaDon(
                             rs.getString("maCTHD"),
                             dh,
                             kc,
-                            rs.getInt("soLuong"),
-                            0,
+                            soLuong,
+                            donGia,
                             rs.getString("ghiChu"),
+                            thanhTien,
                             MucDa.valueOf(rs.getString("luongDa")),
-                            MucDuong.valueOf(rs.getString("luongDuong"))
+                            MucDuong.valueOf(rs.getString("luongDuong")),
+                            toppings
                     );
                     dsCTHD.add(ct);
                 }
@@ -97,5 +107,11 @@ public class ChiTietHoaDonDAO {
             e.printStackTrace();
         }
         return 0.0;
+    }
+
+    private List<String> layToppingCuaChiTiet(String maCTHD) {
+        List<String> toppings = new ArrayList<>();
+        String sql = "SELECT tenTopping FROM CHITIET_TOPPING WHERE maCTHD = ?";
+        return toppings;
     }
 }

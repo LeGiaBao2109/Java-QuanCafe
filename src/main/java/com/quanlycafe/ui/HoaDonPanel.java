@@ -4,6 +4,8 @@ import com.quanlycafe.dao.ChiTietHoaDonDAO;
 import com.quanlycafe.dao.HoaDonDAO;
 import com.quanlycafe.entity.ChiTietHoaDon;
 import com.quanlycafe.entity.HoaDon;
+import com.quanlycafe.util.BillPrinter;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
@@ -16,7 +18,8 @@ public class HoaDonPanel extends JPanel {
     private JTable tblHoaDon, tblChiTiet;
     private DefaultTableModel modelHD, modelCT;
     private DecimalFormat formatter = new DecimalFormat("#,###đ");
-    private DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("dd/MM/2026 HH:mm");
+    private DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private JButton btnInHoaDon;
 
     private HoaDonDAO hdDAO = new HoaDonDAO();
     private ChiTietHoaDonDAO ctDAO = new ChiTietHoaDonDAO();
@@ -34,7 +37,6 @@ public class HoaDonPanel extends JPanel {
 
         add(splitPane, BorderLayout.CENTER);
 
-        // Load dữ liệu lần đầu khi mở panel
         loadDataToTableHD();
     }
 
@@ -56,19 +58,46 @@ public class HoaDonPanel extends JPanel {
         tblHoaDon = new JTable(modelHD);
         tblHoaDon.setRowHeight(35);
 
-        // Sự kiện click chọn dòng trên bảng Hóa Đơn
+        pnl.add(new JScrollPane(tblHoaDon), BorderLayout.CENTER);
+
         tblHoaDon.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = tblHoaDon.getSelectedRow();
                 if (row != -1) {
-                    // Lấy MaDH (cột 1) để truy vấn chi tiết món
                     String maDH = modelHD.getValueAt(row, 1).toString();
                     loadDataToTableCT(maDH);
                 }
             }
         });
 
-        pnl.add(new JScrollPane(tblHoaDon), BorderLayout.CENTER);
+        JPanel pnlControl = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlControl.setOpaque(false);
+
+        btnInHoaDon = new JButton("In Hóa Đơn");
+        btnInHoaDon.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnInHoaDon.setBackground(new Color(0, 153, 76));
+        btnInHoaDon.setForeground(Color.WHITE);
+
+        btnInHoaDon.addActionListener(e -> {
+            int row = tblHoaDon.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một hóa đơn để in!");
+                return;
+            }
+
+            List<HoaDon> dsHD = hdDAO.layTatCaHoaDon();
+            HoaDon selectedHD = dsHD.get(row);
+
+            String maDH = selectedHD.getMaDH().getMaDH();
+            List<ChiTietHoaDon> dsCT = ctDAO.layDanhSachTheoMaDH(maDH);
+
+            String htmlContent = BillPrinter.generateBillHTML(selectedHD, dsCT);
+            showPrintPreview(htmlContent);
+        });
+
+        pnlControl.add(btnInHoaDon);
+        pnl.add(pnlControl, BorderLayout.SOUTH);
+
         return pnl;
     }
 
@@ -81,43 +110,74 @@ public class HoaDonPanel extends JPanel {
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         pnl.add(lbl, BorderLayout.NORTH);
 
-        String[] cols = {"Sản phẩm (Size)", "Số lượng", "Đá", "Đường", "Ghi chú", "Thành tiền"};
-        modelCT = new DefaultTableModel(cols, 0);
+        String[] cols = {"Sản phẩm (Size)", "Topping", "Số lượng", "Đá", "Đường", "Ghi chú", "Thành tiền"};
+        modelCT = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+
         tblChiTiet = new JTable(modelCT);
-        tblChiTiet.setRowHeight(30);
+        tblChiTiet.setRowHeight(35);
+        tblChiTiet.getColumnModel().getColumn(1).setPreferredWidth(150);
 
         pnl.add(new JScrollPane(tblChiTiet), BorderLayout.CENTER);
         return pnl;
     }
 
-    // Hàm lấy danh sách hóa đơn từ Database
     public void loadDataToTableHD() {
         modelHD.setRowCount(0);
         List<HoaDon> ds = hdDAO.layTatCaHoaDon();
+
+        System.out.println("DEBUG: Số lượng hóa đơn lấy được = " + ds.size());
+
         for (HoaDon hd : ds) {
             modelHD.addRow(new Object[]{
                     hd.getMaHD(),
-                    hd.getMaDH().getMaDH(),
-                    hd.getNgayThanhToan().format(dtFormatter),
+                    hd.getMaDH() != null ? hd.getMaDH().getMaDH() : "N/A",
+                    hd.getNgayThanhToan() != null ? hd.getNgayThanhToan().format(dtFormatter) : "N/A",
                     hd.getPhuongThucTT(),
                     formatter.format(hd.getTongTienCuoi())
             });
         }
     }
 
-    // Hàm lấy chi tiết món của Đơn hàng tương ứng
     private void loadDataToTableCT(String maDH) {
         modelCT.setRowCount(0);
         List<ChiTietHoaDon> ds = ctDAO.layDanhSachTheoMaDH(maDH);
+
         for (ChiTietHoaDon ct : ds) {
+            String toppingStr = (ct.getDsTopping() != null && !ct.getDsTopping().isEmpty())
+                    ? String.join(", ", ct.getDsTopping())
+                    : "-";
+
             modelCT.addRow(new Object[]{
-                    ct.getMaSize().getMaSize(), // Sau này Bảo join bảng SanPham để lấy tên SP nhé
+                    ct.getMaSize() != null ? ct.getMaSize().getMaSize() : "N/A",
+                    toppingStr,
                     ct.getSoLuong(),
                     ct.getLuongDa(),
                     ct.getLuongDuong(),
                     ct.getGhiChu(),
                     formatter.format(ct.getThanhTien())
             });
+        }
+    }
+
+    private void showPrintPreview(String html) {
+        JEditorPane editorPane = new JEditorPane("text/html", html);
+        editorPane.setEditable(false);
+
+        JScrollPane scrollPane = new JScrollPane(editorPane);
+        scrollPane.setPreferredSize(new Dimension(350, 500));
+
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, "Xác nhận in hóa đơn",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                editorPane.print();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi in ấn: " + ex.getMessage());
+            }
         }
     }
 }

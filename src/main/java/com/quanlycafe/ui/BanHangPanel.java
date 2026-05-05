@@ -53,7 +53,7 @@ public class BanHangPanel extends JPanel {
         add(splitPane, BorderLayout.CENTER);
     }
 
-    private void loadProducts(String maDM) { // maDM ở đây là mã của Tab bạn đang chọn (ví dụ: DM002 cho Bánh)
+    private void loadProducts(String maDM) {
         gridPanel.removeAll();
 
         SanPhamDAO dao = new SanPhamDAO();
@@ -125,26 +125,22 @@ public class BanHangPanel extends JPanel {
         return leftPanel;
     }
 
-    private void addToCart(String customName, int quantity, int unitPrice) {
+    private void addToCart(String customName, int quantity, int unitPrice, List<String> toppings) {
         if (!rightCartPanel.isVisible()) {
             rightCartPanel.setVisible(true);
-            splitPane.setDividerLocation(800); 
+            splitPane.setDividerLocation(800);
         }
 
-        cartTableModel.addRow(new Object[]{customName, quantity, formatter.format(quantity * unitPrice), unitPrice});
-        
+        cartTableModel.addRow(new Object[]{customName, quantity, formatter.format(quantity * unitPrice), unitPrice, toppings});
+
         int newRowIdx = cartTableModel.getRowCount() - 1;
         table.setRowSelectionInterval(newRowIdx, newRowIdx);
 
-        // --- CẬP NHẬT TÍNH TOÁN CHIỀU CAO: CHUẨN XÁC, VỪA KHÍT ---
         JLabel tempLabel = new JLabel(customName);
         tempLabel.setFont(table.getFont());
-        tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5)); // Đệm y hệt cột Tên món
-        
-        // Nhờ Java đo chính xác chiều cao đoạn HTML với thẻ <br/>
+        tempLabel.setBorder(new EmptyBorder(15, 5, 15, 5));
         int perfectHeight = tempLabel.getPreferredSize().height;
-        table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65)); // 65px là độ cao tối thiểu cho đẹp
-        // -----------------------------------------------------------
+        table.setRowHeight(newRowIdx, Math.max(perfectHeight, 65));
 
         recalculateTotal();
     }
@@ -180,7 +176,7 @@ public class BanHangPanel extends JPanel {
         lblTable.setForeground(COLOR_TEXT_MAIN);
         cartHeader.add(lblTable, BorderLayout.NORTH);
 
-        String[] columnNames = {"Tên món", "SL", "Thành tiền", "UnitPrice"};
+        String[] columnNames = {"Tên món", "SL", "Thành tiền", "UnitPrice", "ToppingList"};
         cartTableModel = new DefaultTableModel(null, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -201,6 +197,8 @@ public class BanHangPanel extends JPanel {
         
         table.getColumnModel().getColumn(2).setMinWidth(90);
         table.getColumnModel().getColumn(2).setMaxWidth(110);
+
+        table.getColumnModel().removeColumn(table.getColumnModel().getColumn(4));
         
         DefaultTableCellRenderer topRenderer = new DefaultTableCellRenderer() {
             @Override
@@ -233,7 +231,6 @@ public class BanHangPanel extends JPanel {
         
         table.setFillsViewportHeight(true);
 
-        // Thêm đoạn này vào sau đoạn khởi tạo table trong createRightCartPanel
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -244,16 +241,16 @@ public class BanHangPanel extends JPanel {
                         int unitPrice = (int) cartTableModel.getValueAt(row, 3);
 
                         Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-                        // Mở lại dialog (Bạn có thể nâng cấp Dialog để nhận lại các thông số cũ nếu muốn,
-                        // hiện tại nó sẽ mở ra như món mới để khách chọn lại từ đầu)
                         ChonMonDialog dialog = new ChonMonDialog(owner, tenMonHienTai.replaceAll("<[^>]*>", ""), unitPrice, "");                        dialog.setVisible(true);
 
                         if (dialog.isConfirmed()) {
-                            // Cập nhật lại dòng hiện tại
                             cartTableModel.setValueAt(dialog.getFinalTenMonDetail(), row, 0);
                             cartTableModel.setValueAt(dialog.getSoLuong(), row, 1);
                             cartTableModel.setValueAt(formatter.format(dialog.getSoLuong() * dialog.getDonGia()), row, 2);
                             cartTableModel.setValueAt(dialog.getDonGia(), row, 3);
+
+                            cartTableModel.setValueAt(dialog.getSelectedToppingNames(), row, 4);
+
                             recalculateTotal();
                         }
                     }
@@ -371,7 +368,6 @@ public class BanHangPanel extends JPanel {
             StringBuilder bill = new StringBuilder();
             bill.append("--- HÓA ĐƠN THANH TOÁN ---\n");
             for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-                // Lấy dữ liệu từ TableModel
                 String detail = cartTableModel.getValueAt(i, 0).toString().replaceAll("<[^>]*>", "");
                 String qty = cartTableModel.getValueAt(i, 1).toString();
                 String totalRow = cartTableModel.getValueAt(i, 2).toString();
@@ -450,13 +446,12 @@ public class BanHangPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
-
-                // TRUYỀN maDM VÀO ĐÂY:
                 ChonMonDialog dialog = new ChonMonDialog(owner, name, price, maDM);
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {
-                    addToCart(dialog.getFinalTenMonDetail(), dialog.getSoLuong(), dialog.getDonGia());
+                    List<String> dsTopping = dialog.getSelectedToppingNames();
+                    addToCart(dialog.getFinalTenMonDetail(), dialog.getSoLuong(), dialog.getDonGia(), dsTopping);
                 }
             }
         });

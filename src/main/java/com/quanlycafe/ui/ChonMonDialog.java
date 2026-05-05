@@ -20,7 +20,7 @@ public class ChonMonDialog extends JDialog {
     private boolean isDrink; // Biến check loại món
     private int giaGoc;
     private int giaTong;
-    
+
     private ButtonGroup sizeGroup, duongGroup, daGroup;
     private JRadioButton radSizeM, radSizeL;
     private List<JCheckBox> chkToppings;
@@ -118,7 +118,7 @@ public class ChonMonDialog extends JDialog {
         for (String md : mucDuong) {
             JRadioButton rad = new JRadioButton(md, isFirst);
             rad.setBackground(COLOR_BG);
-            rad.setActionCommand(md); 
+            rad.setActionCommand(md);
             duongGroup.add(rad);
             pnl.add(rad);
             isFirst = false;
@@ -152,16 +152,16 @@ public class ChonMonDialog extends JDialog {
 
         chkToppings = new ArrayList<>();
         String[][] toppings = {
-            {"Trân châu đen", "5000"}, {"Trân châu trắng", "5000"},
-            {"Thạch đào", "5000"}, {"Thạch trái cây", "5000"},
-            {"Phô mai viên", "8000"}, {"Kem Macchiato", "10000"}
+                {"Trân châu đen", "5000"}, {"Trân châu trắng", "5000"},
+                {"Thạch đào", "5000"}, {"Thạch trái cây", "5000"},
+                {"Phô mai viên", "8000"}, {"Kem Macchiato", "10000"}
         };
 
         for (String[] tp : toppings) {
             JCheckBox chk = new JCheckBox(tp[0] + " (+" + formatter.format(Integer.parseInt(tp[1])) + ")");
             chk.setBackground(COLOR_BG);
-            chk.setActionCommand(tp[1]); 
-            chk.setName(tp[0]); 
+            chk.setActionCommand(tp[1]);
+            chk.setName(tp[0]);
             chk.addActionListener(e -> updateTotalPrice());
             chkToppings.add(chk);
             pnl.add(chk);
@@ -173,7 +173,7 @@ public class ChonMonDialog extends JDialog {
         JPanel pnl = new JPanel(new BorderLayout());
         pnl.setBackground(COLOR_BG);
         pnl.setBorder(createCustomTitledBorder("Ghi chú thêm"));
-        
+
         txtGhiChu = new JTextField();
         txtGhiChu.setPreferredSize(new Dimension(0, 35));
         txtGhiChu.setBorder(new LineBorder(COLOR_BORDER, 1));
@@ -185,8 +185,8 @@ public class ChonMonDialog extends JDialog {
         JPanel pnl = new JPanel(new BorderLayout(15, 0));
         pnl.setBackground(COLOR_BG);
         pnl.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(COLOR_BORDER, 1),
-            new EmptyBorder(15, 15, 15, 15)
+                new LineBorder(COLOR_BORDER, 1),
+                new EmptyBorder(15, 15, 15, 15)
         ));
 
         JPanel pnlSL = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -200,14 +200,14 @@ public class ChonMonDialog extends JDialog {
 
         btnXacNhan = new JButton("Thêm vào giỏ - " + formatter.format(giaTong));
         btnXacNhan.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        btnXacNhan.setBackground(COLOR_PRIMARY_DARK); 
-        btnXacNhan.setForeground(Color.WHITE); 
+        btnXacNhan.setBackground(COLOR_PRIMARY_DARK);
+        btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setFocusPainted(false);
         btnXacNhan.setOpaque(true);
         btnXacNhan.setBorderPainted(false);
-        btnXacNhan.setPreferredSize(new Dimension(240, 45)); 
+        btnXacNhan.setPreferredSize(new Dimension(240, 45));
         btnXacNhan.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         btnXacNhan.addActionListener(e -> {
             buildFinalDetails();
             isConfirmed = true;
@@ -233,10 +233,10 @@ public class ChonMonDialog extends JDialog {
                 }
             }
         }
-        
+
         int sl = (int) spnSoLuong.getValue();
         giaTong = tempPrice * sl;
-        
+
         if (btnXacNhan != null) {
             btnXacNhan.setText("Thêm " + sl + " món - " + formatter.format(giaTong));
         }
@@ -291,8 +291,33 @@ public class ChonMonDialog extends JDialog {
         return border;
     }
 
-    public boolean isConfirmed() { return isConfirmed; }
-    public String getFinalTenMonDetail() { return finalTenMonDetail; }
-    public int getDonGia() { return giaTong / finalSoLuong; } 
-    public int getSoLuong() { return finalSoLuong; }
+    public List<String> getSelectedToppingNames() {
+        List<String> selected = new ArrayList<>();
+        // Nếu là bánh hoặc không có bảng topping thì trả về list rỗng
+        if (isDrink && chkToppings != null) {
+            for (JCheckBox chk : chkToppings) {
+                if (chk.isSelected()) {
+                    // Lấy Name (ví dụ: "Trân châu đen") đã set ở hàm createToppingPanel
+                    selected.add(chk.getName());
+                }
+            }
+        }
+        return selected;
+    }
+
+    public boolean isConfirmed() {
+        return isConfirmed;
+    }
+
+    public String getFinalTenMonDetail() {
+        return finalTenMonDetail;
+    }
+
+    public int getDonGia() {
+        return giaTong / finalSoLuong;
+    }
+
+    public int getSoLuong() {
+        return finalSoLuong;
+    }
 }
