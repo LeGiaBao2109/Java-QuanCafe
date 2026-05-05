@@ -95,6 +95,8 @@ public class ChonMonDialog extends JDialog {
 
         radSizeM.setBackground(COLOR_BG);
         radSizeL.setBackground(COLOR_BG);
+        radSizeM.setActionCommand("M");
+        radSizeL.setActionCommand("L");
 
         radSizeM.addActionListener(e -> updateTotalPrice());
         radSizeL.addActionListener(e -> updateTotalPrice());
@@ -296,6 +298,7 @@ public class ChonMonDialog extends JDialog {
     }
 
     public void setExistingData(int soLuong, String ghiChu, List<String> selectedToppings) {
+        resetToDefault();
         spnSoLuong.setValue(soLuong);
         txtGhiChu.setText(ghiChu);
 
@@ -327,7 +330,31 @@ public class ChonMonDialog extends JDialog {
         }
     }
 
+    private void resetToDefault() {
+        if (spnSoLuong != null) spnSoLuong.setValue(1);
+        if (txtGhiChu != null) txtGhiChu.setText("");
+        if (radSizeM != null) radSizeM.setSelected(true);
+        if (chkToppings != null) {
+            for (JCheckBox chk : chkToppings) chk.setSelected(false);
+        }
+        updateRadioButtonGroup(daGroup, MucDa.DA_100.getLabel());
+        updateRadioButtonGroup(duongGroup, MucDuong.DUONG_100.getLabel());
+    }
+
+    private void updateRadioButtonGroup(ButtonGroup group, String label) {
+        if (group == null) return;
+        java.util.Enumeration<AbstractButton> enu = group.getElements();
+        while (enu.hasMoreElements()) {
+            AbstractButton btn = enu.nextElement();
+            if (btn.getActionCommand().equals(label)) {
+                btn.setSelected(true);
+                break;
+            }
+        }
+    }
+
     public void setFullData(int soLuong, String ghiChu, List<String> toppings, String maSize, MucDa da, MucDuong duong) {
+        resetToDefault();
         spnSoLuong.setValue(soLuong);
         txtGhiChu.setText(ghiChu);
 
@@ -341,25 +368,11 @@ public class ChonMonDialog extends JDialog {
             }
 
             if (da != null && daGroup != null) {
-                java.util.Enumeration<AbstractButton> bgDa = daGroup.getElements();
-                while (bgDa.hasMoreElements()) {
-                    AbstractButton btn = bgDa.nextElement();
-                    if (btn.getActionCommand().equals(da.getLabel())) {
-                        btn.setSelected(true);
-                        break;
-                    }
-                }
+                updateRadioButtonGroup(daGroup, da.getLabel());
             }
 
             if (duong != null && duongGroup != null) {
-                java.util.Enumeration<AbstractButton> bgDuong = duongGroup.getElements();
-                while (bgDuong.hasMoreElements()) {
-                    AbstractButton btn = bgDuong.nextElement();
-                    if (btn.getActionCommand().equals(duong.getLabel())) {
-                        btn.setSelected(true);
-                        break;
-                    }
-                }
+                updateRadioButtonGroup(duongGroup, duong.getLabel());
             }
 
             if (toppings != null && chkToppings != null) {

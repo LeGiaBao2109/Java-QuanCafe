@@ -799,27 +799,6 @@ public class BanHangPanel extends JPanel {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
                 ChonMonDialog dialog = new ChonMonDialog(owner, name, price, maDM);
 
-                int row = -1;
-                for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-                    if (cartTableModel.getValueAt(i, 9).toString().equals(maSP)) {
-                        row = i;
-                        break;
-                    }
-                }
-
-                if (row != -1) {
-                    int currentQty = (int) cartTableModel.getValueAt(row, 1);
-                    List<String> currentToppings = (List<String>) cartTableModel.getValueAt(row, 4);
-                    String fullHTML = (String) cartTableModel.getValueAt(row, 0);
-                    String note = "";
-                    if (fullHTML.contains("* ")) {
-                        int start = fullHTML.lastIndexOf("* ") + 2;
-                        int end = fullHTML.lastIndexOf("</span>");
-                        note = (end > start) ? fullHTML.substring(start, end).trim() : fullHTML.substring(start).replaceAll("</html>", "").trim();
-                    }
-                    dialog.setExistingData(currentQty, note, currentToppings);
-                }
-
                 dialog.setVisible(true);
 
                 if (dialog.isConfirmed()) {
