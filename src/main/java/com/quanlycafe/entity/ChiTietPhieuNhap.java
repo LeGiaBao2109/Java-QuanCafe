@@ -7,21 +7,19 @@ public class ChiTietPhieuNhap {
     private SanPham maSP;
     private int soLuong;
     private double donGiaNhap;
-    private double thanhTien; // Thuộc tính dẫn xuất
+    private double thanhTien;
 
     public ChiTietPhieuNhap() {
     }
 
-    // Constructor 4 tham số để DAO gọi được, thanhTien sẽ tự tính
     public ChiTietPhieuNhap(PhieuNhap maPhieu, SanPham maSP, int soLuong, double donGiaNhap) {
         this.maPhieu = maPhieu;
         this.maSP = maSP;
         this.soLuong = soLuong;
         this.donGiaNhap = donGiaNhap;
-        tinhThanhTien(); // Tự tính khi khởi tạo
+        tinhThanhTien();
     }
 
-    // Hàm tính toán dùng chung
     private void tinhThanhTien() {
         this.thanhTien = this.soLuong * this.donGiaNhap;
     }
@@ -46,7 +44,6 @@ public class ChiTietPhieuNhap {
         return soLuong;
     }
 
-    // Cập nhật lại thanhTien mỗi khi thay đổi số lượng[cite: 5]
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
         tinhThanhTien();
@@ -56,7 +53,6 @@ public class ChiTietPhieuNhap {
         return donGiaNhap;
     }
 
-    // Cập nhật lại thanhTien mỗi khi thay đổi đơn giá[cite: 5]
     public void setDonGiaNhap(double donGiaNhap) {
         this.donGiaNhap = donGiaNhap;
         tinhThanhTien();
@@ -65,8 +61,6 @@ public class ChiTietPhieuNhap {
     public double getThanhTien() {
         return thanhTien;
     }
-
-    // Không nên có setThanhTien vì nó được tính từ cột khác[cite: 5]
 
     @Override
     public boolean equals(Object o) {

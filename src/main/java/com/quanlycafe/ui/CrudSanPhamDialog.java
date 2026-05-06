@@ -146,14 +146,13 @@ public class CrudSanPhamDialog extends JDialog {
     }
 
     private void fillDataAndSetMode(Object[] rowData) {
-        SanPhamDAO dao = new SanPhamDAO(); // Khởi tạo DAO
+        SanPhamDAO dao = new SanPhamDAO();
 
         if (mode.equals("ADD")) {
             btnAction.setText("Thêm Mới");
-            // Tự sinh mã và khóa TextBox lại
             txtMaMon.setText(dao.taoMaSPTuSinh());
             txtMaMon.setEditable(false);
-            txtMaMon.setBackground(new Color(240, 240, 240)); // Đổi màu nền cho biết là field khóa
+            txtMaMon.setBackground(new Color(240, 240, 240));
         } else {
             if (rowData != null) {
                 String maSP = rowData[0].toString();
@@ -164,7 +163,6 @@ public class CrudSanPhamDialog extends JDialog {
 
                 String oldSizeUI = rowData[2].toString();
                 oldSizeDB = oldSizeUI;
-                // Xử lý chuẩn hóa tên Size khi hiển thị
                 if (oldSizeUI != null && (oldSizeUI.equals("M") || oldSizeUI.equals("L") || oldSizeUI.equals("S"))) {
                     oldSizeDB = "Size " + oldSizeUI;
                 }

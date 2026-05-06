@@ -12,7 +12,6 @@ public class KichCo {
     }
 
     public KichCo(String maSize, SanPham maSP, String tenSize, double gia) {
-        // Gọi setter để áp dụng Regex và Validation
         setMaSize(maSize);
         this.maSP = maSP;
         setTenSize(tenSize);
@@ -24,7 +23,6 @@ public class KichCo {
     }
 
     public void setMaSize(String maSize) {
-        // Regex: Phải bắt đầu bằng chữ 'S' theo sau là ít nhất 1 chữ số (VD: S01, S123456)
         if (maSize == null || !maSize.trim().matches("^S\\d+$")) {
             throw new IllegalArgumentException("Mã kích cỡ không hợp lệ! Phải bắt đầu bằng 'S' theo sau là các chữ số (VD: S01).");
         }
@@ -44,7 +42,6 @@ public class KichCo {
     }
 
     public void setTenSize(String tenSize) {
-        // Validation: Không được để trống
         if (tenSize == null || tenSize.trim().isEmpty()) {
             throw new IllegalArgumentException("Tên kích cỡ (Size) không được để trống!");
         }
@@ -56,7 +53,6 @@ public class KichCo {
     }
 
     public void setGia(double gia) {
-        // Validation: Giá bán bắt buộc phải LỚN HƠN 0
         if (gia <= 0) {
             throw new IllegalArgumentException("Giá bán phải lớn hơn 0!");
         }

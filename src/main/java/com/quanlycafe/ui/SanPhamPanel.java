@@ -217,10 +217,8 @@ public class SanPhamPanel extends JPanel {
         dialog.setVisible(true);
 
         if (dialog.isSuccess()) {
-            // Khi thêm/sửa/xóa thành công -> Tải lại dữ liệu từ CSDL
             loadAndFormatData();
-            // Lọc lại dữ liệu trên bảng theo ô tìm kiếm (nếu người dùng đang tìm kiếm dở)
-            performSearch(txtSearch.getText()); 
+            performSearch(txtSearch.getText());
         }
     }
 

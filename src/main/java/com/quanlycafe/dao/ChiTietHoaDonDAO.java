@@ -20,11 +20,9 @@ public class ChiTietHoaDonDAO {
             ps.setString(3, ct.getMaSize());
             ps.setInt(4, ct.getSoLuong());
 
-            // Đảm bảo name() trả về đúng DA_0, DA_50... khớp với CONSTRAINT
             ps.setString(5, ct.getLuongDa().name());
             ps.setString(6, ct.getLuongDuong().name());
 
-            // Cắt bớt ghi chú nếu quá dài để tránh lỗi NVARCHAR(255)
             String note = ct.getGhiChu();
             if (note != null && note.length() > 255) {
                 note = note.substring(0, 250) + "...";
@@ -34,7 +32,6 @@ public class ChiTietHoaDonDAO {
             ps.setDouble(8, ct.getThanhTien());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            // Log chi tiết để debug
             System.err.println("Lỗi SQL tại maCTHD: " + ct.getMaCTHD());
             System.err.println("Giá trị đá: " + ct.getLuongDa().name());
             System.err.println("Giá trị đường: " + ct.getLuongDuong().name());

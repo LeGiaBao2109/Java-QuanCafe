@@ -165,7 +165,6 @@ public class NhanVienPanel extends JPanel {
         } else {
             displayData = new ArrayList<>();
             for (Object[] row : originalData) {
-                // index 0 là maNV, index 4 là tenNV theo cấu trúc DAO của bạn
                 String maNV = row[0].toString().toLowerCase();
                 String tenNV = row[4].toString().toLowerCase();
 
@@ -347,18 +346,17 @@ public class NhanVienPanel extends JPanel {
         for (int i = start; i < end; i++) {
             Object[] fullRow = displayData.get(i);
 
-            // Xử lý hiển thị Role thân thiện hơn
             String roleRaw = fullRow[5].toString();
             String roleDisplay = roleRaw.replace("_", " ");
             if (roleDisplay.equalsIgnoreCase("NHAN VIEN")) roleDisplay = "Nhân Viên";
             if (roleDisplay.equalsIgnoreCase("ADMIN")) roleDisplay = "Quản Trị Viên";
 
             Object[] rowToShow = new Object[] {
-                    fullRow[0], // maNV
-                    fullRow[2], // tenDangNhap
-                    fullRow[4], // tenNV
-                    roleDisplay, // Role (đã format)
-                    fullRow[6]  // sdt
+                    fullRow[0],
+                    fullRow[2],
+                    fullRow[4],
+                    roleDisplay,
+                    fullRow[6]
             };
             model.addRow(rowToShow);
         }
