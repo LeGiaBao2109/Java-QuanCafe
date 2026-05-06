@@ -28,366 +28,378 @@ import javax.swing.table.DefaultTableModel;
 import com.quanlycafe.dao.NhanVienDAO;
 import com.quanlycafe.dao.SanPhamDAO;
 
-public class NhanVienPanel extends JPanel{
-	 private final Color COLOR_BG = new Color(253, 248, 245);
-	    private final Color COLOR_SURFACE = Color.WHITE;
-	    private final Color COLOR_PRIMARY = new Color(92, 64, 51);
-	    private final Color COLOR_BORDER = new Color(230, 220, 210);
-	    private final Color COLOR_TABLE_HEADER = new Color(245, 240, 235);
-	    private final Color COLOR_TABLE_ROW_ALT = new Color(250, 248, 246);
+public class NhanVienPanel extends JPanel {
+    private final Color COLOR_BG = new Color(253, 248, 245);
+    private final Color COLOR_SURFACE = Color.WHITE;
+    private final Color COLOR_PRIMARY = new Color(92, 64, 51);
+    private final Color COLOR_BORDER = new Color(230, 220, 210);
+    private final Color COLOR_TABLE_HEADER = new Color(245, 240, 235);
+    private final Color COLOR_TABLE_ROW_ALT = new Color(250, 248, 246);
 
-	    private List<Object[]> originalData; 
-	    private List<Object[]> displayData;
-//	    private List<Object[]> allData;
-	    private int currentPage = 1;
-	    private int rowsPerPage = 10;
-	    private int totalPages = 1;
+    private List<Object[]> originalData;
+    private List<Object[]> displayData;
+    private int currentPage = 1;
+    private int rowsPerPage = 10;
+    private int totalPages = 1;
 
-	    
-	    
-	    private DefaultTableModel model;
-	    private JTable table;
-	    private JLabel lblTotal;
-	    private JTextField txtPage;
-	    private JTextField txtSearch;
-	    
-	    private JButton btnAdd;
-	    private JButton btnEdit;
-	    private JButton btnDelete;
-	    
-	    
-	    
-	    public NhanVienPanel(String role, String tenNV) {
-	        setLayout(new BorderLayout(0, 15));
-	        setBackground(COLOR_BG);
-	        setOpaque(false);
 
-	        
+    private DefaultTableModel model;
+    private JTable table;
+    private JLabel lblTotal;
+    private JTextField txtPage;
+    private JTextField txtSearch;
 
-	        JPanel tableContainer = new JPanel(new BorderLayout());
-	        tableContainer.setBackground(COLOR_SURFACE);
-	        tableContainer.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
-	        
-	        tableContainer.add(createTableArea(), BorderLayout.CENTER);
-	        tableContainer.add(createPaginationBar(), BorderLayout.SOUTH);
+    private JButton btnAdd;
+    private JButton btnEdit;
+    private JButton btnDelete;
 
-	        add(createTopActionBar(role, tenNV), BorderLayout.NORTH);
-	        add(tableContainer, BorderLayout.CENTER);
 
-	        table.getSelectionModel().addListSelectionListener(e -> {
-	            if (!e.getValueIsAdjusting()) {
-	                boolean isSelected = table.getSelectedRow() != -1;
-	                toggleButtonState(btnEdit, isSelected, COLOR_PRIMARY);
-	                toggleButtonState(btnDelete, isSelected, new Color(220, 53, 69)); 
-	            }
-	        });
-	        loadAndFormatData(); 
-	        updateTableData();
-	    }
-	    private void loadAndFormatData() {
-	        NhanVienDAO dao = new NhanVienDAO();
-	        List<Object[]> rawData = dao.layDanhSachNhanVienQuanLy();
-	        originalData = new ArrayList<>();
+    public NhanVienPanel(String role, String tenNV) {
+        setLayout(new BorderLayout(0, 15));
+        setBackground(COLOR_BG);
+        setOpaque(false);
 
-	        for (Object[] row : rawData) {
-	            String maNV = row[0].toString();
-	            String maTK = row[1].toString();
-	            String tenDangNhap = row[2].toString();
-	            String matkhau = row[3].toString();
-	            String tenNV = row[4].toString(); 
-	            String role = row[5].toString(); 
-	            String dienthoai = row[6].toString(); 
 
-	            
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setBackground(COLOR_SURFACE);
+        tableContainer.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
 
-	            Object[] formattedRow = new Object[]{maNV, maTK, tenDangNhap, matkhau, tenNV, role, dienthoai};
-	            originalData.add(formattedRow);
-	        }
+        tableContainer.add(createTableArea(), BorderLayout.CENTER);
+        tableContainer.add(createPaginationBar(), BorderLayout.SOUTH);
 
-	        displayData = new ArrayList<>(originalData);
-	        calculatePagination();
-	        
-	        
-	    }
+        add(createTopActionBar(role, tenNV), BorderLayout.NORTH);
+        add(tableContainer, BorderLayout.CENTER);
 
-	    private void calculatePagination() {
-	        totalPages = (int) Math.ceil((double) displayData.size() / rowsPerPage);
-	        if (totalPages == 0) totalPages = 1;
-	        if (currentPage > totalPages) currentPage = totalPages;
-	    }
-	    
-	    private JPanel createTopActionBar(String role, String tenNV) {
-	        JPanel topBar = new JPanel(new BorderLayout());
-	        topBar.setBackground(COLOR_SURFACE);
-	        topBar.setBorder(BorderFactory.createCompoundBorder(
-	            BorderFactory.createLineBorder(COLOR_BORDER, 1),
-	            new EmptyBorder(12, 20, 12, 20)
-	        ));
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean isSelected = table.getSelectedRow() != -1;
+                toggleButtonState(btnEdit, isSelected, COLOR_PRIMARY);
+                toggleButtonState(btnDelete, isSelected, new Color(220, 53, 69));
+            }
+        });
+        loadAndFormatData();
+        updateTableData();
+    }
 
-	        JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-	        pnlLeft.setOpaque(false);
-	        
-	        btnAdd = createModernButton("Thêm Mới", true);
-	        btnEdit = createModernButton("Sửa", false); 
-	        btnDelete = createModernButton("Xóa", false); 
-	        
-	        btnAdd.addActionListener(e -> openCrudDialog("ADD"));
-	        btnEdit.addActionListener(e -> openCrudDialog("EDIT"));
-	        btnDelete.addActionListener(e -> openCrudDialog("DELETE"));
+    private void loadAndFormatData() {
+        NhanVienDAO dao = new NhanVienDAO();
+        List<Object[]> rawData = dao.layDanhSachNhanVienQuanLy();
+        originalData = new ArrayList<>(rawData);
+        displayData = new ArrayList<>(originalData);
+        calculatePagination();
+    }
 
-	        pnlLeft.add(btnAdd);
-	        pnlLeft.add(btnEdit);
-	        pnlLeft.add(btnDelete);
+    private void calculatePagination() {
+        totalPages = (int) Math.ceil((double) displayData.size() / rowsPerPage);
+        if (totalPages == 0) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+    }
 
-	        JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-	        pnlSearch.setOpaque(false);
-	        pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
+    private JPanel createTopActionBar(String role, String tenNV) {
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBackground(COLOR_SURFACE);
+        topBar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_BORDER, 1),
+                new EmptyBorder(12, 20, 12, 20)
+        ));
 
-	        txtSearch = new JTextField();
-	        txtSearch.setPreferredSize(new Dimension(250, 38));
-	        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-	        txtSearch.setBorder(BorderFactory.createCompoundBorder(
-	                BorderFactory.createLineBorder(COLOR_BORDER, 1),
-	                BorderFactory.createEmptyBorder(0, 10, 0, 10)
-	        ));
-	        txtSearch.setToolTipText("Nhập mã hoặc tên nhân viên...");
+        JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        pnlLeft.setOpaque(false);
 
-	        JButton btnSearch = createModernButton("Tìm Kiếm", false);
-	        btnSearch.setPreferredSize(new Dimension(100, 38));
-	        
-	        btnSearch.addActionListener(e -> performSearch(txtSearch.getText()));
-	        txtSearch.addActionListener(e -> performSearch(txtSearch.getText()));
+        btnAdd = createModernButton("Thêm Mới", true);
+        btnEdit = createModernButton("Sửa", false);
+        btnDelete = createModernButton("Xóa", false);
 
-	        pnlSearch.add(txtSearch);
-	        pnlSearch.add(Box.createHorizontalStrut(5));
-	        pnlSearch.add(btnSearch);
+        btnAdd.addActionListener(e -> openCrudDialog("ADD"));
+        btnEdit.addActionListener(e -> openCrudDialog("EDIT"));
+        btnDelete.addActionListener(e -> openCrudDialog("DELETE"));
 
-	        pnlLeft.add(pnlSearch);
+        pnlLeft.add(btnAdd);
+        pnlLeft.add(btnEdit);
+        pnlLeft.add(btnDelete);
 
-	        JPanel pnlInfo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-	        pnlInfo.setOpaque(false);
-	        
-	        String roleDisplay = role.equals("ADMIN") ? "Quản lý" : "Nhân viên";
-	        JLabel lblAdminInfo = new JLabel("<html><span style='color:gray;font-size:11px;'>" + roleDisplay + "</span><br>" + tenNV + " 👤</html>");
-	        lblAdminInfo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-	        lblAdminInfo.setForeground(COLOR_PRIMARY);
-	        pnlInfo.add(lblAdminInfo);
+        JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        pnlSearch.setOpaque(false);
+        pnlSearch.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
 
-	        topBar.add(pnlLeft, BorderLayout.WEST);
-	        topBar.add(pnlInfo, BorderLayout.EAST);
+        txtSearch = new JTextField();
+        txtSearch.setPreferredSize(new Dimension(250, 38));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_BORDER, 1),
+                BorderFactory.createEmptyBorder(0, 10, 0, 10)
+        ));
+        txtSearch.setToolTipText("Nhập mã hoặc tên nhân viên...");
 
-	        return topBar;
-	    }
-	    private void performSearch(String keyword) {
-	        String lowerKeyword = keyword.trim().toLowerCase();
-	        
-	        if (lowerKeyword.isEmpty()) {
-	            displayData = new ArrayList<>(originalData);
-	        } else {
-	            displayData = new ArrayList<>();
-	            for (Object[] row : originalData) {
-	                String maNV = row[0].toString().toLowerCase();
-	                String tenNV = row[1].toString().toLowerCase();
-	                
-	                if (maNV.contains(lowerKeyword) || tenNV.contains(lowerKeyword)) {
-	                    displayData.add(row);
-	                }
-	            }
-	        }
-	        
-	        currentPage = 1; 
-	        calculatePagination();
-	        updateTableData();
-	    }
-	    private void toggleButtonState(JButton btn, boolean isActive, Color activeColor) {
-	        if (isActive) {
-	            btn.setBackground(activeColor);
-	            btn.setForeground(Color.WHITE);
-	            btn.setBorder(BorderFactory.createEmptyBorder());
-	        } else {
-	            btn.setBackground(COLOR_SURFACE);
-	            btn.setForeground(COLOR_PRIMARY);
-	            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
-	        }
-	    }
+        JButton btnSearch = createModernButton("Tìm Kiếm", false);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
 
-	    private void openCrudDialog(String mode) {
-	        Window owner = SwingUtilities.getWindowAncestor(this);
-	        Object[] rowData = null;
+        btnSearch.addActionListener(e -> performSearch(txtSearch.getText()));
+        txtSearch.addActionListener(e -> performSearch(txtSearch.getText()));
 
-	        if (!mode.equals("ADD")) {
-	            int selectedRow = table.getSelectedRow();
-	            if (selectedRow == -1) {
-	                JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng trên bảng để thao tác!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-	                return;
-	            }
-	            int actualRow = (currentPage - 1) * rowsPerPage + selectedRow;
-	            rowData = displayData.get(actualRow); 
-	        }
+        pnlSearch.add(txtSearch);
+        pnlSearch.add(Box.createHorizontalStrut(5));
+        pnlSearch.add(btnSearch);
 
-	        CrudNhanVienDialog dialog = new CrudNhanVienDialog(owner, mode, rowData);
-	        dialog.setVisible(true);
+        pnlLeft.add(pnlSearch);
 
-	        if (dialog.isSuccess()) {
-	            // Khi thêm/sửa/xóa thành công -> Tải lại dữ liệu từ CSDL
-	            loadAndFormatData();
-	            // Lọc lại dữ liệu trên bảng theo ô tìm kiếm (nếu người dùng đang tìm kiếm dở)
-	            performSearch(txtSearch.getText()); 
-	        }
-	    }
-	    
-	    private JScrollPane createTableArea() {
-	        String[] columns = {"Mã nhân viên", "Tên đăng nhập", "Tên nhân viên", "Role", "Số điện thoại"};
+        JPanel pnlInfo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        pnlInfo.setOpaque(false);
 
-	        model = new DefaultTableModel(null, columns) {
-	            @Override
-	            public boolean isCellEditable(int row, int column) { return false; }
-	        };
+        String roleDisplay = role.equals("ADMIN") ? "Quản lý" : "Nhân viên";
+        JLabel lblAdminInfo = new JLabel("<html><span style='color:gray;font-size:11px;'>" + roleDisplay + "</span><br>" + tenNV + " 👤</html>");
+        lblAdminInfo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblAdminInfo.setForeground(COLOR_PRIMARY);
+        pnlInfo.add(lblAdminInfo);
 
-	        table = new JTable(model);
-	        table.setRowHeight(48);
-	        table.setShowVerticalLines(false);
-	        table.setShowHorizontalLines(true);
-	        table.setGridColor(new Color(240, 235, 230));
-	        table.setBackground(COLOR_SURFACE);
-	        table.setSelectionBackground(new Color(235, 225, 215));
-	        table.setSelectionForeground(COLOR_PRIMARY);
-	        table.setFillsViewportHeight(true);
-	        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        topBar.add(pnlLeft, BorderLayout.WEST);
+        topBar.add(pnlInfo, BorderLayout.EAST);
 
-	        table.getTableHeader().setPreferredSize(new Dimension(0, 50));
-	        table.getTableHeader().setBackground(COLOR_TABLE_HEADER);
-	        
-	        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
-	            @Override
-	            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	                label.setBackground(COLOR_TABLE_HEADER);
-	                label.setForeground(new Color(100, 80, 70));
-	                label.setFont(new Font("Segoe UI", Font.BOLD, 13));
-	                label.setHorizontalAlignment(JLabel.CENTER);
-	                label.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, COLOR_BORDER));
-	                return label;
-	            }
-	        };
-	        table.getTableHeader().setDefaultRenderer(headerRenderer);
+        return topBar;
+    }
 
-	        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
-	            @Override
-	            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	                if (!isSelected) {
-	                    c.setBackground(row % 2 == 0 ? COLOR_SURFACE : COLOR_TABLE_ROW_ALT);
-	                }
-	                return c;
-	            }
-	        };
-	        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-	        for (int i = 0; i < table.getColumnCount(); i++) {
-	            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-	        }
+    private void performSearch(String keyword) {
+        String lowerKeyword = keyword.trim().toLowerCase();
+        if (lowerKeyword.isEmpty()) {
+            displayData = new ArrayList<>(originalData);
+        } else {
+            displayData = new ArrayList<>();
+            for (Object[] row : originalData) {
+                // index 0 là maNV, index 4 là tenNV theo cấu trúc DAO của bạn
+                String maNV = row[0].toString().toLowerCase();
+                String tenNV = row[4].toString().toLowerCase();
 
-	        JScrollPane scrollPane = new JScrollPane(table);
-	        scrollPane.setBorder(null);
-	        scrollPane.getViewport().setBackground(COLOR_SURFACE);
+                if (maNV.contains(lowerKeyword) || tenNV.contains(lowerKeyword)) {
+                    displayData.add(row);
+                }
+            }
+        }
+        currentPage = 1;
+        calculatePagination();
+        updateTableData();
+    }
 
-	        return scrollPane;
-	    }
-	    private JPanel createPaginationBar() {
-	        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-	        bottomBar.setBackground(COLOR_SURFACE);
-	        bottomBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER));
+    private void toggleButtonState(JButton btn, boolean isActive, Color activeColor) {
+        if (isActive) {
+            btn.setBackground(activeColor);
+            btn.setForeground(Color.WHITE);
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        } else {
+            btn.setBackground(COLOR_SURFACE);
+            btn.setForeground(COLOR_PRIMARY);
+            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        }
+    }
 
-	        JButton btnFirst = createPageButton("«");
-	        JButton btnPrev = createPageButton("‹");
-	        
-	        txtPage = new JTextField("1", 3);
-	        txtPage.setHorizontalAlignment(JTextField.CENTER);
-	        txtPage.setFont(new Font("Segoe UI", Font.BOLD, 13));
-	        txtPage.setBorder(BorderFactory.createLineBorder(COLOR_BORDER));
-	        
-	        lblTotal = new JLabel("/ " + totalPages);
-	        lblTotal.setForeground(Color.GRAY);
-	        lblTotal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-	        
-	        JButton btnNext = createPageButton("›");
-	        JButton btnLast = createPageButton("»");
+    private void openCrudDialog(String mode) {
+        Window owner = SwingUtilities.getWindowAncestor(this);
+        Object[] rowData = null;
 
-	        btnFirst.addActionListener(e -> { currentPage = 1; updateTableData(); });
-	        btnPrev.addActionListener(e -> { if (currentPage > 1) { currentPage--; updateTableData(); } });
-	        btnNext.addActionListener(e -> { if (currentPage < totalPages) { currentPage++; updateTableData(); } });
-	        btnLast.addActionListener(e -> { currentPage = totalPages; updateTableData(); });
-	        
-	        txtPage.addActionListener(e -> {
-	            try {
-	                int p = Integer.parseInt(txtPage.getText());
-	                if (p >= 1 && p <= totalPages) {
-	                    currentPage = p;
-	                    updateTableData();
-	                } else {
-	                    txtPage.setText(String.valueOf(currentPage));
-	                }
-	            } catch (NumberFormatException ex) {
-	                txtPage.setText(String.valueOf(currentPage));
-	            }
-	        });
+        if (!mode.equals("ADD")) {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng trên bảng để thao tác!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            int actualRow = (currentPage - 1) * rowsPerPage + selectedRow;
+            rowData = displayData.get(actualRow);
+        }
 
-	        bottomBar.add(btnFirst);
-	        bottomBar.add(btnPrev);
-	        bottomBar.add(txtPage);
-	        bottomBar.add(lblTotal);
-	        bottomBar.add(btnNext);
-	        bottomBar.add(btnLast);
+        CrudNhanVienDialog dialog = new CrudNhanVienDialog(owner, mode, rowData);
+        dialog.setVisible(true);
 
-	        return bottomBar;
-	    }
+        if (dialog.isSuccess()) {
+            loadAndFormatData();
+            performSearch(txtSearch.getText());
+        }
+    }
 
-	    private void updateTableData() {
-	        model.setRowCount(0);
-	        int start = (currentPage - 1) * rowsPerPage;
-	        int end = Math.min(start + rowsPerPage, displayData.size());
-	        
-	        for (int i = start; i < end; i++) {
-	            model.addRow(displayData.get(i));
-	        }
-	        
-	        if (txtPage != null) txtPage.setText(String.valueOf(currentPage));
-	        if (lblTotal != null) lblTotal.setText("/ " + totalPages);
-	        if (table != null) table.clearSelection();
-	    }
+    private JScrollPane createTableArea() {
+        String[] columns = {"Mã nhân viên", "Tên đăng nhập", "Tên nhân viên", "Role", "Số điện thoại"};
 
-	    private JButton createModernButton(String text, boolean isPrimary) {
-	        JButton btn = new JButton(text);
-	        btn.setPreferredSize(new Dimension(110, 38));
-	        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-	        btn.setFocusPainted(false);
-	        btn.setContentAreaFilled(false);
-	        btn.setOpaque(true);
-	        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        model = new DefaultTableModel(null, columns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-	        if (isPrimary) {
-	            btn.setBackground(COLOR_PRIMARY);
-	            btn.setForeground(Color.WHITE);
-	            btn.setBorder(BorderFactory.createEmptyBorder());
-	        } else {
-	            btn.setBackground(COLOR_SURFACE);
-	            btn.setForeground(COLOR_PRIMARY);
-	            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
-	        }
-	        return btn;
-	    }
+        table = new JTable(model);
+        table.setRowHeight(48);
+        table.setShowVerticalLines(false);
+        table.setShowHorizontalLines(true);
+        table.setGridColor(new Color(240, 235, 230));
+        table.setBackground(COLOR_SURFACE);
+        table.setSelectionBackground(new Color(235, 225, 215));
+        table.setSelectionForeground(COLOR_PRIMARY);
+        table.setFillsViewportHeight(true);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-	    private JButton createPageButton(String text) {
-	        JButton btn = new JButton(text);
-	        btn.setPreferredSize(new Dimension(35, 30));
-	        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-	        btn.setForeground(COLOR_PRIMARY);
-	        btn.setBackground(COLOR_SURFACE);
-	        btn.setFocusPainted(false);
-	        btn.setContentAreaFilled(false);
-	        btn.setOpaque(true);
-	        btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
-	        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-	        return btn;
-	    }
+        table.getTableHeader().setPreferredSize(new Dimension(0, 50));
+        table.getTableHeader().setBackground(COLOR_TABLE_HEADER);
+
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                label.setBackground(COLOR_TABLE_HEADER);
+                label.setForeground(new Color(100, 80, 70));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                label.setHorizontalAlignment(JLabel.CENTER);
+                label.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, COLOR_BORDER));
+                return label;
+            }
+        };
+        table.getTableHeader().setDefaultRenderer(headerRenderer);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? COLOR_SURFACE : COLOR_TABLE_ROW_ALT);
+                }
+                return c;
+            }
+        };
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(COLOR_SURFACE);
+
+        return scrollPane;
+    }
+
+    private JPanel createPaginationBar() {
+        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        bottomBar.setBackground(COLOR_SURFACE);
+        bottomBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER));
+
+        JButton btnFirst = createPageButton("«");
+        JButton btnPrev = createPageButton("‹");
+
+        txtPage = new JTextField("1", 3);
+        txtPage.setHorizontalAlignment(JTextField.CENTER);
+        txtPage.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        txtPage.setBorder(BorderFactory.createLineBorder(COLOR_BORDER));
+
+        lblTotal = new JLabel("/ " + totalPages);
+        lblTotal.setForeground(Color.GRAY);
+        lblTotal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        JButton btnNext = createPageButton("›");
+        JButton btnLast = createPageButton("»");
+
+        btnFirst.addActionListener(e -> {
+            currentPage = 1;
+            updateTableData();
+        });
+        btnPrev.addActionListener(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableData();
+            }
+        });
+        btnNext.addActionListener(e -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableData();
+            }
+        });
+        btnLast.addActionListener(e -> {
+            currentPage = totalPages;
+            updateTableData();
+        });
+
+        txtPage.addActionListener(e -> {
+            try {
+                int p = Integer.parseInt(txtPage.getText());
+                if (p >= 1 && p <= totalPages) {
+                    currentPage = p;
+                    updateTableData();
+                } else {
+                    txtPage.setText(String.valueOf(currentPage));
+                }
+            } catch (NumberFormatException ex) {
+                txtPage.setText(String.valueOf(currentPage));
+            }
+        });
+
+        bottomBar.add(btnFirst);
+        bottomBar.add(btnPrev);
+        bottomBar.add(txtPage);
+        bottomBar.add(lblTotal);
+        bottomBar.add(btnNext);
+        bottomBar.add(btnLast);
+
+        return bottomBar;
+    }
+
+    private void updateTableData() {
+        model.setRowCount(0);
+        int start = (currentPage - 1) * rowsPerPage;
+        int end = Math.min(start + rowsPerPage, displayData.size());
+
+        for (int i = start; i < end; i++) {
+            Object[] fullRow = displayData.get(i);
+
+            // Xử lý hiển thị Role thân thiện hơn
+            String roleRaw = fullRow[5].toString();
+            String roleDisplay = roleRaw.replace("_", " ");
+            if (roleDisplay.equalsIgnoreCase("NHAN VIEN")) roleDisplay = "Nhân Viên";
+            if (roleDisplay.equalsIgnoreCase("ADMIN")) roleDisplay = "Quản Trị Viên";
+
+            Object[] rowToShow = new Object[] {
+                    fullRow[0], // maNV
+                    fullRow[2], // tenDangNhap
+                    fullRow[4], // tenNV
+                    roleDisplay, // Role (đã format)
+                    fullRow[6]  // sdt
+            };
+            model.addRow(rowToShow);
+        }
+
+        if (txtPage != null) txtPage.setText(String.valueOf(currentPage));
+        if (lblTotal != null) lblTotal.setText("/ " + totalPages);
+        if (table != null) table.clearSelection();
+    }
+
+    private JButton createModernButton(String text, boolean isPrimary) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(110, 38));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        if (isPrimary) {
+            btn.setBackground(COLOR_PRIMARY);
+            btn.setForeground(Color.WHITE);
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        } else {
+            btn.setBackground(COLOR_SURFACE);
+            btn.setForeground(COLOR_PRIMARY);
+            btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        }
+        return btn;
+    }
+
+    private JButton createPageButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(35, 30));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btn.setForeground(COLOR_PRIMARY);
+        btn.setBackground(COLOR_SURFACE);
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
 }

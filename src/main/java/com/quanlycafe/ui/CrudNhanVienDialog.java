@@ -9,7 +9,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.time.LocalDateTime;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,16 +23,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import com.quanlycafe.dao.NhanVienDAO;
-import com.quanlycafe.dao.SanPhamDAO;
 import com.quanlycafe.dao.TaiKhoanDAO;
-import com.quanlycafe.entity.DanhMuc;
 import com.quanlycafe.entity.NhanVien;
 import com.quanlycafe.entity.RoleNhanVien;
-import com.quanlycafe.entity.SanPham;
 import com.quanlycafe.entity.TaiKhoan;
 
-public class CrudNhanVienDialog extends JDialog{
-	private final Color COLOR_BG = new Color(253, 248, 245);
+public class CrudNhanVienDialog extends JDialog {
+    private final Color COLOR_BG = new Color(253, 248, 245);
     private final Color COLOR_SURFACE = Color.WHITE;
     private final Color COLOR_PRIMARY = new Color(92, 64, 51);
     private final Color COLOR_BORDER = new Color(230, 220, 210);
@@ -44,20 +40,19 @@ public class CrudNhanVienDialog extends JDialog{
 
     private String mode;
     private boolean isSuccess = false;
-    private String oldSizeDB = ""; 
 
     public CrudNhanVienDialog(Window owner, String mode, Object[] rowData) {
         super(owner, "", Dialog.ModalityType.APPLICATION_MODAL);
         this.mode = mode;
 
         setupUI();
-        
         fillDataAndSetMode(rowData);
         setupActions();
 
         setSize(500, 650);
         setLocationRelativeTo(owner);
     }
+
     private void setupUI() {
         setLayout(new BorderLayout());
         getContentPane().setBackground(COLOR_BG);
@@ -84,21 +79,17 @@ public class CrudNhanVienDialog extends JDialog{
         txtTenDangNhap = createTextField();
         txtMatKhau = createTextField();
         txtTenNV = createTextField();
-        cbRole = createComboBox(new String[]{"NHAN_VIEN", "ADMIN"});
+        cbRole = createComboBox(new String[]{"Nhân Viên", "Admin"});
         txtSDT = createTextField();
-        
-        cbRole.setEnabled(false);
-        
-         
 
         pnlForm.add(createLabel("Mã nhân viên:")); pnlForm.add(txtMaNV);
         pnlForm.add(createLabel("Mã tài khoản:")); pnlForm.add(txtMaTK);
         pnlForm.add(createLabel("Tên đăng nhập:")); pnlForm.add(txtTenDangNhap);
         pnlForm.add(createLabel("Mật khẩu:")); pnlForm.add(txtMatKhau);
         pnlForm.add(createLabel("Tên nhân viên:")); pnlForm.add(txtTenNV);
-        pnlForm.add(createLabel("Role:")); pnlForm.add(cbRole);
+        pnlForm.add(createLabel("Quyền hạn:")); pnlForm.add(cbRole);
         pnlForm.add(createLabel("Số điện thoại:")); pnlForm.add(txtSDT);
-        
+
         JPanel pnlFormWrapper = new JPanel(new BorderLayout());
         pnlFormWrapper.setOpaque(false);
         pnlFormWrapper.setBorder(new EmptyBorder(0, 25, 0, 25));
@@ -114,7 +105,7 @@ public class CrudNhanVienDialog extends JDialog{
         btnAction = new JButton();
         styleButton(btnAction, true);
 
-        if(mode.equals("DELETE")) {
+        if (mode.equals("DELETE")) {
             btnAction.setBackground(new Color(220, 53, 69));
         }
 
@@ -125,23 +116,37 @@ public class CrudNhanVienDialog extends JDialog{
         add(pnlFormWrapper, BorderLayout.CENTER);
         add(pnlButtons, BorderLayout.SOUTH);
     }
-    
+
     private void fillDataAndSetMode(Object[] rowData) {
+        cbRole.setSelectedItem("Nhân Viên");
+        cbRole.setEnabled(false);
+
         if (mode.equals("ADD")) {
             btnAction.setText("Thêm Mới");
+            NhanVienDAO nvDao = new NhanVienDAO();
+            TaiKhoanDAO tkDao = new TaiKhoanDAO();
+            txtMaNV.setText(nvDao.taoMaNVTuSinh());
+            txtMaTK.setText(tkDao.taoMaTKTuSinh());
+            txtMaNV.setEditable(false);
+            txtMaTK.setEditable(false);
         } else {
             if (rowData != null) {
-                String maNV = rowData[0].toString();
-                txtMaNV.setText(maNV);
-                txtMaTK.setText(rowData[1].toString());
-                txtTenDangNhap.setText(rowData[2].toString());
-                txtMatKhau.setText(rowData[3].toString());
-                txtTenNV.setText(rowData[4].toString());
-                cbRole.setSelectedItem(rowData[5].toString());
-                txtSDT.setText(rowData[6].toString());
-                
-                
-                
+                txtMaNV.setText(rowData.length > 0 ? rowData[0].toString() : "");
+                txtMaTK.setText(rowData.length > 1 ? rowData[1].toString() : "");
+                txtTenDangNhap.setText(rowData.length > 2 ? rowData[2].toString() : "");
+                txtMatKhau.setText(rowData.length > 3 ? rowData[3].toString() : "");
+                txtTenNV.setText(rowData.length > 4 ? rowData[4].toString() : "");
+
+                if (rowData.length > 5) {
+                    String roleValue = rowData[5].toString();
+                    if (roleValue.equalsIgnoreCase("ADMIN")) {
+                        cbRole.setSelectedItem("Admin");
+                    } else {
+                        cbRole.setSelectedItem("Nhân Viên");
+                    }
+                }
+
+                txtSDT.setText(rowData.length > 6 ? rowData[6].toString() : "");
             }
 
             if (mode.equals("EDIT")) {
@@ -155,21 +160,20 @@ public class CrudNhanVienDialog extends JDialog{
                 txtTenDangNhap.setEditable(false);
                 txtMatKhau.setEditable(false);
                 txtTenNV.setEditable(false);
-                cbRole.setEnabled(false);
                 txtSDT.setEditable(false);
             }
         }
     }
+
     private void setupActions() {
         btnCancel.addActionListener(e -> dispose());
 
         btnAction.addActionListener(e -> {
-            
             if (mode.equals("DELETE")) {
-                int confirm = JOptionPane.showConfirmDialog(this, 
-                    "Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống không?\n", 
-                    "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống không?\n",
+                        "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
                 if (confirm == JOptionPane.YES_OPTION) {
                     NhanVienDAO dao = new NhanVienDAO();
                     if (dao.xoaNhanVien(txtMaNV.getText().trim())) {
@@ -184,46 +188,39 @@ public class CrudNhanVienDialog extends JDialog{
             }
 
             String maNV = txtMaNV.getText().trim();
-            
             String tenNV = txtTenNV.getText().trim();
             String sdt = txtSDT.getText().trim();
-            
             String maTK = txtMaTK.getText().trim();
             String tenDangNhap = txtTenDangNhap.getText().trim();
             String matkhau = txtMatKhau.getText().trim();
 
-            if (maNV.isEmpty() || tenNV.isEmpty() || sdt.isEmpty() || maTK.isEmpty() || tenDangNhap.isEmpty() || matkhau.isEmpty() ) {
+            if (maNV.isEmpty() || tenNV.isEmpty() || sdt.isEmpty() || maTK.isEmpty() || tenDangNhap.isEmpty() || matkhau.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            if (!maNV.matches("(NV)\\d{2}")) {
-                JOptionPane.showMessageDialog(this, "mã nhân viên bắt đầu NV và có 2 chữ số, vd:NV01", "Lỗi", JOptionPane.WARNING_MESSAGE);
+            if (!maNV.matches("NV\\d{2}")) {
+                JOptionPane.showMessageDialog(this, "Mã nhân viên bắt đầu NV và có 2 chữ số, vd: NV01", "Lỗi", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            if(!sdt.matches("\\d{6}")) {
-            	JOptionPane.showMessageDialog(this, "mã số điện thoại gồm 6 số", "Lỗi", JOptionPane.WARNING_MESSAGE);
+            if (!sdt.matches("0\\d{9}")) {
+                JOptionPane.showMessageDialog(this, "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0", "Lỗi", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-          //dùng unicode property
-        	//p{Lu}:bất kì chữ in hoa nào unicode
-        	//p{Ll}: bất kì chữ in thường nào unicode
-            if(!tenNV.matches("(\\p{Lu}\\p{Ll}+\\s)+\\p{Lu}\\p{Ll}+")) {
-            	JOptionPane.showMessageDialog(this, "tên nhân viên bắt đầu băng chữ hoa và có 2 từ trở lên", "Lỗi", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (!maTK.matches("(TK)\\d{2}")) {
-                JOptionPane.showMessageDialog(this, "mã tài khoản bắt đầu TK và có 2 chữ số, vd:TK01", "Lỗi", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            
 
-            
+            if (!tenNV.matches("^[\\p{Lu}][\\p{Ll}]+(\\s[\\p{Lu}][\\p{Ll}]+)+$")) {
+                JOptionPane.showMessageDialog(this, "Tên nhân viên phải viết hoa chữ cái đầu và có từ 2 từ trở lên", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (!maTK.matches("TK\\d{2}")) {
+                JOptionPane.showMessageDialog(this, "Mã tài khoản bắt đầu TK và có 2 chữ số, vd: TK01", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
             NhanVienDAO dao = new NhanVienDAO();
             TaiKhoanDAO dao2 = new TaiKhoanDAO();
-            
+
             TaiKhoan tk = new TaiKhoan();
             NhanVien nv = new NhanVien();
             nv.setMaNV(maNV);
@@ -233,13 +230,18 @@ public class CrudNhanVienDialog extends JDialog{
             tk.setMatKhau(matkhau);
             tk.setMaNV(nv);
             nv.setSdt(sdt);
-            nv.setRoleNV(RoleNhanVien.valueOf(cbRole.getSelectedItem().toString()) );
+
+            String selectedRole = cbRole.getSelectedItem().toString();
+            if (selectedRole.equals("Admin")) {
+                nv.setRoleNV(RoleNhanVien.ADMIN);
+            } else {
+                nv.setRoleNV(RoleNhanVien.NHAN_VIEN);
+            }
+
             nv.setTrangThai(true);
-            
-            
 
             if (mode.equals("ADD")) {
-                if (dao.timTheoMa(maNV) != null ) {
+                if (dao.timTheoMa(maNV) != null) {
                     JOptionPane.showMessageDialog(this, "Mã nhân viên đã tồn tại trong hệ thống!", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
@@ -247,31 +249,23 @@ public class CrudNhanVienDialog extends JDialog{
                     JOptionPane.showMessageDialog(this, "Mã tài khoản đã tồn tại trong hệ thống!", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                
-                
-                
-                if (dao.themNhanVien(nv)){
-                	if(dao2.themTaiKhoan(tk)) {
-                	JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                    isSuccess = true;
-                    dispose();
-                	}
-                	
-                }
-                else {
+
+                if (dao.themNhanVien(nv)) {
+                    if (dao2.themTaiKhoan(tk)) {
+                        JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        isSuccess = true;
+                        dispose();
+                    }
+                } else {
                     JOptionPane.showMessageDialog(this, "Thêm thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
-              
-                
+
             } else if (mode.equals("EDIT")) {
-               
-               
-                
                 if (dao.capNhatNhanVien(nv)) {
-                    if(dao2.capNhatTaiKhoan(tk)) {
-                    JOptionPane.showMessageDialog(this, "Cập nhật nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                    isSuccess = true;
-                    dispose();
+                    if (dao2.capNhatTaiKhoan(tk)) {
+                        JOptionPane.showMessageDialog(this, "Cập nhật nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        isSuccess = true;
+                        dispose();
                     }
                 } else {
                     JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -279,7 +273,7 @@ public class CrudNhanVienDialog extends JDialog{
             }
         });
     }
-    
+
     public boolean isSuccess() {
         return isSuccess;
     }

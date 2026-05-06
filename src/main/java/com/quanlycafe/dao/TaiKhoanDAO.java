@@ -4,6 +4,7 @@ import com.quanlycafe.entity.NhanVien;
 import com.quanlycafe.entity.RoleNhanVien;
 import com.quanlycafe.entity.TaiKhoan;
 import com.quanlycafe.util.DBConnect;
+
 import java.sql.*;
 
 public class TaiKhoanDAO {
@@ -65,6 +66,7 @@ public class TaiKhoanDAO {
             return false;
         }
     }
+
     public boolean themTaiKhoan(TaiKhoan tk) {
         String sql = "INSERT INTO TAIKHOAN (maTK, tenDangNhap, matKhau, maNV) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
@@ -73,18 +75,18 @@ public class TaiKhoanDAO {
             ps.setString(2, tk.getTenDangNhap());
             ps.setString(3, tk.getMatKhau());
             ps.setString(4, tk.getMaNV().getMaNV());
-            
-            
-            
+
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     public TaiKhoan timTheoMa(String maTK) {
-    	
-    	
+
+
         String sql = "SELECT * FROM TAIKHOAN WHERE maTK = ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -92,10 +94,10 @@ public class TaiKhoanDAO {
 
             ps.setString(1, maTK);
             try (ResultSet rs = ps.executeQuery()) {
-            	
+
                 if (rs.next()) {
-                	NhanVien nv = new NhanVien();
-                	nv.setMaNV(rs.getString("maNV"));
+                    NhanVien nv = new NhanVien();
+                    nv.setMaNV(rs.getString("maNV"));
                     return new TaiKhoan(
                             rs.getString("maTK"),
                             rs.getString("tenDangNhap"),
@@ -109,7 +111,7 @@ public class TaiKhoanDAO {
         }
         return null;
     }
-    
+
     public boolean capNhatTaiKhoan(TaiKhoan tk) {
         String sql = "UPDATE TAIKHOAN SET tenDangNhap = ?, matKhau = ? WHERE maTK = ?";
 
@@ -125,5 +127,22 @@ public class TaiKhoanDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public String taoMaTKTuSinh() {
+        String sql = "SELECT MAX(maTK) FROM TAIKHOAN";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String lastMa = rs.getString(1);
+                if (lastMa == null) return "TK01";
+                int num = Integer.parseInt(lastMa.substring(2)) + 1;
+                return String.format("TK%02d", num);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "TK01";
     }
 }

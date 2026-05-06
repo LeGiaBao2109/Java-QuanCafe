@@ -10,7 +10,7 @@ public class NhanVien {
     private boolean trangThai;
 
     public NhanVien() {
-    	this.trangThai = true;
+        this.trangThai = true;
     }
 
     public NhanVien(String maNV, String tenNV, String sdt, RoleNhanVien roleNV, boolean trangThai) {
@@ -26,8 +26,8 @@ public class NhanVien {
     }
 
     public void setMaNV(String maNV) {
-    	if(!maNV.matches("(NV)\\d{2}"))
-    		throw new IllegalArgumentException("mã nhân viên bắt đầu NV và có 2 chữ số, vd:NV01");
+        if(!maNV.matches("NV\\d{2}"))
+            throw new IllegalArgumentException("Mã nhân viên bắt đầu NV và có 2 chữ số, vd: NV01");
         this.maNV = maNV;
     }
 
@@ -36,11 +36,8 @@ public class NhanVien {
     }
 
     public void setTenNV(String tenNV) {
-    	//dùng unicode property
-    	//p{Lu}:bất kì chữ in hoa nào unicode
-    	//p{Ll}: bất kì chữ in thường nào unicode
-    	if(!tenNV.matches("(\\p{Lu}\\p{Ll}+\\s)+\\p{Lu}\\p{Ll}+"))
-    		throw new IllegalArgumentException("tên bắt đầu chữ in hoa và 2 từ trở lên");
+        if(!tenNV.matches("^[\\p{Lu}][\\p{Ll}]+(\\s[\\p{Lu}][\\p{Ll}]+)+$"))
+            throw new IllegalArgumentException("Tên bắt đầu chữ in hoa và 2 từ trở lên");
         this.tenNV = tenNV;
     }
 
@@ -49,8 +46,8 @@ public class NhanVien {
     }
 
     public void setSdt(String sdt) {
-    	if(!sdt.matches("\\d{6}"))
-    		throw new NumberFormatException("số điện thoại gồm 6 số");
+        if(!sdt.matches("0\\d{9}"))
+            throw new IllegalArgumentException("Số điện thoại gồm 10 số và bắt đầu bằng số 0");
         this.sdt = sdt;
     }
 

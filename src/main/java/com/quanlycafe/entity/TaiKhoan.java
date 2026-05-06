@@ -23,8 +23,8 @@ public class TaiKhoan {
     }
 
     public void setMaTK(String maTK) {
-    	if(!maTK.matches("(TK)\\d{2}"))
-    		throw new IllegalArgumentException("mã tài khoản bắt đầu TK và có 2 chữ số, vd:TK01");
+        if(!maTK.matches("TK\\d{2}"))
+            throw new IllegalArgumentException("Mã tài khoản bắt đầu TK và có 2 chữ số, vd: TK01");
         this.maTK = maTK;
     }
 
