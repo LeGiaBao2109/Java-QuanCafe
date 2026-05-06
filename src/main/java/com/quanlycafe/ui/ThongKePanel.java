@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ThongKePanel extends JPanel {
 
@@ -70,6 +71,15 @@ public class ThongKePanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "\"Từ ngày\" không thể lớn hơn \"Đến ngày\"!", "Lỗi chọn ngày", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
+            long diffInMillies = Math.abs(denNgay.getTime() - tuNgay.getTime());
+            long diffDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            
+            if (diffDays > 31) {
+                JOptionPane.showMessageDialog(this, "Chỉ được phép lọc dữ liệu tối đa 31 ngày", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             capNhatDuLieuThongKe(tuNgay, denNgay);
         });
 
@@ -104,10 +114,13 @@ public class ThongKePanel extends JPanel {
 
     private JDateChooser createDateChooser(boolean isTuNgay) {
         JDateChooser dateChooser = new JDateChooser();
-        
         long sevenDays = 7L * 24 * 60 * 60 * 1000;
-        dateChooser.setDate(isTuNgay ? new Date(System.currentTimeMillis() - sevenDays) : new Date()); 
+        Date today = new Date();
         
+        dateChooser.setDate(isTuNgay ? new Date(today.getTime() - sevenDays) : today); 
+        
+        dateChooser.setMaxSelectableDate(today);
+
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setPreferredSize(new Dimension(150, 35));
         dateChooser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -115,7 +128,6 @@ public class ThongKePanel extends JPanel {
         JTextField dateTextField = (JTextField) dateChooser.getDateEditor().getUiComponent();
         dateTextField.setBackground(COLOR_SURFACE);
         dateTextField.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-        
         return dateChooser;
     }
 
@@ -213,9 +225,7 @@ public class ThongKePanel extends JPanel {
         } else {
             String[] days = mapDoanhThu.keySet().toArray(new String[0]);
             double[] revenues = mapDoanhThu.values().stream().mapToDouble(Double::doubleValue).toArray();
-            
             String todayStr = new SimpleDateFormat("dd/MM").format(new Date());
-            
             chartWrapper.add(new CustomBarChart(days, revenues, todayStr), BorderLayout.CENTER);
         }
         
@@ -264,7 +274,7 @@ public class ThongKePanel extends JPanel {
     class CustomBarChart extends JPanel {
         private String[] labels;
         private double[] values;
-        private String todayStr;
+        private String todayStr; 
 
         public CustomBarChart(String[] labels, double[] values, String todayStr) {
             this.labels = labels;

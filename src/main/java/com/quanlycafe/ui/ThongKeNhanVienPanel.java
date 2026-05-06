@@ -47,7 +47,7 @@ public class ThongKeNhanVienPanel extends JPanel {
         lblDateTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblDateTitle.setForeground(new Color(100, 80, 70));
         
-        JButton btnIn = new JButton("🖨 In Báo Cáo");
+        JButton btnIn = new JButton("In Báo Cáo");
         btnIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnIn.setBackground(new Color(40, 167, 69)); 
         btnIn.setForeground(Color.WHITE);
@@ -303,7 +303,7 @@ public class ThongKeNhanVienPanel extends JPanel {
             pnlBottom.setBackground(Color.WHITE);
             pnlBottom.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER));
             
-            JButton btnXacNhanIn = new JButton("🖨 Xác nhận In");
+            JButton btnXacNhanIn = new JButton("Xác nhận In");
             btnXacNhanIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
             btnXacNhanIn.setBackground(new Color(40, 167, 69)); 
             btnXacNhanIn.setForeground(Color.WHITE);

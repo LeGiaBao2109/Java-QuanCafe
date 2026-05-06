@@ -29,7 +29,7 @@ public class BanHangModernForm extends JFrame {
         BanHangPanel pnlBanHang = new BanHangPanel();
         HoaDonPanel pnlHoaDon = new HoaDonPanel();
         KhachHangPanel pnlKhachHang = new KhachHangPanel();
-        NhapKhoPanel pnlNhapKho = new NhapKhoPanel();
+        NhapKhoPanel pnlNhapKho = new NhapKhoPanel(tenNV);
         ThongKeNhanVienPanel pnlThongKeNV = new ThongKeNhanVienPanel();
 
         cardPanel.add(pnlBanHang, "BanHang");

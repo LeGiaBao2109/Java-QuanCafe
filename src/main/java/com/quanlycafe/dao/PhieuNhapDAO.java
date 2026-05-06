@@ -9,103 +9,21 @@ import java.util.List;
 
 public class PhieuNhapDAO {
 
-    public boolean taoPhieuNhap(PhieuNhap pn) {
-        String sql = "INSERT INTO PHIEUNHAP (maPhieu, tenNCC, ngayNhap, tongTienNhap) VALUES (?, ?, ?, ?)";
+    public String layMaNVTheoTen(String tenNV) {
+        String sql = "SELECT TOP 1 maNV FROM NHANVIEN WHERE tenNV = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, pn.getMaPhieu());
-            ps.setString(2, pn.getTenNCC());
-            ps.setTimestamp(3, Timestamp.valueOf(pn.getNgayNhap()));
-            ps.setDouble(4, pn.getTongTienNhap());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public List<PhieuNhap> layTatCaPhieuNhap() {
-        List<PhieuNhap> dsPN = new ArrayList<>();
-        String sql = "SELECT * FROM PHIEUNHAP ORDER BY ngayNhap DESC";
-        try (Connection conn = DBConnect.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                PhieuNhap pn = new PhieuNhap();
-                pn.setMaPhieu(rs.getString("maPhieu"));
-                pn.setTenNCC(rs.getString("tenNCC"));
-                pn.setNgayNhap(rs.getTimestamp("ngayNhap").toLocalDateTime());
-                pn.setTongTienNhap(rs.getDouble("tongTienNhap"));
-                dsPN.add(pn);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return dsPN;
-    }
-
-    public PhieuNhap timTheoMa(String maPhieu) {
-        String sql = "SELECT * FROM PHIEUNHAP WHERE maPhieu = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maPhieu);
+            ps.setString(1, tenNV);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    PhieuNhap pn = new PhieuNhap();
-                    pn.setMaPhieu(rs.getString("maPhieu"));
-                    pn.setTenNCC(rs.getString("tenNCC"));
-                    pn.setNgayNhap(rs.getTimestamp("ngayNhap").toLocalDateTime());
-                    pn.setTongTienNhap(rs.getDouble("tongTienNhap"));
-                    return pn;
-                }
+                if (rs.next()) return rs.getString("maNV");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public double tinhTongTienNhap(LocalDateTime tuNgay, LocalDateTime denNgay) {
-        String sql = "SELECT SUM(tongTienNhap) FROM PHIEUNHAP WHERE ngayNhap BETWEEN ? AND ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, Timestamp.valueOf(tuNgay));
-            ps.setTimestamp(2, Timestamp.valueOf(denNgay));
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getDouble(1);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0.0;
-    }
-
-    public List<PhieuNhap> locTheoNhaCungCap(String tenNCC) {
-        List<PhieuNhap> dsPN = new ArrayList<>();
-        String sql = "SELECT * FROM PHIEUNHAP WHERE tenNCC LIKE ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + tenNCC + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    PhieuNhap pn = new PhieuNhap();
-                    pn.setMaPhieu(rs.getString("maPhieu"));
-                    pn.setTenNCC(rs.getString("tenNCC"));
-                    pn.setNgayNhap(rs.getTimestamp("ngayNhap").toLocalDateTime());
-                    pn.setTongTienNhap(rs.getDouble("tongTienNhap"));
-                    dsPN.add(pn);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return dsPN;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return "NV01";
     }
 
     public String taoMaPhieuMoi() {
-        String sql = "SELECT MAX(CAST(SUBSTRING(maPhieu, 3, LEN(maPhieu)) AS INT)) FROM PHIEUNHAP";
+        String sql = "SELECT MAX(CAST(SUBSTRING(maPhieu, 3, LEN(maPhieu)) AS INT)) " +
+                     "FROM PHIEUNHAP WHERE maPhieu NOT LIKE '%MOCK%'";
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -113,8 +31,8 @@ public class PhieuNhapDAO {
                 int maxId = rs.getInt(1);
                 return "PN" + String.format("%03d", maxId + 1);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
         }
         return "PN001";
     }
@@ -125,27 +43,52 @@ public class PhieuNhapDAO {
         try (Connection conn = DBConnect.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(rs.getString(1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            while (rs.next()) list.add(rs.getString(1));
+        } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
 
-    public boolean thucHienNhapKho(PhieuNhap pn, List<Object[]> danhSachChiTiet) {
+    public List<Object[]> layLichSuNhapKho() {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT pn.maPhieu, sp.tenSP, pn.tenNCC, ct.soLuong, ct.donGiaNhap, " +
+                     "(ct.soLuong * ct.donGiaNhap) as ThanhTien, pn.ngayNhap, nv.tenNV " +
+                     "FROM PHIEUNHAP pn " +
+                     "JOIN CHITIETPHIEUNHAP ct ON pn.maPhieu = ct.maPhieu " +
+                     "JOIN SANPHAM sp ON ct.maSP = sp.maSP " +
+                     "LEFT JOIN NHANVIEN nv ON pn.maNV = nv.maNV " +
+                     "ORDER BY pn.ngayNhap DESC";
+        try (Connection conn = DBConnect.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new Object[]{
+                    rs.getString("maPhieu"),
+                    rs.getString("tenSP"),
+                    rs.getString("tenNCC"), 
+                    rs.getInt("soLuong"),
+                    rs.getDouble("donGiaNhap"),
+                    rs.getDouble("ThanhTien"),
+                    rs.getTimestamp("ngayNhap"), 
+                    rs.getString("tenNV") != null ? rs.getString("tenNV") : "Không rõ" // 7
+                });
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public boolean thucHienNhapKho(PhieuNhap pn, List<Object[]> danhSachChiTiet, String maNV) {
         Connection conn = null;
         try {
             conn = DBConnect.getConnection();
             conn.setAutoCommit(false);
 
-            String sqlPhieu = "INSERT INTO PHIEUNHAP (maPhieu, tenNCC, ngayNhap, tongTienNhap) VALUES (?, ?, ?, ?)";
+            String sqlPhieu = "INSERT INTO PHIEUNHAP (maPhieu, tenNCC, ngayNhap, tongTienNhap, maNV) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement psPhieu = conn.prepareStatement(sqlPhieu)) {
                 psPhieu.setString(1, pn.getMaPhieu());
                 psPhieu.setString(2, pn.getTenNCC());
                 psPhieu.setTimestamp(3, Timestamp.valueOf(pn.getNgayNhap()));
                 psPhieu.setDouble(4, pn.getTongTienNhap());
+                psPhieu.setString(5, maNV);
                 psPhieu.executeUpdate();
             }
 
@@ -185,10 +128,8 @@ public class PhieuNhapDAO {
             return false;
         } finally {
             if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) { e.printStackTrace(); }
+                try { conn.setAutoCommit(true); conn.close(); } 
+                catch (SQLException e) { e.printStackTrace(); }
             }
         }
     }

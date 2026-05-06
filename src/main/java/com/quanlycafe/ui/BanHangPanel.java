@@ -890,30 +890,33 @@ public class BanHangPanel extends JPanel {
         return card;
     }
 
-    private ImageIcon scaleImageToFit(Image originalImage, int width, int height) {
-        int imgWidth = originalImage.getWidth(null);
-        int imgHeight = originalImage.getHeight(null);
+    private ImageIcon scaleImageToFit(Image originalImage, int targetWidth, int targetHeight) {
+        int originalWidth = originalImage.getWidth(null);
+        int originalHeight = originalImage.getHeight(null);
 
-        double thumbRatio = (double) width / height;
-        double imageRatio = (double) imgWidth / imgHeight;
+        double scaleX = (double) targetWidth / originalWidth;
+        double scaleY = (double) targetHeight / originalHeight;
+        double scale = Math.max(scaleX, scaleY); 
 
-        if (imageRatio < thumbRatio) {
-            imgHeight = (int) (imgWidth / thumbRatio);
-        } else {
-            imgWidth = (int) (imgHeight * thumbRatio);
-        }
+        int scaledWidth = (int) Math.round(originalWidth * scale);
+        int scaledHeight = (int) Math.round(originalHeight * scale);
 
-        BufferedImage bimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = bimg.createGraphics();
+        Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
 
+        int x = (scaledWidth - targetWidth) / 2;
+        int y = (scaledHeight - targetHeight) / 2;
+        
+        BufferedImage croppedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = croppedImage.createGraphics();
+        
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        g2.drawImage(originalImage, 0, 0, width, height, 0, 0, imgWidth, imgHeight, null);
+        
+        g2.drawImage(scaledImage, 0, 0, targetWidth, targetHeight, x, y, x + targetWidth, y + targetHeight, null);
         g2.dispose();
 
-        return new ImageIcon(bimg);
+        return new ImageIcon(croppedImage);
     }
 
     private JButton createTabButton(String title, String maDM, boolean isActive) {
