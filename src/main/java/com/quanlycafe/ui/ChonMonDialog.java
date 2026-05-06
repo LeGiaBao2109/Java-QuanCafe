@@ -11,6 +11,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 public class ChonMonDialog extends JDialog {
@@ -359,7 +360,7 @@ public class ChonMonDialog extends JDialog {
 
     private void updateRadioButtonGroup(ButtonGroup group, String label) {
         if (group == null) return;
-        java.util.Enumeration<AbstractButton> enu = group.getElements();
+        Enumeration<AbstractButton> enu = group.getElements();
         while (enu.hasMoreElements()) {
             AbstractButton btn = enu.nextElement();
             if (btn.getActionCommand().equals(label)) {
@@ -376,7 +377,7 @@ public class ChonMonDialog extends JDialog {
 
         if (isDrink) {
             if (maSize != null && sizeGroup != null) {
-                java.util.Enumeration<AbstractButton> enu = sizeGroup.getElements();
+                Enumeration<AbstractButton> enu = sizeGroup.getElements();
                 while (enu.hasMoreElements()) {
                     AbstractButton btn = enu.nextElement();
                     if (btn.getActionCommand().equals(maSize)) {

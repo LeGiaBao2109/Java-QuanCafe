@@ -3,6 +3,7 @@ package com.quanlycafe.ui;
 import com.quanlycafe.dao.*;
 import com.quanlycafe.entity.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -14,6 +15,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,8 +49,6 @@ public class BanHangPanel extends JPanel {
     private KhachHang khachHangHienTai = null;
     private KhachHangDAO khDAO = new KhachHangDAO();
     private Voucher voucherApDung = null;
-    private JSpinner spnDiemDung;
-    private double giamGiaTuDiem = 0;
     private Map<String, ImageIcon> imageCache = new HashMap<>();
 
     public BanHangPanel() {
@@ -529,12 +529,23 @@ public class BanHangPanel extends JPanel {
         btnDoiDiem.addActionListener(e -> showDiemDialog());
 
         btnVoucher.addActionListener(e -> {
-            int diem = (khachHangHienTai != null) ? khachHangHienTai.getDiemTL() : 0;
+            if (!chkTichDiem.isSelected() || khachHangHienTai == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập thông tin khách hàng thành viên để dùng voucher!");
+                return;
+            }
+
+            String sdt = khachHangHienTai.getSdt().trim();
+            if (sdt.equals("0000000000") || sdt.equals("0")) {
+                JOptionPane.showMessageDialog(this, "Khách vãng lai không được áp dụng voucher tích lũy!");
+                return;
+            }
+
+            int diem = khachHangHienTai.getDiemTL();
             VoucherDAO vDAO = new VoucherDAO();
             List<Voucher> dsVoucher = vDAO.layVoucherKhaDung(diem);
 
             if (dsVoucher.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Không có voucher nào khả dụng!");
+                JOptionPane.showMessageDialog(this, "Bạn không có đủ điểm để đổi voucher nào!");
                 return;
             }
 
@@ -575,10 +586,17 @@ public class BanHangPanel extends JPanel {
                         khachHangHienTai = kh;
                         txtTenKH.setText(kh.getTenKH());
                         txtTenKH.setEditable(false);
+
+                        if (sdt.equals("0000000000")) {
+                            voucherApDung = null;
+                            recalculateTotal();
+                        }
                     } else {
                         khachHangHienTai = null;
+                        voucherApDung = null;
                         txtTenKH.setText("");
                         txtTenKH.setEditable(true);
+                        recalculateTotal();
                     }
                 }
             }
@@ -771,10 +789,10 @@ public class BanHangPanel extends JPanel {
             } else {
                 new Thread(() -> {
                     try {
-                        java.net.URL url = new java.net.URL(linkAnh);
-                        java.awt.Image rawImg = javax.imageio.ImageIO.read(url);
+                        URL url = new URL(linkAnh);
+                        Image rawImg = ImageIO.read(url);
                         if (rawImg != null) {
-                            java.awt.Image scaledImg = rawImg.getScaledInstance(180, 150, java.awt.Image.SCALE_SMOOTH);
+                            Image scaledImg = rawImg.getScaledInstance(180, 150, Image.SCALE_SMOOTH);
                             ImageIcon icon = new ImageIcon(scaledImg);
                             imageCache.put(linkAnh, icon);
                             SwingUtilities.invokeLater(() -> {
@@ -793,7 +811,7 @@ public class BanHangPanel extends JPanel {
 
         JPanel info = new JPanel(new BorderLayout());
         info.setBackground(Color.WHITE);
-        info.setBorder(new javax.swing.border.EmptyBorder(10, 10, 10, 10));
+        info.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JLabel lblName = new JLabel(name);
         lblName.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -813,7 +831,7 @@ public class BanHangPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 Window owner = SwingUtilities.getWindowAncestor(BanHangPanel.this);
                 KichCoDAO kcDAO = new KichCoDAO();
-                java.util.List<com.quanlycafe.entity.KichCo> dsSizeCuaSP = kcDAO.layKichCoTheoSP(maSP);
+                List<com.quanlycafe.entity.KichCo> dsSizeCuaSP = kcDAO.layKichCoTheoSP(maSP);
 
                 int giaNhoNhat = price;
                 if (dsSizeCuaSP != null && !dsSizeCuaSP.isEmpty()) {
@@ -915,6 +933,11 @@ public class BanHangPanel extends JPanel {
             return;
         }
 
+        if (khachHangHienTai.getSdt().trim().equals("0000000000")) {
+            JOptionPane.showMessageDialog(this, "Khách vãng lai không có điểm tích lũy để đổi!");
+            return;
+        }
+
         int diemHienCo = khachHangHienTai.getDiemTL();
         String input = JOptionPane.showInputDialog(this,
                 "Điểm hiện có: " + diemHienCo + "\n(Quy đổi: 100 điểm = 10.000đ)\nNhập số điểm muốn đổi:",
@@ -933,11 +956,11 @@ public class BanHangPanel extends JPanel {
                     diemNhap = 5000;
                 }
 
-                voucherApDung = new Voucher();
-                voucherApDung.setTenCT("Đổi " + diemNhap + " điểm");
-                voucherApDung.setGiaTriGiam(diemNhap * 100.0);
-                voucherApDung.setDiemCanDoi(diemNhap);
-                voucherApDung.setLoaiGiamGia(LoaiGiamGia.DIEM_TICH_LUY);
+                BanHangPanel.this.voucherApDung = new Voucher();
+                BanHangPanel.this.voucherApDung.setTenCT("Đổi " + diemNhap + " điểm");
+                BanHangPanel.this.voucherApDung.setGiaTriGiam(diemNhap * 100.0);
+                BanHangPanel.this.voucherApDung.setDiemCanDoi(diemNhap);
+                BanHangPanel.this.voucherApDung.setLoaiGiamGia(LoaiGiamGia.DIEM_TICH_LUY);
 
                 recalculateTotal();
             } catch (NumberFormatException e) {

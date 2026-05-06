@@ -61,6 +61,9 @@ public class KhachHangPanel extends JPanel {
 
         if (dsKhachHang != null) {
             for (KhachHang kh : dsKhachHang) {
+                if (kh.getSdt() != null && kh.getSdt().equals("0000000000")) {
+                    continue;
+                }
                 allData.add(new Object[]{
                         kh.getMaKH(),
                         kh.getTenKH(),

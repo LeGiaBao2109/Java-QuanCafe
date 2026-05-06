@@ -28,4 +28,13 @@ public enum LoaiGiamGia {
     public boolean isLaPhanTram() {
         return laPhanTram;
     }
+
+    public static LoaiGiamGia fromString(String text) {
+        for (LoaiGiamGia b : LoaiGiamGia.values()) {
+            if (b.name().equalsIgnoreCase(text)) {
+                return b;
+            }
+        }
+        return KHONG_GIAM;
+    }
 }
