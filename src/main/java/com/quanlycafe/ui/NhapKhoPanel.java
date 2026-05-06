@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -94,7 +95,7 @@ public class NhapKhoPanel extends JPanel {
         btnTim.setBorderPainted(false);
         btnTim.setFocusPainted(false);
         btnTim.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnTim.setPreferredSize(new Dimension(100, 35));
+        btnTim.setPreferredSize(new Dimension(150, 35));
 
         btnTim.addActionListener(e -> thucHienTimKiem());
         txtTimKiem.addActionListener(e -> thucHienTimKiem());
@@ -168,7 +169,7 @@ public class NhapKhoPanel extends JPanel {
         lblDockTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblDockTitle.setForeground(COLOR_PRIMARY);
 
-        JButton btnClose = new JButton("Đóng Form (X)");
+        JButton btnClose = new JButton("Đóng");
         btnClose.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnClose.setBackground(new Color(220, 53, 69));
         btnClose.setForeground(Color.WHITE);
@@ -221,21 +222,21 @@ public class NhapKhoPanel extends JPanel {
         lblTien.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTongTienDock = new JLabel("0 đ");
         lblTongTienDock.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTongTienDock.setForeground(new Color(40, 167, 69));
+        lblTongTienDock.setForeground(COLOR_PRIMARY);
         lblTongTienDock.setPreferredSize(new Dimension(180, 38));
         pnlTien.add(lblTien, BorderLayout.NORTH);
         pnlTien.add(lblTongTienDock, BorderLayout.CENTER);
 
         JButton btnXacNhan = new JButton("XÁC NHẬN NHẬP KHO");
         btnXacNhan.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnXacNhan.setBackground(new Color(40, 167, 69));
+        btnXacNhan.setBackground(COLOR_PRIMARY);
         btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setOpaque(true);
         btnXacNhan.setContentAreaFilled(true);
         btnXacNhan.setBorderPainted(false);
         btnXacNhan.setFocusPainted(false);
         btnXacNhan.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnXacNhan.setPreferredSize(new Dimension(200, 45));
+        btnXacNhan.setPreferredSize(new Dimension(250, 45));
         btnXacNhan.addActionListener(e -> xuLyNhapKhoDock());
 
         JPanel pnlAction = new JPanel(new BorderLayout());
@@ -340,7 +341,7 @@ public class NhapKhoPanel extends JPanel {
         String giaNhap = formatter.format(data[4]) + " đ";
         String thanhTien = formatter.format(data[5]) + " đ";
         
-        java.sql.Timestamp ts = (java.sql.Timestamp) data[6];
+        Timestamp ts = (Timestamp) data[6];
         String ngayNhap = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(ts);
         String tenNV = data[7].toString();
 

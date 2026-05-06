@@ -23,7 +23,7 @@ public class TaiKhoan {
     }
 
     public void setMaTK(String maTK) {
-        if(!maTK.matches("TK\\d{2}"))
+        if (!maTK.matches("TK\\d{2}"))
             throw new IllegalArgumentException("Mã tài khoản bắt đầu TK và có 2 chữ số, vd: TK01");
         this.maTK = maTK;
     }
@@ -41,7 +41,6 @@ public class TaiKhoan {
     }
 
     public void setMatKhau(String matKhau) {
-    	
         this.matKhau = matKhau;
     }
 
@@ -67,11 +66,6 @@ public class TaiKhoan {
 
     @Override
     public String toString() {
-        return "TaiKhoan{" +
-                "maTK='" + maTK + '\'' +
-                ", tenDangNhap='" + tenDangNhap + '\'' +
-                ", matKhau='" + matKhau + '\'' +
-                ", maNV=" + maNV +
-                '}';
+        return "TaiKhoan{" + "maTK='" + maTK + '\'' + ", tenDangNhap='" + tenDangNhap + '\'' + ", matKhau='" + matKhau + '\'' + ", maNV=" + maNV + '}';
     }
 }

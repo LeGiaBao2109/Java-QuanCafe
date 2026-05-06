@@ -305,7 +305,7 @@ public class ThongKeNhanVienPanel extends JPanel {
             
             JButton btnXacNhanIn = new JButton("Xác nhận In");
             btnXacNhanIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            btnXacNhanIn.setBackground(new Color(40, 167, 69)); 
+            btnXacNhanIn.setBackground(COLOR_PRIMARY);
             btnXacNhanIn.setForeground(Color.WHITE);
             btnXacNhanIn.setOpaque(true);
             btnXacNhanIn.setContentAreaFilled(true);

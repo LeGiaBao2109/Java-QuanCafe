@@ -15,14 +15,12 @@
     </properties>
 
     <dependencies>
-        <!-- JDBC Driver để kết nối SQL Server -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>12.6.1.jre11</version>
         </dependency>
 
-        <!-- Thư viện giao diện hiện đại FlatLaf -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
@@ -35,7 +33,6 @@
             <version>1.4</version>
         </dependency>
 
-        <!-- HỖ TRỢ ĐỌC ẢNH WEBP VÀ CÁC ĐỊNH DẠNG KHÁC -->
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-webp</artifactId>

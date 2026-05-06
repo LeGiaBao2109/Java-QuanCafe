@@ -69,7 +69,7 @@ public class PhieuNhapDAO {
                     rs.getDouble("donGiaNhap"),
                     rs.getDouble("ThanhTien"),
                     rs.getTimestamp("ngayNhap"), 
-                    rs.getString("tenNV") != null ? rs.getString("tenNV") : "Không rõ" // 7
+                    rs.getString("tenNV") != null ? rs.getString("tenNV") : "Không rõ"
                 });
             }
         } catch (SQLException e) { e.printStackTrace(); }

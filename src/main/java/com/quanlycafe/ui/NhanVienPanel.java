@@ -26,7 +26,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import com.quanlycafe.dao.NhanVienDAO;
-import com.quanlycafe.dao.SanPhamDAO;
 
 public class NhanVienPanel extends JPanel {
     private final Color COLOR_BG = new Color(253, 248, 245);
