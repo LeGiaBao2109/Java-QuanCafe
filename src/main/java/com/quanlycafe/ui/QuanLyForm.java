@@ -16,7 +16,7 @@ public class QuanLyForm extends JFrame {
     private JPanel cardPanel;
 
     public QuanLyForm(String role, String tenNV) { 
-        setTitle("BaristaPro - Quản trị Hệ thống");
+        setTitle("Quản trị Hệ thống - KAHVI");
         setSize(1366, 768);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

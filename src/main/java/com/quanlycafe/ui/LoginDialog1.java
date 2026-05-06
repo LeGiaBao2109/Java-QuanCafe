@@ -24,7 +24,7 @@ public class LoginDialog1 extends JFrame {
     private final Color COLOR_TEXT = new Color(60, 42, 33);
 
     public LoginDialog1() {
-        setTitle("Đăng nhập - HAHA Coffee");
+        setTitle("Đăng nhập - KAHVI");
         setSize(900, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -36,7 +36,7 @@ public class LoginDialog1 extends JFrame {
         leftPanel.setBackground(COLOR_BG_LEFT);
 
         try {
-            ImageIcon imageIcon = new ImageIcon("src/main/resources/images/side_image.png");
+            ImageIcon imageIcon = new ImageIcon("src/main/resources/images/side_image.jpg");
             Image img = imageIcon.getImage().getScaledInstance(450, 500, Image.SCALE_SMOOTH);
             JLabel lblImage = new JLabel(new ImageIcon(img));
             leftPanel.add(lblImage);

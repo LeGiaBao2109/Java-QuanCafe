@@ -14,7 +14,7 @@ public class BanHangModernForm extends JFrame {
     private JPanel cardPanel;
 
     public BanHangModernForm(String role, String tenNV) {
-        setTitle("BaristaPro - Phần mềm Quản lý Bán hàng");
+        setTitle("KAHVI");
         setSize(1366, 768); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
