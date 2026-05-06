@@ -146,47 +146,47 @@ public class CrudSanPhamDialog extends JDialog {
     }
 
     private void fillDataAndSetMode(Object[] rowData) {
+        SanPhamDAO dao = new SanPhamDAO(); // Khởi tạo DAO
+
         if (mode.equals("ADD")) {
             btnAction.setText("Thêm Mới");
+            // Tự sinh mã và khóa TextBox lại
+            txtMaMon.setText(dao.taoMaSPTuSinh());
+            txtMaMon.setEditable(false);
+            txtMaMon.setBackground(new Color(240, 240, 240)); // Đổi màu nền cho biết là field khóa
         } else {
             if (rowData != null) {
                 String maSP = rowData[0].toString();
                 txtMaMon.setText(maSP);
                 txtTenMon.setText(rowData[1].toString());
-                
+
                 cbNhomThucDon.setSelectedItem(rowData[3].toString());
-                
+
                 String oldSizeUI = rowData[2].toString();
                 oldSizeDB = oldSizeUI;
+                // Xử lý chuẩn hóa tên Size khi hiển thị
                 if (oldSizeUI != null && (oldSizeUI.equals("M") || oldSizeUI.equals("L") || oldSizeUI.equals("S"))) {
                     oldSizeDB = "Size " + oldSizeUI;
                 }
-                
-                cbSize.setSelectedItem(oldSizeUI.replace("Size ", "")); 
+
+                cbSize.setSelectedItem(oldSizeUI.replace("Size ", ""));
                 cbDonViTinh.setSelectedItem(rowData[4].toString());
-                txtGia.setText(rowData[5].toString().replace(".000 VND", "000").replace(" VND", ""));
-                
-                SanPhamDAO dao = new SanPhamDAO();
+                txtGia.setText(rowData[5].toString().replace(".000 VND", "000").replace(" VND", "").replace(",", ""));
+
                 SanPham sp = dao.timTheoMa(maSP);
                 if (sp != null) {
                     txtTonKho.setText(String.valueOf(sp.getTonKho()));
-                    txtAnhSP.setText(sp.getAnhSP() == null ? "" : sp.getAnhSP());
+                    txtAnhSP.setText(sp.getAnhSP() == null ? "default.png" : sp.getAnhSP());
                 }
             }
 
             if (mode.equals("EDIT")) {
                 btnAction.setText("Cập Nhật");
                 txtMaMon.setEditable(false);
+                txtMaMon.setBackground(new Color(240, 240, 240));
             } else if (mode.equals("DELETE")) {
                 btnAction.setText("Xác Nhận Xóa");
-                txtMaMon.setEditable(false);
-                txtTenMon.setEditable(false);
-                cbSize.setEnabled(false);
-                cbNhomThucDon.setEnabled(false);
-                cbDonViTinh.setEnabled(false);
-                txtGia.setEditable(false);
-                txtTonKho.setEditable(false);
-                txtAnhSP.setEditable(false);
+                setFieldsEditable(false);
             }
         }
     }
@@ -364,5 +364,16 @@ public class CrudSanPhamDialog extends JDialog {
             btn.setContentAreaFilled(false);
             btn.setOpaque(true);
         }
+    }
+
+    private void setFieldsEditable(boolean editable) {
+        txtMaMon.setEditable(editable);
+        txtTenMon.setEditable(editable);
+        cbSize.setEnabled(editable);
+        cbNhomThucDon.setEnabled(editable);
+        cbDonViTinh.setEnabled(editable);
+        txtGia.setEditable(editable);
+        txtTonKho.setEditable(editable);
+        txtAnhSP.setEditable(editable);
     }
 }

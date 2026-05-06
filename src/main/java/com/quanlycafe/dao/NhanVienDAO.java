@@ -22,10 +22,10 @@ public class NhanVienDAO {
 
             while (rs.next()) {
                 NhanVien nv = new NhanVien(
-                        rs.getString("maNV"),
-                        rs.getString("tenNV"),
-                        rs.getString("sdt"),
-                        RoleNhanVien.valueOf(rs.getString("roleNV")),
+                        rs.getString("maNV").trim(),
+                        rs.getString("tenNV").trim(),
+                        rs.getString("sdt").trim(),
+                        RoleNhanVien.valueOf(rs.getString("roleNV").trim()),
                         rs.getBoolean("trangThai")
                 );
                 dsNV.add(nv);
@@ -82,20 +82,19 @@ public class NhanVienDAO {
         List<Object[]> list = new ArrayList<>();
         String sql = "SELECT nv.maNV, tk.maTK, tk.tenDangNhap, tk.matKhau, nv.tenNV, nv.roleNV, nv.sdt " +
                 "FROM NHANVIEN nv " +
-                "JOIN TAIKHOAN tk ON nv.maNV = tk.maNV " +
-                "WHERE nv.trangThai = 1";
+                "JOIN TAIKHOAN tk ON nv.maNV = tk.maNV";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new Object[]{
-                        rs.getString("maNV"),
-                        rs.getString("maTK"),
-                        rs.getString("tenDangNhap"),
-                        rs.getString("matKhau"),
-                        rs.getString("tenNV"),
-                        rs.getString("roleNV"),
-                        rs.getString("sdt")
+                        rs.getString("maNV").trim(),
+                        rs.getString("maTK").trim(),
+                        rs.getString("tenDangNhap").trim(),
+                        rs.getString("matKhau").trim(),
+                        rs.getString("tenNV").trim(),
+                        rs.getString("roleNV").trim(),
+                        rs.getString("sdt").trim()
                 });
             }
         } catch (Exception e) {
@@ -122,15 +121,30 @@ public class NhanVienDAO {
     }
 
     public boolean xoaNhanVien(String maNV) {
-        String sql = "UPDATE NHANVIEN SET trangThai = 0 WHERE maNV = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maNV);
-            return ps.executeUpdate() > 0;
+        String sqlDeleteTK = "DELETE FROM TAIKHOAN WHERE maNV = ?";
+        String sqlDeleteNV = "DELETE FROM NHANVIEN WHERE maNV = ?";
+
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement psTK = conn.prepareStatement(sqlDeleteTK);
+                 PreparedStatement psNV = conn.prepareStatement(sqlDeleteNV)) {
+
+                psTK.setString(1, maNV);
+                psTK.executeUpdate();
+
+                psNV.setString(1, maNV);
+                int result = psNV.executeUpdate();
+
+                conn.commit();
+                return result > 0;
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     public String taoMaNVTuSinh() {
@@ -141,7 +155,7 @@ public class NhanVienDAO {
             if (rs.next()) {
                 String lastMa = rs.getString(1);
                 if (lastMa == null) return "NV01";
-                int num = Integer.parseInt(lastMa.substring(2)) + 1;
+                int num = Integer.parseInt(lastMa.substring(2).trim()) + 1;
                 return String.format("NV%02d", num);
             }
         } catch (SQLException e) {

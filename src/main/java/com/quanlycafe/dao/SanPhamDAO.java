@@ -33,15 +33,25 @@ public class SanPhamDAO {
     }
 
     public boolean themKichCo(String maSP, String tenSize, double gia) {
-        String maSize = "S" + String.format("%08d", (int)(Math.random() * 100000000));
-        String sql = "INSERT INTO KICHCO (maSize, maSP, tenSize, gia) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maSize);
-            ps.setString(2, maSP);
-            ps.setString(3, tenSize);
-            ps.setDouble(4, gia);
-            return ps.executeUpdate() > 0;
+        String sqlMax = "SELECT MAX(maSize) FROM KICHCO";
+        String maSize = "S00000001";
+
+        try (Connection conn = DBConnect.getConnection()) {
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sqlMax);
+            if (rs.next() && rs.getString(1) != null) {
+                int num = Integer.parseInt(rs.getString(1).substring(1)) + 1;
+                maSize = String.format("S%08d", num);
+            }
+
+            String sql = "INSERT INTO KICHCO (maSize, maSP, tenSize, gia) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, maSize);
+                ps.setString(2, maSP);
+                ps.setString(3, tenSize);
+                ps.setDouble(4, gia);
+                return ps.executeUpdate() > 0;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -292,5 +302,22 @@ public class SanPhamDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public String taoMaSPTuSinh() {
+        String sql = "SELECT MAX(maSP) FROM SANPHAM";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String lastMa = rs.getString(1);
+                if (lastMa == null) return "SP01";
+                int num = Integer.parseInt(lastMa.substring(2).trim()) + 1;
+                return String.format("SP%02d", num);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "SP01";
     }
 }
