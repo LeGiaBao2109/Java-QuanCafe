@@ -36,7 +36,7 @@ public class LoginDialog1 extends JFrame {
         leftPanel.setBackground(COLOR_BG_LEFT);
 
         try {
-            ImageIcon imageIcon = new ImageIcon("src/main/resources/images/side_image.jpg");
+            ImageIcon imageIcon = new ImageIcon("src/main/resources/images/kahvi.png");
             Image img = imageIcon.getImage().getScaledInstance(450, 500, Image.SCALE_SMOOTH);
             JLabel lblImage = new JLabel(new ImageIcon(img));
             leftPanel.add(lblImage);
