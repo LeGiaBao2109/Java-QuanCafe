@@ -30,11 +30,13 @@ public class BanHangModernForm extends JFrame {
         HoaDonPanel pnlHoaDon = new HoaDonPanel();
         KhachHangPanel pnlKhachHang = new KhachHangPanel();
         NhapKhoPanel pnlNhapKho = new NhapKhoPanel();
+        ThongKeNhanVienPanel pnlThongKeNV = new ThongKeNhanVienPanel();
 
         cardPanel.add(pnlBanHang, "BanHang");
         cardPanel.add(pnlHoaDon, "HoaDon");
         cardPanel.add(pnlKhachHang, "KhachHang");
         cardPanel.add(pnlNhapKho, "NhapKho");
+        cardPanel.add(pnlThongKeNV, "ThongKeNV");
 
         Sidebar sidebar = new Sidebar(role, tenNV, menu -> cardLayout.show(cardPanel, menu)); 
         
