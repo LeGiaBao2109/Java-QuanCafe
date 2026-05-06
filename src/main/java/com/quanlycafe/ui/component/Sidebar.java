@@ -71,6 +71,7 @@ public class Sidebar extends JPanel {
             JButton btnBill = createNavButton("🧾 Bill", false);
             JButton btnKH = createNavButton("👥 Khách hàng", false);
             JButton btnNhapKho = createNavButton("📦 Nhập Kho", false); 
+            JButton btnBaoCaoCa = createNavButton("📊 Báo cáo chốt ca", false);
 
             btnOrder.addActionListener(e -> {
                 setActive(btnOrder);
@@ -88,6 +89,10 @@ public class Sidebar extends JPanel {
                 setActive(btnNhapKho);
                 if (onMenuClick != null) onMenuClick.accept("NhapKho");
             });
+            btnBaoCaoCa.addActionListener(e -> {
+                setActive(btnBaoCaoCa);
+                if (onMenuClick != null) onMenuClick.accept("ThongKeNV");
+            });
 
             topMenu.add(btnOrder);
             topMenu.add(Box.createVerticalStrut(8));
@@ -96,6 +101,8 @@ public class Sidebar extends JPanel {
             topMenu.add(btnKH);
             topMenu.add(Box.createVerticalStrut(8));
             topMenu.add(btnNhapKho);
+            topMenu.add(Box.createVerticalStrut(8));
+            topMenu.add(btnBaoCaoCa);
         }
 
         JPanel bottomMenu = new JPanel(new BorderLayout());
