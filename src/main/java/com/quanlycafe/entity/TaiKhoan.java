@@ -12,7 +12,7 @@ public class TaiKhoan {
     }
 
     public TaiKhoan(String maTK, String tenDangNhap, String matKhau, NhanVien maNV) {
-        this.maTK = maTK;
+        setMaTK(maTK);
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
         this.maNV = maNV;
@@ -23,6 +23,8 @@ public class TaiKhoan {
     }
 
     public void setMaTK(String maTK) {
+    	if(!maTK.matches("(TK)\\d{2}"))
+    		throw new IllegalArgumentException("mã tài khoản bắt đầu TK và có 2 chữ số, vd:TK01");
         this.maTK = maTK;
     }
 
@@ -39,6 +41,7 @@ public class TaiKhoan {
     }
 
     public void setMatKhau(String matKhau) {
+    	
         this.matKhau = matKhau;
     }
 

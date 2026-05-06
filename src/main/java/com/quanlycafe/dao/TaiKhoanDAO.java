@@ -65,4 +65,65 @@ public class TaiKhoanDAO {
             return false;
         }
     }
+    public boolean themTaiKhoan(TaiKhoan tk) {
+        String sql = "INSERT INTO TAIKHOAN (maTK, tenDangNhap, matKhau, maNV) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, tk.getMaTK());
+            ps.setString(2, tk.getTenDangNhap());
+            ps.setString(3, tk.getMatKhau());
+            ps.setString(4, tk.getMaNV().getMaNV());
+            
+            
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public TaiKhoan timTheoMa(String maTK) {
+    	
+    	
+        String sql = "SELECT * FROM TAIKHOAN WHERE maTK = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, maTK);
+            try (ResultSet rs = ps.executeQuery()) {
+            	
+                if (rs.next()) {
+                	NhanVien nv = new NhanVien();
+                	nv.setMaNV(rs.getString("maNV"));
+                    return new TaiKhoan(
+                            rs.getString("maTK"),
+                            rs.getString("tenDangNhap"),
+                            rs.getString("matKhau"),
+                            nv
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public boolean capNhatTaiKhoan(TaiKhoan tk) {
+        String sql = "UPDATE TAIKHOAN SET tenDangNhap = ?, matKhau = ? WHERE maTK = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, tk.getTenDangNhap());
+            ps.setString(2, tk.getMatKhau());
+            ps.setString(3, tk.getMaTK());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
