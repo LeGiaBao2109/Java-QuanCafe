@@ -47,6 +47,16 @@ public class ThongKeNhanVienPanel extends JPanel {
         lblDateTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblDateTitle.setForeground(new Color(100, 80, 70));
         
+        JButton btnLamMoi = new JButton("Làm Mới");
+        btnLamMoi.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnLamMoi.setBackground(Color.WHITE);
+        btnLamMoi.setForeground(COLOR_PRIMARY);
+        btnLamMoi.setFocusPainted(false);
+        btnLamMoi.setBorder(BorderFactory.createLineBorder(COLOR_PRIMARY, 1));
+        btnLamMoi.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLamMoi.setPreferredSize(new Dimension(100, 35));
+        btnLamMoi.addActionListener(e -> loadDuLieu(new Date()));
+
         JButton btnIn = new JButton("In Báo Cáo");
         btnIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnIn.setBackground(COLOR_PRIMARY); 
@@ -59,6 +69,7 @@ public class ThongKeNhanVienPanel extends JPanel {
         btnIn.addActionListener(e -> inBaoCaoCa());
         
         pnlRight.add(lblDateTitle);
+        pnlRight.add(btnLamMoi);
         pnlRight.add(btnIn);
 
         pnlTop.add(lblTitle, BorderLayout.WEST);
