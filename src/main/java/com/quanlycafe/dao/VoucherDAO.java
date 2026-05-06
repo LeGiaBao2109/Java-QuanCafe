@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VoucherDAO {
+
     public List<Voucher> layVoucherKhaDung(int diemHienTai) {
         List<Voucher> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM VOUCHER WHERE trangThai = 1 AND diemCanDoi <= ?";
@@ -20,7 +21,18 @@ public class VoucherDAO {
             ps.setInt(1, diemHienTai);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    danhSach.add(mapResultSetToVoucher(rs));
+                    Voucher v = new Voucher();
+                    v.setMaCT(rs.getString("maCT"));
+                    v.setTenCT(rs.getString("tenCT"));
+                    v.setDiemCanDoi(rs.getInt("diemCanDoi"));
+                    try {
+                        v.setLoaiGiamGia(LoaiGiamGia.valueOf(rs.getString("loaiGiamGia")));
+                    } catch (Exception e) {
+                        v.setLoaiGiamGia(LoaiGiamGia.KHONG_GIAM);
+                    }
+                    v.setTrangThai(rs.getBoolean("trangThai"));
+                    v.setGiaTriGiam(rs.getDouble("giaGiam"));
+                    danhSach.add(v);
                 }
             }
         } catch (SQLException e) {
@@ -36,7 +48,18 @@ public class VoucherDAO {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                danhSach.add(mapResultSetToVoucher(rs));
+                Voucher v = new Voucher();
+                v.setMaCT(rs.getString("maCT"));
+                v.setTenCT(rs.getString("tenCT"));
+                v.setDiemCanDoi(rs.getInt("diemCanDoi"));
+                try {
+                    v.setLoaiGiamGia(LoaiGiamGia.valueOf(rs.getString("loaiGiamGia")));
+                } catch (Exception e) {
+                    v.setLoaiGiamGia(LoaiGiamGia.KHONG_GIAM);
+                }
+                v.setTrangThai(rs.getBoolean("trangThai"));
+                v.setGiaTriGiam(rs.getDouble("giaGiam"));
+                danhSach.add(v);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -51,7 +74,18 @@ public class VoucherDAO {
             ps.setString(1, maCT);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapResultSetToVoucher(rs);
+                    Voucher v = new Voucher();
+                    v.setMaCT(rs.getString("maCT"));
+                    v.setTenCT(rs.getString("tenCT"));
+                    v.setDiemCanDoi(rs.getInt("diemCanDoi"));
+                    try {
+                        v.setLoaiGiamGia(LoaiGiamGia.valueOf(rs.getString("loaiGiamGia")));
+                    } catch (Exception e) {
+                        v.setLoaiGiamGia(LoaiGiamGia.KHONG_GIAM);
+                    }
+                    v.setTrangThai(rs.getBoolean("trangThai"));
+                    v.setGiaTriGiam(rs.getDouble("giaGiam"));
+                    return v;
                 }
             }
         } catch (SQLException e) {
@@ -106,22 +140,44 @@ public class VoucherDAO {
         }
     }
 
-    private Voucher mapResultSetToVoucher(ResultSet rs) throws SQLException {
-        Voucher v = new Voucher();
-        v.setMaCT(rs.getString("maCT"));
-        v.setTenCT(rs.getString("tenCT"));
-        v.setDiemCanDoi(rs.getInt("diemCanDoi"));
-
-        try {
-            v.setLoaiGiamGia(LoaiGiamGia.valueOf(rs.getString("loaiGiamGia")));
-        } catch (Exception e) {
-            v.setLoaiGiamGia(LoaiGiamGia.KHONG_GIAM);
+    public boolean xoaVoucherVinhVien(String maCT) {
+        String sql = "DELETE FROM VOUCHER WHERE maCT = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maCT);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
+    }
 
-        v.setTrangThai(rs.getBoolean("trangThai"));
-
-        v.setGiaTriGiam(rs.getDouble("giaGiam"));
-
-        return v;
+    public List<Voucher> timKiemVoucher(String keyword) {
+        List<Voucher> danhSach = new ArrayList<>();
+        String sql = "SELECT * FROM VOUCHER WHERE maCT LIKE ? OR tenCT LIKE ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Voucher v = new Voucher();
+                    v.setMaCT(rs.getString("maCT"));
+                    v.setTenCT(rs.getString("tenCT"));
+                    v.setDiemCanDoi(rs.getInt("diemCanDoi"));
+                    try {
+                        v.setLoaiGiamGia(LoaiGiamGia.valueOf(rs.getString("loaiGiamGia")));
+                    } catch (Exception e) {
+                        v.setLoaiGiamGia(LoaiGiamGia.KHONG_GIAM);
+                    }
+                    v.setTrangThai(rs.getBoolean("trangThai"));
+                    v.setGiaTriGiam(rs.getDouble("giaGiam"));
+                    danhSach.add(v);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return danhSach;
     }
 }
