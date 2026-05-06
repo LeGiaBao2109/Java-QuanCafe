@@ -5,124 +5,109 @@ import com.quanlycafe.ui.LoginDialog1;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class Sidebar extends JPanel {
 
-    private final Color COLOR_BORDER = new Color(222, 204, 190);
+    private final Color COLOR_BORDER = new Color(235, 230, 225);
     private final Color COLOR_PRIMARY_DARK = new Color(92, 64, 51);
-    private final Color COLOR_TEXT_MAIN = new Color(60, 42, 33);
+    private final Color COLOR_TEXT_MAIN = new Color(70, 55, 45);
+    private final Color COLOR_BG = new Color(255, 255, 255);
+    private final Color COLOR_HOVER = new Color(248, 245, 242);
+    private final Color COLOR_DANGER = new Color(220, 53, 69);
 
     private List<JButton> menuButtons = new ArrayList<>();
 
     public Sidebar(String role, String userName, Consumer<String> onMenuClick) {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(220, 0));
+        setBackground(COLOR_BG);
+        setPreferredSize(new Dimension(240, 0));
         setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, COLOR_BORDER));
 
         JPanel topMenu = new JPanel();
         topMenu.setLayout(new BoxLayout(topMenu, BoxLayout.Y_AXIS));
-        topMenu.setBackground(Color.WHITE);
-        topMenu.setBorder(new EmptyBorder(20, 15, 20, 15));
+        topMenu.setBackground(COLOR_BG);
+        topMenu.setBorder(new EmptyBorder(30, 15, 20, 15));
 
         JLabel lblName = new JLabel(userName);
         lblName.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblName.setForeground(COLOR_PRIMARY_DARK);
         lblName.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        JLabel lblRole = new JLabel(role.equals("ADMIN") ? "Quản lý (Admin)" : "Nhân viên (Staff)");
-        lblRole.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblRole.setForeground(Color.GRAY);
+
+        JLabel lblRole = new JLabel(role.equalsIgnoreCase("ADMIN") ? "Quản lý hệ thống" : "Nhân viên vận hành");
+        lblRole.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+        lblRole.setForeground(new Color(140, 130, 120));
         lblRole.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         topMenu.add(lblName);
+        topMenu.add(Box.createVerticalStrut(5));
         topMenu.add(lblRole);
-        topMenu.add(Box.createVerticalStrut(30));
+        topMenu.add(Box.createVerticalStrut(35));
 
-        if (role.equals("ADMIN")) {
-            JButton btnSP = createNavButton("📦 Sản phẩm/Menu", true);
-            JButton btnNV = createNavButton("👥 Nhân viên", false);
-            JButton btnBC = createNavButton("📊 Báo cáo", false);
+        if (role.equalsIgnoreCase("ADMIN")) {
+            JButton btnSP = createNavButton("Sản phẩm & Menu", true);
+            JButton btnNV = createNavButton("Quản lý nhân viên", false);
+            JButton btnBC = createNavButton("Báo cáo doanh thu", false);
 
-            btnSP.addActionListener(e -> {
-                setActive(btnSP);
-                if (onMenuClick != null) onMenuClick.accept("SanPham");
-            });
-            btnNV.addActionListener(e -> {
-                setActive(btnNV);
-                if (onMenuClick != null) onMenuClick.accept("NhanVien");
-            });
-            btnBC.addActionListener(e -> {
-                setActive(btnBC);
-                if (onMenuClick != null) onMenuClick.accept("BaoCao");
-            });
+            btnSP.addActionListener(e -> { setActive(btnSP); if (onMenuClick != null) onMenuClick.accept("SanPham"); });
+            btnNV.addActionListener(e -> { setActive(btnNV); if (onMenuClick != null) onMenuClick.accept("NhanVien"); });
+            btnBC.addActionListener(e -> { setActive(btnBC); if (onMenuClick != null) onMenuClick.accept("BaoCao"); });
 
-            topMenu.add(btnSP);
-            topMenu.add(Box.createVerticalStrut(8));
-            topMenu.add(btnNV);
-            topMenu.add(Box.createVerticalStrut(8));
+            topMenu.add(btnSP); topMenu.add(Box.createVerticalStrut(10));
+            topMenu.add(btnNV); topMenu.add(Box.createVerticalStrut(10));
             topMenu.add(btnBC);
-            
-        } else if (role.equals("STAFF") || role.equals("NHAN_VIEN")) {
-            JButton btnOrder = createNavButton("🛒 Order", true);
-            JButton btnBill = createNavButton("🧾 Bill", false);
-            JButton btnKH = createNavButton("👥 Khách hàng", false);
-            JButton btnNhapKho = createNavButton("📦 Nhập Kho", false); 
-            JButton btnBaoCaoCa = createNavButton("📊 Báo cáo chốt ca", false);
 
-            btnOrder.addActionListener(e -> {
-                setActive(btnOrder);
-                if (onMenuClick != null) onMenuClick.accept("BanHang");
-            });
-            btnBill.addActionListener(e -> {
-                setActive(btnBill);
-                if (onMenuClick != null) onMenuClick.accept("HoaDon");
-            });
-            btnKH.addActionListener(e -> {
-                setActive(btnKH);
-                if (onMenuClick != null) onMenuClick.accept("KhachHang");
-            });
-            btnNhapKho.addActionListener(e -> {
-                setActive(btnNhapKho);
-                if (onMenuClick != null) onMenuClick.accept("NhapKho");
-            });
-            btnBaoCaoCa.addActionListener(e -> {
-                setActive(btnBaoCaoCa);
-                if (onMenuClick != null) onMenuClick.accept("ThongKeNV");
-            });
+        } else {
+            JButton btnOrder = createNavButton("Order bán hàng", true);
+            JButton btnBill = createNavButton("Quản lý hóa đơn", false);
+            JButton btnKH = createNavButton("Khách hàng", false);
+            JButton btnNhapKho = createNavButton("Nhập kho hàng", false);
+            JButton btnBaoCaoCa = createNavButton("Báo cáo chốt ca", false);
 
-            topMenu.add(btnOrder);
-            topMenu.add(Box.createVerticalStrut(8));
-            topMenu.add(btnBill);
-            topMenu.add(Box.createVerticalStrut(8));
-            topMenu.add(btnKH);
-            topMenu.add(Box.createVerticalStrut(8));
-            topMenu.add(btnNhapKho);
-            topMenu.add(Box.createVerticalStrut(8));
+            btnOrder.addActionListener(e -> { setActive(btnOrder); if (onMenuClick != null) onMenuClick.accept("BanHang"); });
+            btnBill.addActionListener(e -> { setActive(btnBill); if (onMenuClick != null) onMenuClick.accept("HoaDon"); });
+            btnKH.addActionListener(e -> { setActive(btnKH); if (onMenuClick != null) onMenuClick.accept("KhachHang"); });
+            btnNhapKho.addActionListener(e -> { setActive(btnNhapKho); if (onMenuClick != null) onMenuClick.accept("NhapKho"); });
+            btnBaoCaoCa.addActionListener(e -> { setActive(btnBaoCaoCa); if (onMenuClick != null) onMenuClick.accept("ThongKeNV"); });
+
+            topMenu.add(btnOrder); topMenu.add(Box.createVerticalStrut(10));
+            topMenu.add(btnBill); topMenu.add(Box.createVerticalStrut(10));
+            topMenu.add(btnKH); topMenu.add(Box.createVerticalStrut(10));
+            topMenu.add(btnNhapKho); topMenu.add(Box.createVerticalStrut(10));
             topMenu.add(btnBaoCaoCa);
         }
 
         JPanel bottomMenu = new JPanel(new BorderLayout());
-        bottomMenu.setBackground(Color.WHITE);
-        bottomMenu.setBorder(new EmptyBorder(15, 15, 20, 15));
-        
-        JButton btnLogout = createNavButton("🚪 Đăng xuất", false);
-        btnLogout.setForeground(new Color(220, 53, 69));
-        
+        bottomMenu.setBackground(COLOR_BG);
+        bottomMenu.setBorder(new EmptyBorder(15, 15, 25, 15));
+
+        JButton btnLogout = createNavButton("Đăng xuất", false);
+        btnLogout.setForeground(COLOR_DANGER);
+
         btnLogout.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
+            UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 13));
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    null,
+                    "Bạn có chắc chắn muốn đăng xuất?",
+                    "Xác nhận",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
             if (confirm == JOptionPane.YES_OPTION) {
                 Window currentWindow = SwingUtilities.getWindowAncestor(this);
                 if (currentWindow != null) {
-                    currentWindow.dispose(); 
+                    currentWindow.dispose();
                     new LoginDialog1().setVisible(true);
                 }
             }
         });
-        
+
         bottomMenu.add(btnLogout, BorderLayout.CENTER);
 
         add(topMenu, BorderLayout.NORTH);
@@ -130,22 +115,51 @@ public class Sidebar extends JPanel {
     }
 
     private JButton createNavButton(String text, boolean isActive) {
-        JButton btn = new JButton(text);
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (getBackground() != COLOR_BG) {
+                    g2.setColor(getBackground());
+                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 12, 12));
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+
         btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(200, 45)); 
+        btn.setMaximumSize(new Dimension(210, 48));
+        btn.setPreferredSize(new Dimension(210, 48));
+        btn.setBorder(new EmptyBorder(0, 15, 0, 0));
 
         if (isActive) {
-            btn.setBackground(COLOR_PRIMARY_DARK); 
+            btn.setBackground(COLOR_PRIMARY_DARK);
             btn.setForeground(Color.WHITE);
         } else {
-            btn.setBackground(Color.WHITE);
+            btn.setBackground(COLOR_BG);
             btn.setForeground(COLOR_TEXT_MAIN);
         }
-        
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (btn.getBackground() != COLOR_PRIMARY_DARK) {
+                    btn.setBackground(COLOR_HOVER);
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (btn.getBackground() != COLOR_PRIMARY_DARK) {
+                    btn.setBackground(COLOR_BG);
+                }
+            }
+        });
+
         menuButtons.add(btn);
         return btn;
     }
@@ -153,7 +167,7 @@ public class Sidebar extends JPanel {
     private void setActive(JButton activeBtn) {
         for (JButton btn : menuButtons) {
             if (btn.getText().contains("Đăng xuất")) continue;
-            btn.setBackground(Color.WHITE);
+            btn.setBackground(COLOR_BG);
             btn.setForeground(COLOR_TEXT_MAIN);
         }
         activeBtn.setBackground(COLOR_PRIMARY_DARK);

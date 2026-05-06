@@ -154,7 +154,7 @@ public class SanPhamPanel extends JPanel {
         pnlInfo.setOpaque(false);
         
         String roleDisplay = role.equals("ADMIN") ? "Quản lý" : "Nhân viên";
-        JLabel lblAdminInfo = new JLabel("<html><span style='color:gray;font-size:11px;'>" + roleDisplay + "</span><br>" + tenNV + " 👤</html>");
+        JLabel lblAdminInfo = new JLabel("<html><span style='color:gray;font-size:11px;'>" + roleDisplay + "</span><br>" + tenNV + "</html>");
         lblAdminInfo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblAdminInfo.setForeground(COLOR_PRIMARY);
         pnlInfo.add(lblAdminInfo);

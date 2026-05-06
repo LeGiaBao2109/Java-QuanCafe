@@ -32,7 +32,6 @@ public class ThongKeNhanVienPanel extends JPanel {
         setBackground(COLOR_BG);
         setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // 1. Thanh công cụ Header
         JPanel pnlTop = new JPanel(new BorderLayout());
         pnlTop.setOpaque(false);
         
@@ -65,7 +64,6 @@ public class ThongKeNhanVienPanel extends JPanel {
         pnlTop.add(lblTitle, BorderLayout.WEST);
         pnlTop.add(pnlRight, BorderLayout.EAST);
 
-        // 2. Nội dung chính
         JPanel pnlContent = new JPanel(new GridLayout(1, 2, 20, 0));
         pnlContent.setOpaque(false);
 
@@ -75,7 +73,6 @@ public class ThongKeNhanVienPanel extends JPanel {
         add(pnlTop, BorderLayout.NORTH);
         add(pnlContent, BorderLayout.CENTER);
 
-        // Luôn load dữ liệu ngày hôm nay
         loadDuLieu(new Date());
     }
 
@@ -229,7 +226,6 @@ public class ThongKeNhanVienPanel extends JPanel {
         }
     }
 
-    // --- MÔ PHỎNG GIAO DIỆN IN BILL ĐẦY ĐỦ THÔNG TIN ---
     private void inBaoCaoCa() {
         try {
             Date ngayIn = new Date();
@@ -240,7 +236,6 @@ public class ThongKeNhanVienPanel extends JPanel {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             sb.append("Thời gian in: ").append(sdf.format(ngayIn)).append("\n\n");
 
-            // --- 1. NHÓM HÀNG ---
             sb.append(String.format("%-20s %5s %13s\n", "Nhóm hàng", "SL", "Thành tiền"));
             sb.append("------------------------------------------\n");
             
@@ -257,14 +252,12 @@ public class ThongKeNhanVienPanel extends JPanel {
             }
             sb.append("------------------------------------------\n");
 
-            // --- 2. TỔNG KẾT ---
             sb.append(String.format("%-25s %14s\n", "Tổng tiền:", formatter.format(chiSo[0]) + " đ"));
             double tbBill = chiSo[1] > 0 ? chiSo[0] / chiSo[1] : 0;
             sb.append(String.format("%-25s %14s\n", "Trung bình bill:", formatter.format(tbBill) + " đ"));
             sb.append(String.format("%-25s %14s\n", "Phiếu chưa thanh toán:", (int)chiSo[2] + ""));
             sb.append("------------------------------------------\n");
 
-            // --- 3. KHUNG GIỜ ---
             sb.append(String.format("%-15s %7s %11s %5s\n", "Khung giờ", "SL Bill", "Doanh thu", "Tỉ lệ"));
             sb.append("------------------------------------------\n");
             
@@ -291,9 +284,8 @@ public class ThongKeNhanVienPanel extends JPanel {
             sb.append("==========================================\n");
             sb.append("        Xin cảm ơn và hẹn gặp lại!\n");
 
-            // --- MÀN HÌNH DIALOG XEM TRƯỚC ---
             JDialog printDialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Xem trước bản in Z-Report", Dialog.ModalityType.APPLICATION_MODAL);
-            printDialog.setSize(440, 750); // Tăng chiều cao để chứa được nguyên 24 khung giờ
+            printDialog.setSize(440, 750);
             printDialog.setLocationRelativeTo(this);
             printDialog.setLayout(new BorderLayout());
 
@@ -305,19 +297,18 @@ public class ThongKeNhanVienPanel extends JPanel {
 
             JScrollPane scroll = new JScrollPane(txtPrint);
             scroll.setBorder(BorderFactory.createEmptyBorder());
-            scroll.getVerticalScrollBar().setUnitIncrement(16); // Lăn chuột mượt hơn
+            scroll.getVerticalScrollBar().setUnitIncrement(16);
 
             JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
             pnlBottom.setBackground(Color.WHITE);
             pnlBottom.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER));
             
-            // Fix lỗi nút bấm bị mờ
             JButton btnXacNhanIn = new JButton("🖨 Xác nhận In");
             btnXacNhanIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
             btnXacNhanIn.setBackground(new Color(40, 167, 69)); 
             btnXacNhanIn.setForeground(Color.WHITE);
-            btnXacNhanIn.setOpaque(true);             // Bắt buộc trên Windows
-            btnXacNhanIn.setContentAreaFilled(true);  // Bắt buộc trên Windows
+            btnXacNhanIn.setOpaque(true);
+            btnXacNhanIn.setContentAreaFilled(true);
             btnXacNhanIn.setFocusPainted(false);
             btnXacNhanIn.setBorderPainted(false);
             btnXacNhanIn.setPreferredSize(new Dimension(140, 35));

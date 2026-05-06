@@ -25,7 +25,6 @@ public class ThongKePanel extends JPanel {
     private DecimalFormat formatter = new DecimalFormat("#,### đ");
     private ThongKeDAO dao;
     
-    // Các khu vực cần cập nhật dữ liệu động
     private JPanel pnlCards;
     private JPanel pnlChartArea;
     private JPanel pnlTopProducts;
@@ -36,7 +35,6 @@ public class ThongKePanel extends JPanel {
         setBackground(COLOR_BG);
         setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // 1. Thanh Lọc Ngày
         JPanel pnlFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 12));
         pnlFilter.setBackground(COLOR_SURFACE);
         pnlFilter.setBorder(BorderFactory.createLineBorder(COLOR_BORDER, 1));
@@ -81,7 +79,6 @@ public class ThongKePanel extends JPanel {
         pnlFilter.add(dcDenNgay);
         pnlFilter.add(btnLoc);
 
-        // 2. Khu vực Nội dung chính
         JPanel pnlContent = new JPanel(new BorderLayout(15, 15));
         pnlContent.setOpaque(false);
 
@@ -102,14 +99,12 @@ public class ThongKePanel extends JPanel {
         add(pnlFilter, BorderLayout.NORTH);
         add(pnlContent, BorderLayout.CENTER);
 
-        // Tự động tải dữ liệu lần đầu tiên (7 ngày qua)
         capNhatDuLieuThongKe(dcTuNgay.getDate(), dcDenNgay.getDate());
     }
 
     private JDateChooser createDateChooser(boolean isTuNgay) {
         JDateChooser dateChooser = new JDateChooser();
         
-        // Mặc định: Từ ngày = 7 ngày trước, Đến ngày = Hôm nay
         long sevenDays = 7L * 24 * 60 * 60 * 1000;
         dateChooser.setDate(isTuNgay ? new Date(System.currentTimeMillis() - sevenDays) : new Date()); 
         
@@ -151,15 +146,12 @@ public class ThongKePanel extends JPanel {
         return card;
     }
 
-    // --- HÀM CỐT LÕI: TẢI DỮ LIỆU THỰC TỪ DB VÀ VẼ LẠI GIAO DIỆN ---
     private void capNhatDuLieuThongKe(Date tuNgay, Date denNgay) {
-        // Lấy Data từ Database
         double[] tongQuan = dao.getThongKeTongQuan(tuNgay, denNgay);
         int soDon = (int) tongQuan[0];
         double tongDoanhThu = tongQuan[1];
         double tongChiPhi = tongQuan[2];
 
-        // --- TÍNH TOÁN SO SÁNH HÔM NAY VS HÔM QUA ---
         double[] doanhThuSoSanh = dao.getDoanhThuHomNayVaHomQua();
         double dtHomNay = doanhThuSoSanh[0];
         double dtHomQua = doanhThuSoSanh[1];
@@ -188,14 +180,12 @@ public class ThongKePanel extends JPanel {
             }
         }
 
-        // 1. Cập nhật KPI Cards (Đã đổi thứ tự: Doanh thu hôm nay nằm ở vị trí đầu tiên)
         pnlCards.removeAll();
         pnlCards.add(createKPICard("DOANH THU HÔM NAY", formatter.format(dtHomNay), subTitleSoSanh, colorSoSanh));
         pnlCards.add(createKPICard("SỐ ĐƠN (KỲ LỌC)", soDon + "", "Hóa đơn đã thanh toán", COLOR_PRIMARY));
         pnlCards.add(createKPICard("DOANH THU (KỲ LỌC)", formatter.format(tongDoanhThu), "Tiền thu vào", new Color(40, 167, 69)));
         pnlCards.add(createKPICard("CHI PHÍ NHẬP (KỲ LỌC)", formatter.format(tongChiPhi), "Tiền mua nguyên liệu", new Color(220, 53, 69)));
         
-        // 2. Cập nhật Biểu Đồ
         pnlChartArea.removeAll();
         JLabel lblChartTitle = new JLabel("Biểu đồ Doanh thu theo ngày (Kỳ lọc)");
         lblChartTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -224,7 +214,6 @@ public class ThongKePanel extends JPanel {
             String[] days = mapDoanhThu.keySet().toArray(new String[0]);
             double[] revenues = mapDoanhThu.values().stream().mapToDouble(Double::doubleValue).toArray();
             
-            // Lấy chuỗi ngày hôm nay định dạng dd/MM để tô đậm chính xác cột
             String todayStr = new SimpleDateFormat("dd/MM").format(new Date());
             
             chartWrapper.add(new CustomBarChart(days, revenues, todayStr), BorderLayout.CENTER);
@@ -233,7 +222,6 @@ public class ThongKePanel extends JPanel {
         pnlChartArea.add(lblChartTitle, BorderLayout.NORTH);
         pnlChartArea.add(chartWrapper, BorderLayout.CENTER);
 
-        // 3. Cập nhật Bảng Top Sản Phẩm
         pnlTopProducts.removeAll();
         JLabel lblTopTitle = new JLabel("Top Sản phẩm bán chạy (Kỳ lọc)");
         lblTopTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -268,17 +256,15 @@ public class ThongKePanel extends JPanel {
         pnlTopProducts.add(lblTopTitle, BorderLayout.NORTH);
         pnlTopProducts.add(scrollPane, BorderLayout.CENTER);
 
-        // Refresh UI
         pnlCards.revalidate(); pnlCards.repaint();
         pnlChartArea.revalidate(); pnlChartArea.repaint();
         pnlTopProducts.revalidate(); pnlTopProducts.repaint();
     }
 
-    // LỚP VẼ BIỂU ĐỒ CỘT
     class CustomBarChart extends JPanel {
         private String[] labels;
         private double[] values;
-        private String todayStr; // Lưu trữ ngày hôm nay
+        private String todayStr;
 
         public CustomBarChart(String[] labels, double[] values, String todayStr) {
             this.labels = labels;
@@ -319,7 +305,6 @@ public class ThongKePanel extends JPanel {
                 int barHeight = (int) ((values[i] / maxVal) * chartHeight);
                 int y = height - labelPadding - barHeight;
 
-                // Chỉ tô đậm nếu nhãn của cột đó TRÙNG VỚI chuỗi ngày hôm nay
                 if (labels[i].equals(todayStr)) {
                     g2.setColor(COLOR_PRIMARY); 
                 } else {
