@@ -3,6 +3,7 @@ package com.quanlycafe.ui;
 import com.quanlycafe.dao.*;
 import com.quanlycafe.entity.*;
 import com.quanlycafe.util.Auth;
+import com.quanlycafe.util.BillPrinter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -765,7 +766,39 @@ public class BanHangPanel extends JPanel {
                         hd.setTongTienCuoi(tongTienCuoi);
 
                         if (hdDAO.taoHoaDon(hd)) {
-                            JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                            List<ChiTietHoaDon> dsIn = new ArrayList<>();
+                            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+                                ChiTietHoaDon item = new ChiTietHoaDon();
+
+                                String fullDisplayName = cartTableModel.getValueAt(i, 0).toString();
+                                String tenMonGoc = fullDisplayName.replaceAll("<[^>]*>", "").split(" \\(")[0].trim();
+
+                                String ghiChu = "";
+                                if (fullDisplayName.contains("* ")) {
+                                    ghiChu = fullDisplayName.substring(fullDisplayName.lastIndexOf("* ") + 2)
+                                            .replaceAll("</span></html>", "").trim();
+                                }
+
+                                item.setGhiChu(tenMonGoc + " | " + ghiChu);
+                                item.setSoLuong((int) cartTableModel.getValueAt(i, 1));
+                                item.setThanhTien(Double.parseDouble(cartTableModel.getValueAt(i, 2).toString().replaceAll("[^\\d]", "")));
+
+                                Object daObj = cartTableModel.getValueAt(i, 7);
+                                Object duongObj = cartTableModel.getValueAt(i, 8);
+                                item.setLuongDa(daObj instanceof MucDa ? (MucDa) daObj : MucDa.DA_100);
+                                item.setLuongDuong(duongObj instanceof MucDuong ? (MucDuong) duongObj : MucDuong.DUONG_100);
+
+                                Object toppingObj = cartTableModel.getValueAt(i, 4);
+                                if (toppingObj instanceof List) {
+                                    item.setDsTopping((List<String>) toppingObj);
+                                }
+                                dsIn.add(item);
+                            }
+
+                            String billHTML = BillPrinter.generateBillHTML(hd, dsIn);
+
+                            showPrintPreview(billHTML);
+
                             resetForm();
                         }
                     }
@@ -1023,5 +1056,15 @@ public class BanHangPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập số điểm hợp lệ!");
             }
         }
+    }
+
+    private void showPrintPreview(String html) {
+        JEditorPane editorPane = new JEditorPane("text/html", html);
+        editorPane.setEditable(false);
+
+        JScrollPane scrollPane = new JScrollPane(editorPane);
+        scrollPane.setPreferredSize(new Dimension(400, 600));
+
+        JOptionPane.showMessageDialog(this, scrollPane, "CHI TIẾT HÓA ĐƠN", JOptionPane.PLAIN_MESSAGE);
     }
 }

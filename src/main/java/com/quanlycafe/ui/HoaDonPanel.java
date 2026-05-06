@@ -259,7 +259,7 @@ public class HoaDonPanel extends JPanel {
         UIManager.put("OptionPane.background", backgroundColor);
         UIManager.put("Panel.background", backgroundColor);
 
-        int result = JOptionPane.showConfirmDialog(this, scrollPane, "Xem trước Hóa đơn - BaristaPro",
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, "Xem trước Hóa đơn - KAHVI",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {

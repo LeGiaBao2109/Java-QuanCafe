@@ -2,7 +2,6 @@ package com.quanlycafe.util;
 
 import com.quanlycafe.entity.ChiTietHoaDon;
 import com.quanlycafe.entity.HoaDon;
-import com.quanlycafe.util.Auth;
 
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +24,7 @@ public class BillPrinter {
         double giaGiam = giaBanDau - tong;
 
         sb.append("<html><body style='width: 100%; font-family: sans-serif; font-size: 12px; padding: 10px; color: black;'>");
-        sb.append("<h2 style='text-align: center; margin-bottom: 2px; font-size: 16px;'>BARISTAPRO</h2>");
+        sb.append("<h2 style='text-align: center; margin-bottom: 2px; font-size: 16px;'>KAHVI</h2>");
         sb.append("<p style='text-align: center; margin-top: 0; font-size: 10px;'>Hệ thống Quản lý Bán hàng chuyên nghiệp</p>");
         sb.append("<div style='border-top: 1px dashed black; margin: 10px 0;'></div>");
 
