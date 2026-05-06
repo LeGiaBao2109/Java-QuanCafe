@@ -49,7 +49,7 @@ public class ThongKeNhanVienPanel extends JPanel {
         
         JButton btnIn = new JButton("In Báo Cáo");
         btnIn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnIn.setBackground(new Color(40, 167, 69)); 
+        btnIn.setBackground(COLOR_PRIMARY); 
         btnIn.setForeground(Color.WHITE);
         btnIn.setFocusPainted(false);
         btnIn.setBorderPainted(false);

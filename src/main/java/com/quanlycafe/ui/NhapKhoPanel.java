@@ -160,7 +160,7 @@ public class NhapKhoPanel extends JPanel {
         pnlInputDock.setBackground(COLOR_SURFACE);
         pnlInputDock.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(4, 0, 0, 0, COLOR_PRIMARY),
-                new EmptyBorder(15, 20, 20, 20)
+                new EmptyBorder(10, 20, 15, 20)
         ));
 
         JPanel pnlHeader = new JPanel(new BorderLayout());
@@ -183,7 +183,7 @@ public class NhapKhoPanel extends JPanel {
         pnlHeader.add(lblDockTitle, BorderLayout.WEST);
         pnlHeader.add(btnClose, BorderLayout.EAST);
 
-        JPanel pnlBody = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 0));
+        JPanel pnlBody = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pnlBody.setOpaque(false);
 
         JPanel pnlNCC = new JPanel(new BorderLayout(5, 5));
@@ -202,7 +202,7 @@ public class NhapKhoPanel extends JPanel {
         lblSL.setFont(new Font("Segoe UI", Font.BOLD, 13));
         txtSL = new JTextField();
         txtSL.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        txtSL.setPreferredSize(new Dimension(100, 38));
+        txtSL.setPreferredSize(new Dimension(80, 38));
         pnlSL.add(lblSL, BorderLayout.NORTH);
         pnlSL.add(txtSL, BorderLayout.CENTER);
 
@@ -212,7 +212,7 @@ public class NhapKhoPanel extends JPanel {
         lblGia.setFont(new Font("Segoe UI", Font.BOLD, 13));
         txtGia = new JTextField();
         txtGia.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        txtGia.setPreferredSize(new Dimension(150, 38));
+        txtGia.setPreferredSize(new Dimension(130, 38));
         pnlGia.add(lblGia, BorderLayout.NORTH);
         pnlGia.add(txtGia, BorderLayout.CENTER);
 
@@ -223,7 +223,7 @@ public class NhapKhoPanel extends JPanel {
         lblTongTienDock = new JLabel("0 đ");
         lblTongTienDock.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTongTienDock.setForeground(COLOR_PRIMARY);
-        lblTongTienDock.setPreferredSize(new Dimension(180, 38));
+        lblTongTienDock.setPreferredSize(new Dimension(160, 38));
         pnlTien.add(lblTien, BorderLayout.NORTH);
         pnlTien.add(lblTongTienDock, BorderLayout.CENTER);
 
@@ -236,12 +236,11 @@ public class NhapKhoPanel extends JPanel {
         btnXacNhan.setBorderPainted(false);
         btnXacNhan.setFocusPainted(false);
         btnXacNhan.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnXacNhan.setPreferredSize(new Dimension(250, 45));
+        btnXacNhan.setPreferredSize(new Dimension(200, 38)); 
         btnXacNhan.addActionListener(e -> xuLyNhapKhoDock());
 
         JPanel pnlAction = new JPanel(new BorderLayout());
         pnlAction.setOpaque(false);
-        pnlAction.setBorder(new EmptyBorder(15, 0, 0, 0));
         pnlAction.add(btnXacNhan, BorderLayout.SOUTH);
 
         DocumentListener dl = new DocumentListener() {
@@ -265,10 +264,10 @@ public class NhapKhoPanel extends JPanel {
         pnlBody.add(pnlSL);
         pnlBody.add(pnlGia);
         pnlBody.add(pnlTien);
-        pnlBody.add(pnlAction);
 
         pnlInputDock.add(pnlHeader, BorderLayout.NORTH);
         pnlInputDock.add(pnlBody, BorderLayout.CENTER);
+        pnlInputDock.add(pnlAction, BorderLayout.EAST); 
 
         pnlInputDock.setVisible(false);
     }
