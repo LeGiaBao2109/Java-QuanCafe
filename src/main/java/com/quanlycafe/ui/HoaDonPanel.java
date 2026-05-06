@@ -24,6 +24,7 @@ public class HoaDonPanel extends JPanel {
     private DateTimeFormatter dFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private DateTimeFormatter tFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private JButton btnInHoaDon;
+    private JButton btnReload;
 
     private Color primaryColor = new Color(91, 67, 56);
     private Color backgroundColor = new Color(253, 248, 245);
@@ -87,9 +88,22 @@ public class HoaDonPanel extends JPanel {
             }
         });
 
-        JPanel pnlControl = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel pnlControl = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlControl.setOpaque(false);
         pnlControl.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        btnReload = new JButton("Làm mới");
+        btnReload.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnReload.setBackground(new Color(240, 240, 240));
+        btnReload.setForeground(primaryColor);
+        btnReload.setFocusPainted(false);
+        btnReload.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btnReload.addActionListener(e -> {
+            loadDataToTableHD();
+            modelCT.setRowCount(0);
+            JOptionPane.showMessageDialog(this, "Đã cập nhật danh sách hóa đơn!");
+        });
 
         btnInHoaDon = new JButton("In Hóa Đơn");
         btnInHoaDon.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -115,6 +129,7 @@ public class HoaDonPanel extends JPanel {
             showPrintPreview(htmlContent);
         });
 
+        pnlControl.add(btnReload);
         pnlControl.add(btnInHoaDon);
         pnl.add(pnlControl, BorderLayout.SOUTH);
 

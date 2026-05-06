@@ -2,6 +2,7 @@ package com.quanlycafe.util;
 
 import com.quanlycafe.entity.ChiTietHoaDon;
 import com.quanlycafe.entity.HoaDon;
+import com.quanlycafe.util.Auth;
 
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
@@ -31,15 +32,21 @@ public class BillPrinter {
         sb.append("<table style='width: 100%; font-size: 11px;'>");
         sb.append("<tr><td colspan='2'><b>Mã HD:</b> ").append(hd.getMaHD()).append("</td></tr>");
 
-        String tenNV = (hd.getMaDH() != null && hd.getMaDH().getMaNV() != null)
-                ? hd.getMaDH().getMaNV().getTenNV()
-                : "Quản trị viên";
+        String tenNV = "Quản trị viên";
+        if (hd.getMaDH() != null && hd.getMaDH().getMaNV() != null) {
+            tenNV = hd.getMaDH().getMaNV().getTenNV();
+        } else if (Auth.isLoggedIn()) {
+            tenNV = Auth.user.getTenNV();
+        }
+
         sb.append("<tr><td colspan='2'><b>Nhân viên:</b> ").append(tenNV).append("</td></tr>");
 
-        String tenKH = (hd.getMaDH() != null && hd.getMaDH().getMaKH() != null)
-                ? hd.getMaDH().getMaKH().getTenKH()
-                : "Khách vãng lai";
-        sb.append("<tr><td colspan='2'><b>Khách hàng:</b> ").append(tenKH).append("</td></tr>");
+        if (hd.getMaDH() != null && hd.getMaDH().getMaKH() != null) {
+            String tenKH = hd.getMaDH().getMaKH().getTenKH();
+            if (tenKH != null && !tenKH.equalsIgnoreCase("Khách vãng lai") && !tenKH.trim().isEmpty()) {
+                sb.append("<tr><td colspan='2'><b>Khách hàng:</b> ").append(tenKH).append("</td></tr>");
+            }
+        }
 
         sb.append("<tr>");
         sb.append("<td><b>Ngày:</b> ").append(hd.getNgayThanhToan().format(dFormatter)).append("</td>");

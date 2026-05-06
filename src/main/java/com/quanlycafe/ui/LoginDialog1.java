@@ -3,6 +3,7 @@ package com.quanlycafe.ui;
 import com.quanlycafe.dao.TaiKhoanDAO;
 import com.quanlycafe.entity.NhanVien;
 import com.quanlycafe.entity.TaiKhoan;
+import com.quanlycafe.util.Auth;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -120,6 +121,8 @@ public class LoginDialog1 extends JFrame {
         TaiKhoan tk = dao.dangNhap(username, password);
 
         if (tk != null) {
+            Auth.user = tk.getMaNV();
+
             NhanVien nv = tk.getMaNV();
             String role = nv.getRoleNV().name();
             String tenNV = nv.getTenNV();
@@ -134,17 +137,17 @@ public class LoginDialog1 extends JFrame {
                 bhForm.setVisible(true);
             }
 
-            this.dispose(); 
-            
+            this.dispose();
+
         } else {
             JOptionPane.showMessageDialog(this, "Sai tên đăng nhập, mật khẩu hoặc tài khoản đã bị khóa!", "Lỗi Đăng Nhập", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } 
+        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
         catch (Exception e) {}
-        
+
         SwingUtilities.invokeLater(() -> new LoginDialog1().setVisible(true));
     }
 }

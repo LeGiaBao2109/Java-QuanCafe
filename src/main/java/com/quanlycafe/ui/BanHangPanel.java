@@ -2,6 +2,7 @@ package com.quanlycafe.ui;
 
 import com.quanlycafe.dao.*;
 import com.quanlycafe.entity.*;
+import com.quanlycafe.util.Auth;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -11,10 +12,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
@@ -125,8 +124,20 @@ public class BanHangPanel extends JPanel {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         searchPanel.setOpaque(false);
 
-        JTextField txtSearch = new JTextField("Nhập mã/Tên món cần tìm...", 30);
+        String placeholder = "Nhập mã/Tên món cần tìm...";
+        JTextField txtSearch = new JTextField(placeholder, 30);
         txtSearch.setPreferredSize(new Dimension(300, 35));
+        txtSearch.setForeground(Color.GRAY);
+
+        txtSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String keyword = txtSearch.getText().trim();
+                if (!keyword.isEmpty() && !keyword.equals(placeholder)) {
+                    searchProducts(keyword);
+                }
+            }
+        });
 
         JButton btnSearch = new JButton("Tìm kiếm");
         btnSearch.setPreferredSize(new Dimension(100, 35));
@@ -134,19 +145,29 @@ public class BanHangPanel extends JPanel {
         btnSearch.setForeground(COLOR_TEXT_MAIN);
         btnSearch.setFocusPainted(false);
 
-        txtSearch.addKeyListener(new KeyAdapter() {
+        txtSearch.addFocusListener(new FocusAdapter() {
             @Override
-            public void keyReleased(KeyEvent e) {
-                String keyword = txtSearch.getText().trim();
-                if (!keyword.isEmpty() && !keyword.contains("🔍")) {
-                    searchProducts(keyword);
+            public void focusGained(FocusEvent e) {
+                if (txtSearch.getText().equals(placeholder)) {
+                    txtSearch.setText("");
+                    txtSearch.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (txtSearch.getText().isEmpty()) {
+                    txtSearch.setText(placeholder);
+                    txtSearch.setForeground(Color.GRAY);
                 }
             }
         });
 
         btnSearch.addActionListener(e -> {
             String keyword = txtSearch.getText().trim();
-            searchProducts(keyword);
+            if (!keyword.equals(placeholder)) {
+                searchProducts(keyword);
+            }
         });
 
         searchPanel.add(txtSearch);
@@ -662,8 +683,7 @@ public class BanHangPanel extends JPanel {
                         khDAO.themKhachHang(khFinal);
                     }
                 } else {
-                    khFinal = new KhachHang();
-                    khFinal.setMaKH("KH01");
+                    khFinal = khDAO.timTheoSDT("0000000000");
                 }
 
                 DonHang dh = new DonHang();
@@ -673,9 +693,14 @@ public class BanHangPanel extends JPanel {
                 dh.setTrangThai(true);
                 dh.setTongTien(tongTienCuoi);
                 dh.setStt(1);
-                NhanVien nv = new NhanVien();
-                nv.setMaNV("NV01");
-                dh.setMaNV(nv);
+                if (Auth.isLoggedIn()) {
+                    dh.setMaNV(Auth.user);
+                } else {
+                    NhanVien nvMacDinh = new NhanVien();
+                    nvMacDinh.setMaNV("NV01");
+                    dh.setMaNV(nvMacDinh);
+                }
+
                 dh.setMaKH(khFinal);
 
                 DonHangDAO dhDAO = new DonHangDAO();
@@ -778,7 +803,7 @@ public class BanHangPanel extends JPanel {
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JLabel lblImg = new JLabel("Đang tải...", SwingConstants.CENTER);
-        lblImg.setPreferredSize(new Dimension(0, 150));
+        lblImg.setPreferredSize(new Dimension(0, 160));
         lblImg.setBackground(new Color(250, 242, 235));
         lblImg.setOpaque(true);
 
@@ -792,8 +817,10 @@ public class BanHangPanel extends JPanel {
                         URL url = new URL(linkAnh);
                         Image rawImg = ImageIO.read(url);
                         if (rawImg != null) {
-                            Image scaledImg = rawImg.getScaledInstance(180, 150, Image.SCALE_SMOOTH);
-                            ImageIcon icon = new ImageIcon(scaledImg);
+                            int targetW = card.getWidth() > 0 ? card.getWidth() : 210;
+                            int targetH = 160;
+
+                            ImageIcon icon = scaleImageToFit(rawImg, targetW, targetH);
                             imageCache.put(linkAnh, icon);
                             SwingUtilities.invokeLater(() -> {
                                 lblImg.setText("");
@@ -861,6 +888,32 @@ public class BanHangPanel extends JPanel {
         });
 
         return card;
+    }
+
+    private ImageIcon scaleImageToFit(Image originalImage, int width, int height) {
+        int imgWidth = originalImage.getWidth(null);
+        int imgHeight = originalImage.getHeight(null);
+
+        double thumbRatio = (double) width / height;
+        double imageRatio = (double) imgWidth / imgHeight;
+
+        if (imageRatio < thumbRatio) {
+            imgHeight = (int) (imgWidth / thumbRatio);
+        } else {
+            imgWidth = (int) (imgHeight * thumbRatio);
+        }
+
+        BufferedImage bimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = bimg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.drawImage(originalImage, 0, 0, width, height, 0, 0, imgWidth, imgHeight, null);
+        g2.dispose();
+
+        return new ImageIcon(bimg);
     }
 
     private JButton createTabButton(String title, String maDM, boolean isActive) {
