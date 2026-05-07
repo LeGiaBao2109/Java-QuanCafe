@@ -153,7 +153,7 @@ public class KhachHangPanel extends JPanel {
         JPanel pnlLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pnlLeft.setOpaque(false);
 
-        JButton btnEdit = createModernButton("✎ Sửa thông tin", false);
+        JButton btnEdit = createModernButton("Sửa thông tin", false);
         btnEdit.addActionListener(e -> showEditDialog());
         pnlLeft.add(btnEdit);
 
