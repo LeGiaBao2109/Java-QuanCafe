@@ -106,4 +106,20 @@ public class KhachHangDAO {
         }
         return dsKH;
     }
+
+    public String getNewMaKH() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maKH, 3, LEN(maKH)) AS INT)) FROM KHACHHANG";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                int maxNumber = rs.getInt(1);
+                if (maxNumber == 0) return "KH01";
+                return String.format("KH%02d", maxNumber + 1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "KH01";
+    }
 }
