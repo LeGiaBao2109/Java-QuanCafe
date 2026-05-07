@@ -5,6 +5,8 @@ import com.quanlycafe.entity.KhachHang;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -134,12 +136,18 @@ public class KhachHangPanel extends JPanel {
             KhachHangDAO dao = new KhachHangDAO();
             if (dao.capNhatKhachHang(maKH, tenMoi, sdtMoi)) {
                 JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-                loadData();
-                filterData(txtSearch.getText());
+                reloadAllData();
             } else {
                 JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
             }
         }
+    }
+
+    private void reloadAllData() {
+        txtSearch.setText("");
+        loadData();
+        currentPage = 1;
+        updateTableData();
     }
 
     private JPanel createTopActionBar() {
@@ -156,6 +164,11 @@ public class KhachHangPanel extends JPanel {
         JButton btnEdit = createModernButton("✎ Sửa thông tin", false);
         btnEdit.addActionListener(e -> showEditDialog());
         pnlLeft.add(btnEdit);
+
+        JButton btnReload = createModernButton("↻ Làm mới", false);
+        btnReload.setPreferredSize(new Dimension(120, 38));
+        btnReload.addActionListener(e -> reloadAllData());
+        pnlLeft.add(btnReload);
 
         JPanel pnlSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearch.setOpaque(false);

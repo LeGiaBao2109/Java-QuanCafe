@@ -43,10 +43,4 @@ public class BanHangModernForm extends JFrame {
         add(sidebar, BorderLayout.WEST);
         add(cardPanel, BorderLayout.CENTER);
     }
-
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } 
-        catch (Exception e) {}
-        SwingUtilities.invokeLater(() -> new BanHangModernForm("NHAN_VIEN", "Test User").setVisible(true));
-    }
 }

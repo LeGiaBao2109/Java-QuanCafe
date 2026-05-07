@@ -676,7 +676,8 @@ public class BanHangPanel extends JPanel {
                         khFinal.setDiemTL(khFinal.getDiemTL() + diemCong);
                     } else {
                         khFinal = new KhachHang();
-                        khFinal.setMaKH("KH" + System.currentTimeMillis());
+                        String maMoi = khDAO.getNewMaKH();
+                        khFinal.setMaKH(maMoi);
                         khFinal.setTenKH(txtTenKH.getText().trim());
                         khFinal.setSdt(sdt);
                         khFinal.setDiemTL((int)(tongTienCuoi * 0.1));
@@ -688,7 +689,8 @@ public class BanHangPanel extends JPanel {
                 }
 
                 DonHang dh = new DonHang();
-                String maDH = "DH" + System.currentTimeMillis();
+                String tsDH = String.valueOf(System.currentTimeMillis());
+                String maDH = "DH" + tsDH.substring(tsDH.length() - 8);
                 dh.setMaDH(maDH);
                 dh.setNgayTao(LocalDateTime.now());
                 dh.setTrangThai(true);
@@ -713,8 +715,8 @@ public class BanHangPanel extends JPanel {
                     boolean allDetailsSaved = true;
                     for (int i = 0; i < cartTableModel.getRowCount(); i++) {
                         ChiTietHoaDon ct = new ChiTietHoaDon();
-
-                        String maCTHD = "CT" + System.currentTimeMillis() + i;
+                        String tsCT = String.valueOf(System.currentTimeMillis());
+                        String maCTHD = "CT" + tsCT.substring(tsCT.length() - 6) + i;
 
                         int soLuong = Integer.parseInt(cartTableModel.getValueAt(i, 1).toString());
                         double thanhTien = Double.parseDouble(cartTableModel.getValueAt(i, 2).toString().replaceAll("[^\\d]", ""));
@@ -758,7 +760,8 @@ public class BanHangPanel extends JPanel {
 
                     if (allDetailsSaved) {
                         HoaDon hd = new HoaDon();
-                        hd.setMaHD("HD" + System.currentTimeMillis());
+                        String tsHD = String.valueOf(System.currentTimeMillis());
+                        hd.setMaHD("HD" + tsHD.substring(tsHD.length() - 8));
                         hd.setMaDH(dh);
                         hd.setMaVoucher(voucherApDung);
                         hd.setNgayThanhToan(LocalDateTime.now());

@@ -143,11 +143,4 @@ public class LoginDialog1 extends JFrame {
             JOptionPane.showMessageDialog(this, "Sai tên đăng nhập, mật khẩu hoặc tài khoản đã bị khóa!", "Lỗi Đăng Nhập", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception e) {}
-
-        SwingUtilities.invokeLater(() -> new LoginDialog1().setVisible(true));
-    }
 }
